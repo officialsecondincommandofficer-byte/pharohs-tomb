@@ -1,0 +1,12 @@
+[gd_scene load_steps=5 format=3 uid="uid://keheod42yiof"]
+
+[ext_resource type="Script" uid="uid://r5okscex1c5x" path="res://src/GameRunner/game_runner.gd" id="1_h2nvm"]
+[ext_resource type="PackedScene" uid="uid://j70fvs6i65gl" path="res://src/Stages/BaseStage.tscn" id="2_jloqd"]
+[ext_resource type="PackedScene" uid="uid://dyupu2elkuj0a" path="res://src/Characters/WhiteMummy/WhiteMummy.tscn" id="3_bgtdr"]
+[ext_resource type="PackedScene" uid="uid://ue60etqppj8p" path="res://src/Characters/OldMummy/OldMummy.tscn" id="4_wfifm"]
+
+[node name="GameRunner" type="Node"]
+script = ExtResource("1_h2nvm")
+stages = Array[PackedScene]([ExtResource("2_jloqd")])
+player_scene = ExtResource("3_bgtdr")
+enemies = Array[PackedScene]([ExtResource("4_wfifm")])

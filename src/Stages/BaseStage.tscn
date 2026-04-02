@@ -1,0 +1,21 @@
+[gd_scene load_steps=6 format=3 uid="uid://j70fvs6i65gl"]
+
+[ext_resource type="Script" uid="uid://bidgntjqwjh6d" path="res://src/Stages/base_stage.gd" id="1_3wdu2"]
+[ext_resource type="PackedScene" uid="uid://dyupu2elkuj0a" path="res://src/Characters/WhiteMummy/WhiteMummy.tscn" id="2_g2lr0"]
+[ext_resource type="PackedScene" uid="uid://cvuqb6yf5uvd4" path="res://src/Stages/Tutorial_Stage/Tutorial_Stage.tscn" id="2_ltl44"]
+[ext_resource type="PackedScene" uid="uid://ue60etqppj8p" path="res://src/Characters/OldMummy/OldMummy.tscn" id="3_frfes"]
+[ext_resource type="Script" uid="uid://omk2ya11pv00" path="res://src/Stages/Tutorial_Stage/grid.gd" id="5_frfes"]
+
+[node name="BaseStage" type="Node2D"]
+script = ExtResource("1_3wdu2")
+player_scene = ExtResource("2_g2lr0")
+enemy_scene = ExtResource("3_frfes")
+
+[node name="TutorialStage" parent="." instance=ExtResource("2_ltl44")]
+script = ExtResource("5_frfes")
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(48, 48)
+
+[node name="EnemySpawn" type="Marker2D" parent="."]
+position = Vector2(208, 176)

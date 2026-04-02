@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dyupu2elkuj0a"]
+
+[ext_resource type="SpriteFrames" uid="uid://ddsfpiepp5mtt" path="res://Assets/Sprites/WhiteMummy/Resources/WhiteMummy.tres" id="1_aldd0"]
+[ext_resource type="Script" uid="uid://dt4c168iv15bt" path="res://src/Characters/WhiteMummy/player.gd" id="1_blv11"]
+
+[node name="WhiteMummy" type="CharacterBody2D"]
+texture_filter = 1
+script = ExtResource("1_blv11")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -30)
+sprite_frames = ExtResource("1_aldd0")
+animation = &"walk_downward"
+frame = 3
+frame_progress = 0.6433146

@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="SpriteFrames" path="res://Assets/Sprites/Enemies/Chaser/Resources/ChaserFrames.tres" id="1"]
+[ext_resource type="Script" path="res://EnemyManager/Chaser/chaser.gd" id="2"]
+
+[node name="Chaser" type="CharacterBody2D"]
+texture_filter = 1
+script = ExtResource("2")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -2)
+scale = Vector2(0.42, 0.42)
+sprite_frames = ExtResource("1")
+animation = &"walk_downward"
+frame = 1
