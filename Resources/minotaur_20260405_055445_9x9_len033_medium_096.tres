@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+display_name = "2026-04-05 05:56:20 UTC 9x9 Medium #096"
+saved_at_unix = 1775368580
+width = 9
+height = 9
+size_category = "large"
+difficulty_category = "medium"
+horizontal_walls = Array[Vector2i]([Vector2i(6, 1), Vector2i(0, 2), Vector2i(6, 2), Vector2i(3, 3), Vector2i(7, 3), Vector2i(3, 5), Vector2i(1, 6), Vector2i(5, 6), Vector2i(5, 7), Vector2i(6, 7), Vector2i(6, 8)])
+vertical_walls = Array[Vector2i]([Vector2i(1, 1), Vector2i(5, 1), Vector2i(6, 1), Vector2i(3, 2), Vector2i(7, 2), Vector2i(2, 3), Vector2i(3, 3), Vector2i(6, 3), Vector2i(3, 4), Vector2i(5, 4), Vector2i(6, 4), Vector2i(3, 5), Vector2i(6, 5), Vector2i(3, 6)])
+player_spawn = Vector2i(0, 6)
+minotaur_spawn = Vector2i(3, 7)
+exit_cell = Vector2i(1, 8)
+solution_actions = Array[String](["up", "right", "up", "up", "up", "up", "right", "right", "down", "right", "right", "right", "down", "right", "right", "up", "up", "up", "down", "down", "down", "left", "left", "down", "down", "down", "left", "left", "left", "down", "left", "left", "down"])
+solution_total_steps = 33
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "minotaur_import_9x9_batch"

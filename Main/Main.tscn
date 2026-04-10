@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dbx2d1auhhsds"]
+[gd_scene load_steps=8 format=3 uid="uid://dbx2d1auhhsds"]
 
 [ext_resource type="Script" path="res://Main/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://GameManager/GameManager.tscn" id="2"]
@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" path="res://FogOfWar/FogOfWar.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://Player/Player.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://EnemyManager/EnemyManager.tscn" id="7"]
-[ext_resource type="PackedScene" path="res://ItemLayer/ItemLayer.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://HUD/HUD.tscn" id="9"]
 
 [node name="Main" type="Node2D"]
@@ -22,8 +21,6 @@ enabled = true
 [node name="MazeGenerator" parent="." instance=ExtResource("3")]
 
 [node name="TileMap" parent="." instance=ExtResource("4")]
-
-[node name="ItemLayer" parent="." instance=ExtResource("8")]
 
 [node name="FogOfWar" parent="." instance=ExtResource("5")]
 

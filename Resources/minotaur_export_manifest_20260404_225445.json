@@ -1,0 +1,2118 @@
+{
+  "source_project": "C:\\Users\\echri\\Python Projects\\Minotaur-Project",
+  "output_dir": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources",
+  "generated_at_unix": 1775368485,
+  "parameters": {
+    "width": 9,
+    "height": 9,
+    "iterations": 10,
+    "mazes_per_iteration": 10,
+    "min_moves": 30,
+    "seed": null,
+    "cell_size": 16,
+    "additional_checks": true,
+    "additional_check_threshold": 50
+  },
+  "files": [
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_001.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_001.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 1,
+      "player_start": [
+        3,
+        8
+      ],
+      "minotaur_start": [
+        5,
+        2
+      ],
+      "goal": [
+        2,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_002.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_002.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 1,
+      "player_start": [
+        8,
+        0
+      ],
+      "minotaur_start": [
+        1,
+        5
+      ],
+      "goal": [
+        8,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_003.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_003.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 1,
+      "player_start": [
+        4,
+        4
+      ],
+      "minotaur_start": [
+        1,
+        1
+      ],
+      "goal": [
+        8,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len032_easy_004.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len032_easy_004.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 32,
+      "difficulty_category": "easy",
+      "iteration": 1,
+      "player_start": [
+        3,
+        7
+      ],
+      "minotaur_start": [
+        5,
+        2
+      ],
+      "goal": [
+        0,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_005.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_005.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 1,
+      "player_start": [
+        1,
+        8
+      ],
+      "minotaur_start": [
+        7,
+        1
+      ],
+      "goal": [
+        1,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len034_medium_006.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len034_medium_006.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 34,
+      "difficulty_category": "medium",
+      "iteration": 1,
+      "player_start": [
+        5,
+        2
+      ],
+      "minotaur_start": [
+        6,
+        5
+      ],
+      "goal": [
+        1,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_007.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_007.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 1,
+      "player_start": [
+        8,
+        5
+      ],
+      "minotaur_start": [
+        1,
+        4
+      ],
+      "goal": [
+        3,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len037_hard_008.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len037_hard_008.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 37,
+      "difficulty_category": "hard",
+      "iteration": 1,
+      "player_start": [
+        3,
+        4
+      ],
+      "minotaur_start": [
+        7,
+        1
+      ],
+      "goal": [
+        5,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len041_hard_009.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len041_hard_009.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 41,
+      "difficulty_category": "hard",
+      "iteration": 1,
+      "player_start": [
+        8,
+        0
+      ],
+      "minotaur_start": [
+        4,
+        4
+      ],
+      "goal": [
+        3,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len044_hard_010.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len044_hard_010.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 44,
+      "difficulty_category": "hard",
+      "iteration": 1,
+      "player_start": [
+        8,
+        2
+      ],
+      "minotaur_start": [
+        5,
+        6
+      ],
+      "goal": [
+        7,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_011.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_011.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 2,
+      "player_start": [
+        7,
+        3
+      ],
+      "minotaur_start": [
+        5,
+        3
+      ],
+      "goal": [
+        5,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_012.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_012.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 2,
+      "player_start": [
+        7,
+        8
+      ],
+      "minotaur_start": [
+        1,
+        8
+      ],
+      "goal": [
+        0,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_013.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_013.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 2,
+      "player_start": [
+        8,
+        4
+      ],
+      "minotaur_start": [
+        0,
+        0
+      ],
+      "goal": [
+        1,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_014.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_014.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 2,
+      "player_start": [
+        0,
+        7
+      ],
+      "minotaur_start": [
+        8,
+        6
+      ],
+      "goal": [
+        1,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_015.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_015.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 2,
+      "player_start": [
+        3,
+        5
+      ],
+      "minotaur_start": [
+        1,
+        4
+      ],
+      "goal": [
+        7,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_016.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_016.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 2,
+      "player_start": [
+        7,
+        8
+      ],
+      "minotaur_start": [
+        4,
+        0
+      ],
+      "goal": [
+        8,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_017.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_017.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 2,
+      "player_start": [
+        6,
+        8
+      ],
+      "minotaur_start": [
+        4,
+        5
+      ],
+      "goal": [
+        8,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_018.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_018.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 2,
+      "player_start": [
+        5,
+        6
+      ],
+      "minotaur_start": [
+        8,
+        3
+      ],
+      "goal": [
+        8,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len034_medium_019.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len034_medium_019.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 34,
+      "difficulty_category": "medium",
+      "iteration": 2,
+      "player_start": [
+        5,
+        4
+      ],
+      "minotaur_start": [
+        8,
+        7
+      ],
+      "goal": [
+        6,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len041_hard_020.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len041_hard_020.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 41,
+      "difficulty_category": "hard",
+      "iteration": 2,
+      "player_start": [
+        0,
+        4
+      ],
+      "minotaur_start": [
+        1,
+        8
+      ],
+      "goal": [
+        8,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_021.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_021.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 3,
+      "player_start": [
+        0,
+        3
+      ],
+      "minotaur_start": [
+        3,
+        1
+      ],
+      "goal": [
+        2,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_022.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_022.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 3,
+      "player_start": [
+        8,
+        2
+      ],
+      "minotaur_start": [
+        2,
+        0
+      ],
+      "goal": [
+        7,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_023.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_023.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 3,
+      "player_start": [
+        5,
+        0
+      ],
+      "minotaur_start": [
+        2,
+        2
+      ],
+      "goal": [
+        8,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len032_easy_024.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len032_easy_024.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 32,
+      "difficulty_category": "easy",
+      "iteration": 3,
+      "player_start": [
+        8,
+        5
+      ],
+      "minotaur_start": [
+        3,
+        1
+      ],
+      "goal": [
+        1,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len032_easy_025.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len032_easy_025.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 32,
+      "difficulty_category": "easy",
+      "iteration": 3,
+      "player_start": [
+        6,
+        2
+      ],
+      "minotaur_start": [
+        0,
+        1
+      ],
+      "goal": [
+        1,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len032_easy_026.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len032_easy_026.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 32,
+      "difficulty_category": "easy",
+      "iteration": 3,
+      "player_start": [
+        7,
+        4
+      ],
+      "minotaur_start": [
+        2,
+        1
+      ],
+      "goal": [
+        2,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_027.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_027.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 3,
+      "player_start": [
+        0,
+        1
+      ],
+      "minotaur_start": [
+        1,
+        3
+      ],
+      "goal": [
+        6,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_028.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_028.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 3,
+      "player_start": [
+        4,
+        5
+      ],
+      "minotaur_start": [
+        6,
+        4
+      ],
+      "goal": [
+        5,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len036_medium_029.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len036_medium_029.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 36,
+      "difficulty_category": "medium",
+      "iteration": 3,
+      "player_start": [
+        0,
+        1
+      ],
+      "minotaur_start": [
+        5,
+        3
+      ],
+      "goal": [
+        6,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len047_hard_030.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len047_hard_030.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 47,
+      "difficulty_category": "hard",
+      "iteration": 3,
+      "player_start": [
+        6,
+        8
+      ],
+      "minotaur_start": [
+        6,
+        5
+      ],
+      "goal": [
+        8,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_031.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_031.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 4,
+      "player_start": [
+        6,
+        7
+      ],
+      "minotaur_start": [
+        7,
+        8
+      ],
+      "goal": [
+        4,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_032.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_032.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 4,
+      "player_start": [
+        5,
+        7
+      ],
+      "minotaur_start": [
+        2,
+        4
+      ],
+      "goal": [
+        8,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_033.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_033.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 4,
+      "player_start": [
+        6,
+        8
+      ],
+      "minotaur_start": [
+        4,
+        8
+      ],
+      "goal": [
+        5,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_034.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_034.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 4,
+      "player_start": [
+        1,
+        4
+      ],
+      "minotaur_start": [
+        5,
+        3
+      ],
+      "goal": [
+        6,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len036_medium_035.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len036_medium_035.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 36,
+      "difficulty_category": "medium",
+      "iteration": 4,
+      "player_start": [
+        5,
+        6
+      ],
+      "minotaur_start": [
+        5,
+        3
+      ],
+      "goal": [
+        1,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len037_hard_036.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len037_hard_036.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 37,
+      "difficulty_category": "hard",
+      "iteration": 4,
+      "player_start": [
+        4,
+        2
+      ],
+      "minotaur_start": [
+        2,
+        7
+      ],
+      "goal": [
+        1,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len039_hard_037.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len039_hard_037.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 39,
+      "difficulty_category": "hard",
+      "iteration": 4,
+      "player_start": [
+        2,
+        2
+      ],
+      "minotaur_start": [
+        7,
+        6
+      ],
+      "goal": [
+        0,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len042_hard_038.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len042_hard_038.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 42,
+      "difficulty_category": "hard",
+      "iteration": 4,
+      "player_start": [
+        3,
+        1
+      ],
+      "minotaur_start": [
+        2,
+        7
+      ],
+      "goal": [
+        8,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len044_hard_039.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len044_hard_039.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 44,
+      "difficulty_category": "hard",
+      "iteration": 4,
+      "player_start": [
+        6,
+        1
+      ],
+      "minotaur_start": [
+        7,
+        3
+      ],
+      "goal": [
+        7,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len046_hard_040.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len046_hard_040.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 46,
+      "difficulty_category": "hard",
+      "iteration": 4,
+      "player_start": [
+        3,
+        0
+      ],
+      "minotaur_start": [
+        0,
+        5
+      ],
+      "goal": [
+        8,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_041.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_041.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 5,
+      "player_start": [
+        3,
+        7
+      ],
+      "minotaur_start": [
+        4,
+        1
+      ],
+      "goal": [
+        0,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_042.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_042.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 5,
+      "player_start": [
+        6,
+        0
+      ],
+      "minotaur_start": [
+        6,
+        7
+      ],
+      "goal": [
+        8,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_043.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_043.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 5,
+      "player_start": [
+        7,
+        0
+      ],
+      "minotaur_start": [
+        5,
+        8
+      ],
+      "goal": [
+        6,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len034_medium_044.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len034_medium_044.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 34,
+      "difficulty_category": "medium",
+      "iteration": 5,
+      "player_start": [
+        2,
+        1
+      ],
+      "minotaur_start": [
+        1,
+        3
+      ],
+      "goal": [
+        0,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len034_medium_045.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len034_medium_045.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 34,
+      "difficulty_category": "medium",
+      "iteration": 5,
+      "player_start": [
+        8,
+        4
+      ],
+      "minotaur_start": [
+        3,
+        3
+      ],
+      "goal": [
+        3,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_046.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_046.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 5,
+      "player_start": [
+        0,
+        7
+      ],
+      "minotaur_start": [
+        5,
+        1
+      ],
+      "goal": [
+        0,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_047.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_047.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 5,
+      "player_start": [
+        5,
+        4
+      ],
+      "minotaur_start": [
+        3,
+        1
+      ],
+      "goal": [
+        8,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len038_hard_048.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len038_hard_048.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 38,
+      "difficulty_category": "hard",
+      "iteration": 5,
+      "player_start": [
+        4,
+        2
+      ],
+      "minotaur_start": [
+        5,
+        4
+      ],
+      "goal": [
+        0,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len041_hard_049.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len041_hard_049.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 41,
+      "difficulty_category": "hard",
+      "iteration": 5,
+      "player_start": [
+        8,
+        0
+      ],
+      "minotaur_start": [
+        1,
+        6
+      ],
+      "goal": [
+        3,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len043_hard_050.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len043_hard_050.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 43,
+      "difficulty_category": "hard",
+      "iteration": 5,
+      "player_start": [
+        5,
+        8
+      ],
+      "minotaur_start": [
+        0,
+        4
+      ],
+      "goal": [
+        7,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_051.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_051.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 6,
+      "player_start": [
+        0,
+        1
+      ],
+      "minotaur_start": [
+        8,
+        8
+      ],
+      "goal": [
+        7,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_052.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_052.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 6,
+      "player_start": [
+        8,
+        0
+      ],
+      "minotaur_start": [
+        8,
+        6
+      ],
+      "goal": [
+        3,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len032_medium_053.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len032_medium_053.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 32,
+      "difficulty_category": "medium",
+      "iteration": 6,
+      "player_start": [
+        5,
+        0
+      ],
+      "minotaur_start": [
+        2,
+        7
+      ],
+      "goal": [
+        5,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_054.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_054.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 6,
+      "player_start": [
+        6,
+        5
+      ],
+      "minotaur_start": [
+        6,
+        3
+      ],
+      "goal": [
+        8,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len037_hard_055.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len037_hard_055.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 37,
+      "difficulty_category": "hard",
+      "iteration": 6,
+      "player_start": [
+        7,
+        2
+      ],
+      "minotaur_start": [
+        4,
+        0
+      ],
+      "goal": [
+        4,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len037_hard_056.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len037_hard_056.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 37,
+      "difficulty_category": "hard",
+      "iteration": 6,
+      "player_start": [
+        5,
+        4
+      ],
+      "minotaur_start": [
+        8,
+        6
+      ],
+      "goal": [
+        7,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len037_hard_057.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len037_hard_057.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 37,
+      "difficulty_category": "hard",
+      "iteration": 6,
+      "player_start": [
+        8,
+        5
+      ],
+      "minotaur_start": [
+        8,
+        6
+      ],
+      "goal": [
+        7,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len038_hard_058.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len038_hard_058.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 38,
+      "difficulty_category": "hard",
+      "iteration": 6,
+      "player_start": [
+        6,
+        1
+      ],
+      "minotaur_start": [
+        8,
+        5
+      ],
+      "goal": [
+        2,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len039_hard_059.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len039_hard_059.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 39,
+      "difficulty_category": "hard",
+      "iteration": 6,
+      "player_start": [
+        2,
+        6
+      ],
+      "minotaur_start": [
+        6,
+        8
+      ],
+      "goal": [
+        5,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len040_hard_060.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len040_hard_060.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 40,
+      "difficulty_category": "hard",
+      "iteration": 6,
+      "player_start": [
+        7,
+        5
+      ],
+      "minotaur_start": [
+        7,
+        2
+      ],
+      "goal": [
+        4,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_061.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_061.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 7,
+      "player_start": [
+        1,
+        6
+      ],
+      "minotaur_start": [
+        6,
+        0
+      ],
+      "goal": [
+        7,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_062.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_062.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 7,
+      "player_start": [
+        7,
+        8
+      ],
+      "minotaur_start": [
+        4,
+        3
+      ],
+      "goal": [
+        4,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len034_medium_063.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len034_medium_063.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 34,
+      "difficulty_category": "medium",
+      "iteration": 7,
+      "player_start": [
+        6,
+        3
+      ],
+      "minotaur_start": [
+        5,
+        4
+      ],
+      "goal": [
+        0,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_064.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_064.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 7,
+      "player_start": [
+        0,
+        3
+      ],
+      "minotaur_start": [
+        6,
+        0
+      ],
+      "goal": [
+        4,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len036_medium_065.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len036_medium_065.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 36,
+      "difficulty_category": "medium",
+      "iteration": 7,
+      "player_start": [
+        4,
+        3
+      ],
+      "minotaur_start": [
+        1,
+        5
+      ],
+      "goal": [
+        1,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len036_medium_066.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len036_medium_066.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 36,
+      "difficulty_category": "medium",
+      "iteration": 7,
+      "player_start": [
+        5,
+        4
+      ],
+      "minotaur_start": [
+        3,
+        5
+      ],
+      "goal": [
+        2,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len037_hard_067.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len037_hard_067.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 37,
+      "difficulty_category": "hard",
+      "iteration": 7,
+      "player_start": [
+        5,
+        3
+      ],
+      "minotaur_start": [
+        3,
+        6
+      ],
+      "goal": [
+        0,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len040_hard_068.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len040_hard_068.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 40,
+      "difficulty_category": "hard",
+      "iteration": 7,
+      "player_start": [
+        4,
+        6
+      ],
+      "minotaur_start": [
+        0,
+        4
+      ],
+      "goal": [
+        1,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len041_hard_069.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len041_hard_069.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 41,
+      "difficulty_category": "hard",
+      "iteration": 7,
+      "player_start": [
+        4,
+        8
+      ],
+      "minotaur_start": [
+        1,
+        4
+      ],
+      "goal": [
+        2,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len043_hard_070.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len043_hard_070.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 43,
+      "difficulty_category": "hard",
+      "iteration": 7,
+      "player_start": [
+        2,
+        0
+      ],
+      "minotaur_start": [
+        8,
+        8
+      ],
+      "goal": [
+        8,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_071.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_071.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 8,
+      "player_start": [
+        8,
+        8
+      ],
+      "minotaur_start": [
+        2,
+        3
+      ],
+      "goal": [
+        6,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_072.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_072.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 8,
+      "player_start": [
+        8,
+        0
+      ],
+      "minotaur_start": [
+        3,
+        7
+      ],
+      "goal": [
+        8,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_073.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_073.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 8,
+      "player_start": [
+        5,
+        4
+      ],
+      "minotaur_start": [
+        3,
+        7
+      ],
+      "goal": [
+        6,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_074.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_074.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 8,
+      "player_start": [
+        8,
+        5
+      ],
+      "minotaur_start": [
+        2,
+        8
+      ],
+      "goal": [
+        8,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_075.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_075.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 8,
+      "player_start": [
+        7,
+        0
+      ],
+      "minotaur_start": [
+        5,
+        8
+      ],
+      "goal": [
+        8,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len034_medium_076.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len034_medium_076.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 34,
+      "difficulty_category": "medium",
+      "iteration": 8,
+      "player_start": [
+        3,
+        5
+      ],
+      "minotaur_start": [
+        3,
+        3
+      ],
+      "goal": [
+        3,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_077.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_077.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 8,
+      "player_start": [
+        4,
+        5
+      ],
+      "minotaur_start": [
+        1,
+        1
+      ],
+      "goal": [
+        5,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_078.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_078.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 8,
+      "player_start": [
+        0,
+        5
+      ],
+      "minotaur_start": [
+        8,
+        5
+      ],
+      "goal": [
+        6,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len039_hard_079.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len039_hard_079.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 39,
+      "difficulty_category": "hard",
+      "iteration": 8,
+      "player_start": [
+        2,
+        4
+      ],
+      "minotaur_start": [
+        6,
+        2
+      ],
+      "goal": [
+        7,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len040_hard_080.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len040_hard_080.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 40,
+      "difficulty_category": "hard",
+      "iteration": 8,
+      "player_start": [
+        2,
+        3
+      ],
+      "minotaur_start": [
+        4,
+        1
+      ],
+      "goal": [
+        5,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_081.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_081.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 9,
+      "player_start": [
+        3,
+        0
+      ],
+      "minotaur_start": [
+        7,
+        8
+      ],
+      "goal": [
+        8,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len032_medium_082.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len032_medium_082.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 32,
+      "difficulty_category": "medium",
+      "iteration": 9,
+      "player_start": [
+        0,
+        4
+      ],
+      "minotaur_start": [
+        5,
+        7
+      ],
+      "goal": [
+        5,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_083.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_083.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 9,
+      "player_start": [
+        0,
+        4
+      ],
+      "minotaur_start": [
+        6,
+        6
+      ],
+      "goal": [
+        8,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len036_medium_084.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len036_medium_084.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 36,
+      "difficulty_category": "medium",
+      "iteration": 9,
+      "player_start": [
+        3,
+        7
+      ],
+      "minotaur_start": [
+        8,
+        5
+      ],
+      "goal": [
+        6,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len039_hard_085.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len039_hard_085.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 39,
+      "difficulty_category": "hard",
+      "iteration": 9,
+      "player_start": [
+        5,
+        6
+      ],
+      "minotaur_start": [
+        1,
+        6
+      ],
+      "goal": [
+        0,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len040_hard_086.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len040_hard_086.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 40,
+      "difficulty_category": "hard",
+      "iteration": 9,
+      "player_start": [
+        4,
+        3
+      ],
+      "minotaur_start": [
+        6,
+        4
+      ],
+      "goal": [
+        6,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len041_hard_087.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len041_hard_087.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 41,
+      "difficulty_category": "hard",
+      "iteration": 9,
+      "player_start": [
+        3,
+        1
+      ],
+      "minotaur_start": [
+        6,
+        4
+      ],
+      "goal": [
+        7,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len042_hard_088.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len042_hard_088.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 42,
+      "difficulty_category": "hard",
+      "iteration": 9,
+      "player_start": [
+        0,
+        0
+      ],
+      "minotaur_start": [
+        8,
+        5
+      ],
+      "goal": [
+        8,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len043_hard_089.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len043_hard_089.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 43,
+      "difficulty_category": "hard",
+      "iteration": 9,
+      "player_start": [
+        5,
+        1
+      ],
+      "minotaur_start": [
+        8,
+        7
+      ],
+      "goal": [
+        7,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len048_max_090.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len048_max_090.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 48,
+      "difficulty_category": "max",
+      "iteration": 9,
+      "player_start": [
+        5,
+        2
+      ],
+      "minotaur_start": [
+        8,
+        7
+      ],
+      "goal": [
+        8,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_091.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_091.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 10,
+      "player_start": [
+        2,
+        7
+      ],
+      "minotaur_start": [
+        0,
+        5
+      ],
+      "goal": [
+        1,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_092.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_092.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 10,
+      "player_start": [
+        2,
+        0
+      ],
+      "minotaur_start": [
+        6,
+        8
+      ],
+      "goal": [
+        1,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len030_easy_093.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len030_easy_093.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "easy",
+      "iteration": 10,
+      "player_start": [
+        0,
+        5
+      ],
+      "minotaur_start": [
+        1,
+        7
+      ],
+      "goal": [
+        2,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len031_easy_094.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len031_easy_094.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 31,
+      "difficulty_category": "easy",
+      "iteration": 10,
+      "player_start": [
+        1,
+        5
+      ],
+      "minotaur_start": [
+        4,
+        7
+      ],
+      "goal": [
+        0,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len032_medium_095.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len032_medium_095.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 32,
+      "difficulty_category": "medium",
+      "iteration": 10,
+      "player_start": [
+        2,
+        5
+      ],
+      "minotaur_start": [
+        0,
+        7
+      ],
+      "goal": [
+        5,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len033_medium_096.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len033_medium_096.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 33,
+      "difficulty_category": "medium",
+      "iteration": 10,
+      "player_start": [
+        0,
+        6
+      ],
+      "minotaur_start": [
+        3,
+        7
+      ],
+      "goal": [
+        1,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len035_medium_097.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len035_medium_097.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 35,
+      "difficulty_category": "medium",
+      "iteration": 10,
+      "player_start": [
+        1,
+        7
+      ],
+      "minotaur_start": [
+        6,
+        8
+      ],
+      "goal": [
+        5,
+        8
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len036_hard_098.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len036_hard_098.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 36,
+      "difficulty_category": "hard",
+      "iteration": 10,
+      "player_start": [
+        0,
+        3
+      ],
+      "minotaur_start": [
+        4,
+        7
+      ],
+      "goal": [
+        2,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len038_hard_099.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len038_hard_099.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 38,
+      "difficulty_category": "hard",
+      "iteration": 10,
+      "player_start": [
+        1,
+        4
+      ],
+      "minotaur_start": [
+        1,
+        7
+      ],
+      "goal": [
+        0,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260405_055445_9x9_len043_hard_100.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\minotaur_20260405_055445_9x9_len043_hard_100.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 43,
+      "difficulty_category": "hard",
+      "iteration": 10,
+      "player_start": [
+        1,
+        6
+      ],
+      "minotaur_start": [
+        4,
+        8
+      ],
+      "goal": [
+        0,
+        8
+      ]
+    }
+  ]
+}

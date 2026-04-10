@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://HUD/hud.gd" id="1"]
 
@@ -24,23 +24,74 @@ offset_right = 236.0
 offset_bottom = 154.0
 
 [node name="FloorLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-text = "Floor: 1 / 1"
+text = "Board: 0x0"
 
 [node name="GridLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-text = "Grid: 0x0"
+text = "Size: Small"
 
 [node name="WallDensityLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-text = "Walls: 0%"
+text = "Difficulty: Medium"
 
 [node name="TurnsLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-text = "Turns Remaining: 0"
+text = "Moves: 0"
 
 [node name="KeyLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-text = "Key: Missing"
+text = "Shortest Solution: 0"
 
 [node name="InventoryLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-text = "Inventory: Empty"
+text = "Seed ID: N/A"
+
+[node name="StatusLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
+text = "Status: In progress"
 
 [node name="MessageLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
 autowrap_mode = 2
-text = "Arrow keys move, Space waits, 1 uses an item, R restarts."
+text = "Arrows move, Space waits, Shift undoes, Backspace resets, P shows the solution, R rerolls."
+
+[node name="TransitionOverlay" type="Control" parent="."]
+visible = false
+z_index = 100
+mouse_filter = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="OverlayBackground" type="ColorRect" parent="TransitionOverlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.78)
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="TransitionOverlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="TransitionOverlay/CenterContainer"]
+custom_minimum_size = Vector2(280, 110)
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="TransitionOverlay/CenterContainer/PanelContainer"]
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TransitionOverlay/CenterContainer/PanelContainer/MarginContainer"]
+offset_right = 244.0
+offset_bottom = 74.0
+theme_override_constants/separation = 10
+
+[node name="LoadingTitleLabel" type="Label" parent="TransitionOverlay/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+text = "Descending..."
+
+[node name="LoadingDetailLabel" type="RichTextLabel" parent="TransitionOverlay/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(244, 52)
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = "[i]Brushing sand off the save files...[/i]"

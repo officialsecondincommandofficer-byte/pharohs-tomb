@@ -1,5 +1,7 @@
 extends "res://EnemyManager/enemy_base.gd"
 
+const ChaserLogicScript = preload("res://EnemyManager/chaser_logic.gd")
+
 var move_priority: String = "horizontal"
 
 
@@ -44,22 +46,10 @@ func take_turn(player_cell: Vector2i, occupied_cells: Array[Vector2i]) -> Dictio
 
 
 func _choose_greedy_step(player_cell: Vector2i, occupied_lookup: Dictionary) -> Vector2i:
-	var vertical_direction: int = sign(player_cell.y - current_cell.y)
-	var horizontal_direction: int = sign(player_cell.x - current_cell.x)
-	var preferred_axes: Array[String] = ["horizontal", "vertical"]
-
-	if move_priority == "vertical":
-		preferred_axes = ["vertical", "horizontal"]
-
-	for axis in preferred_axes:
-		if axis == "vertical" and vertical_direction != 0:
-			var vertical_target: Vector2i = current_cell + Vector2i(0, vertical_direction)
-			if _can_enter(vertical_target, occupied_lookup):
-				return vertical_target
-
-		if axis == "horizontal" and horizontal_direction != 0:
-			var horizontal_target: Vector2i = current_cell + Vector2i(horizontal_direction, 0)
-			if _can_enter(horizontal_target, occupied_lookup):
-				return horizontal_target
-
-	return current_cell
+	return ChaserLogicScript.choose_greedy_step(
+		current_cell,
+		player_cell,
+		occupied_lookup,
+		board_state,
+		move_priority
+	)
