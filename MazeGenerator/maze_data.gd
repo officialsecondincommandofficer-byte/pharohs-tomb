@@ -1,6 +1,8 @@
 extends RefCounted
 class_name MazeData
 
+const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
+
 const SAVE_VERSION := 1
 
 const ACTION_TO_DIRECTION := {
@@ -21,6 +23,7 @@ var wall_cells: Array[Vector2i] = []
 var horizontal_walls: Array[Vector2i] = []
 var vertical_walls: Array[Vector2i] = []
 var player_spawn: Vector2i = Vector2i.ZERO
+var enemy_spawns: Array[Dictionary] = []
 var minotaur_spawn: Vector2i = Vector2i.ZERO
 var exit_cell: Vector2i = Vector2i.ZERO
 var solution_actions: Array[String] = []
@@ -52,6 +55,7 @@ func configure_from_maze_key(
 	wall_cells.clear()
 	horizontal_walls.clear()
 	vertical_walls.clear()
+	enemy_spawns.clear()
 	solution_actions.clear()
 	_floor_lookup.clear()
 	_horizontal_wall_lookup.clear()
@@ -66,6 +70,8 @@ func configure_from_maze_key(
 
 	player_spawn = _coerce_vector2i(next_maze_key.get("player_start", Vector2i.ZERO))
 	minotaur_spawn = _coerce_vector2i(next_maze_key.get("mino_start", Vector2i.ZERO))
+	enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(next_maze_key.get("enemy_spawns", []), minotaur_spawn)
+	minotaur_spawn = EnemySpawnDataScript.first_enemy_cell(enemy_spawns, minotaur_spawn)
 	exit_cell = _coerce_vector2i(next_maze_key.get("goal", Vector2i.ZERO))
 
 	for action in next_maze_key.get("solution", []):
@@ -196,6 +202,7 @@ func to_saved_payload(display_name: String = "", saved_at_unix: int = 0) -> Dict
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
 		"player_spawn": player_spawn,
+		"enemy_spawns": enemy_spawns.duplicate(true),
 		"minotaur_spawn": minotaur_spawn,
 		"exit_cell": exit_cell,
 		"solution_actions": solution_actions.duplicate(),
@@ -216,6 +223,8 @@ static func from_saved_payload(payload: Dictionary) -> MazeData:
 	board.saved_at_unix = int(payload.get("saved_at_unix", 0))
 	board.player_spawn = board._coerce_vector2i(payload.get("player_spawn", Vector2i.ZERO))
 	board.minotaur_spawn = board._coerce_vector2i(payload.get("minotaur_spawn", Vector2i.ZERO))
+	board.enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), board.minotaur_spawn)
+	board.minotaur_spawn = EnemySpawnDataScript.first_enemy_cell(board.enemy_spawns, board.minotaur_spawn)
 	board.exit_cell = board._coerce_vector2i(payload.get("exit_cell", Vector2i.ZERO))
 	board.generation_mode = String(payload.get("generation_mode", "RUNTIME_GENERATED"))
 	board.generation_profile_id = String(payload.get("generation_profile_id", ""))
@@ -286,6 +295,7 @@ func _build_maze_key_from_state() -> Dictionary:
 		"size_board": [width, height],
 		"walls": serialized_walls,
 		"player_start": [player_spawn.x, player_spawn.y],
+		"enemy_spawns": enemy_spawns.duplicate(true),
 		"mino_start": [minotaur_spawn.x, minotaur_spawn.y],
 		"goal": [exit_cell.x, exit_cell.y],
 		"solution": solution_actions.duplicate(),

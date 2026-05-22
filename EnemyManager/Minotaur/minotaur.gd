@@ -20,7 +20,11 @@ func take_turn(player_cell: Vector2i, _occupied_cells: Array[Vector2i]) -> Dicti
 
 	return {
 		"enemy_type": enemy_type,
+		"spawn_order": spawn_order,
+		"traits": traits.duplicate(),
 		"previous_cell": previous_cell,
 		"new_cell": current_cell,
 		"contact_player": resolved_turn.get("contact_player", false),
+		"died": false,
+		"killed_spawn_order": -1,
 	}

@@ -1,0 +1,67 @@
+{
+  "source_project": "C:\\Users\\echri\\Python Projects\\Minotaur-Project",
+  "output_dir": "Resources\\Test",
+  "generated_at_unix": 1776893267,
+  "parameters": {
+    "width": 8,
+    "height": 8,
+    "iterations": 1,
+    "mazes_per_iteration": 1,
+    "min_moves": 8,
+    "seed": 4222026,
+    "cell_size": 16,
+    "enemy_move_priority": "horizontal",
+    "greedy_horizontal_count": 2,
+    "greedy_vertical_count": 0,
+    "killer_count": 1,
+    "additional_checks": false,
+    "additional_check_threshold": 50
+  },
+  "files": [
+    {
+      "file_name": "minotaur_20260422_212747_8x8_len014_max_001.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260422_212747_8x8_len014_max_001.tres",
+      "width": 8,
+      "height": 8,
+      "solution_total_steps": 14,
+      "difficulty_category": "max",
+      "iteration": 1,
+      "player_start": [
+        6,
+        1
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            6,
+            4
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "traits": [
+            "killer"
+          ]
+        },
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            6,
+            3
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        6,
+        4
+      ],
+      "goal": [
+        5,
+        6
+      ]
+    }
+  ]
+}
