@@ -61,9 +61,15 @@ func _refresh_saved_resource_paths() -> void:
 	if saved_resource_directory.is_empty():
 		return
 
-	var directory := DirAccess.open(saved_resource_directory)
+	_collect_saved_resource_paths(saved_resource_directory)
+	_saved_resource_paths.sort()
+	print("[Startup] MazeGenerator found %d saved maze resources in %s" % [_saved_resource_paths.size(), saved_resource_directory])
+
+
+func _collect_saved_resource_paths(directory_path: String) -> void:
+	var directory := DirAccess.open(directory_path)
 	if directory == null:
-		push_warning("[Startup] MazeGenerator could not open saved maze directory: %s" % saved_resource_directory)
+		push_warning("[Startup] MazeGenerator could not open saved maze directory: %s" % directory_path)
 		return
 
 	directory.list_dir_begin()
@@ -71,17 +77,19 @@ func _refresh_saved_resource_paths() -> void:
 		var entry := directory.get_next()
 		if entry.is_empty():
 			break
+		if entry == "." or entry == "..":
+			continue
+
+		var entry_path := directory_path.path_join(entry)
 		if directory.current_is_dir():
+			_collect_saved_resource_paths(entry_path)
 			continue
 		if not entry.ends_with(".tres"):
 			continue
 		if not entry.begins_with("minotaur_"):
 			continue
-		_saved_resource_paths.append(saved_resource_directory.path_join(entry))
+		_saved_resource_paths.append(entry_path)
 	directory.list_dir_end()
-
-	_saved_resource_paths.sort()
-	print("[Startup] MazeGenerator found %d saved maze resources in %s" % [_saved_resource_paths.size(), saved_resource_directory])
 
 
 func _load_next_saved_board() -> MazeData:

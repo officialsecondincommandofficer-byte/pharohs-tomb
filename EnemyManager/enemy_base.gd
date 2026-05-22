@@ -8,6 +8,9 @@ extends CharacterBody2D
 
 var board_state
 var current_cell: Vector2i = Vector2i.ZERO
+var spawn_order: int = 0
+var traits: Array[String] = []
+var is_dead := false
 var patrol_route: Array[Vector2i] = []
 var patrol_index := 0
 var patrol_direction := 1
@@ -22,9 +25,13 @@ func _ready() -> void:
 func configure(spawn_data: Dictionary, next_board_state) -> void:
 	board_state = next_board_state
 	enemy_type = String(spawn_data.get("type", enemy_type))
+	spawn_order = int(spawn_data.get("spawn_order", spawn_order))
+	traits = _coerce_string_array(spawn_data.get("traits", []))
 	var next_tint: Color = spawn_data.get("tint", tint)
 	tint = next_tint
 	current_cell = spawn_data.get("cell", Vector2i.ZERO)
+	is_dead = false
+	visible = true
 	patrol_route.clear()
 	var raw_patrol_route: Array = spawn_data.get("patrol_route", [current_cell])
 	for patrol_cell in raw_patrol_route:
@@ -46,9 +53,13 @@ func take_turn(player_cell: Vector2i, occupied_cells: Array[Vector2i]) -> Dictio
 	var next_cell: Vector2i = choose_target_cell(player_cell, occupied_lookup)
 	var result: Dictionary = {
 		"enemy_type": enemy_type,
+		"spawn_order": spawn_order,
+		"traits": traits.duplicate(),
 		"previous_cell": current_cell,
 		"new_cell": current_cell,
 		"contact_player": false,
+		"died": false,
+		"killed_spawn_order": -1,
 	}
 
 	if next_cell == current_cell:
@@ -60,6 +71,35 @@ func take_turn(player_cell: Vector2i, occupied_cells: Array[Vector2i]) -> Dictio
 	_update_facing(current_cell - result["previous_cell"])
 	await _animate_to_world_position(board_state.to_world(current_cell))
 	return result
+
+
+func get_step_count() -> int:
+	return 1
+
+
+func move_to_cell(next_cell: Vector2i) -> void:
+	if next_cell == current_cell:
+		return
+	var step_direction: Vector2i = next_cell - current_cell
+	current_cell = next_cell
+	_update_facing(step_direction)
+	await _animate_to_world_position(board_state.to_world(current_cell))
+
+
+func mark_dead() -> void:
+	is_dead = true
+	visible = false
+
+
+func restore_to_cell(cell: Vector2i, alive: bool) -> void:
+	current_cell = cell
+	position = board_state.to_world(current_cell)
+	is_dead = not alive
+	visible = alive
+
+
+func has_trait(trait_name: String) -> bool:
+	return traits.has(trait_name)
 
 
 func choose_target_cell(_player_cell: Vector2i, _occupied_lookup: Dictionary) -> Vector2i:
@@ -115,3 +155,10 @@ func _animate_to_world_position(target_position: Vector2) -> void:
 	var tween: Tween = create_tween()
 	tween.tween_property(self, "position", target_position, move_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	await tween.finished
+
+
+func _coerce_string_array(raw_value) -> Array[String]:
+	var coerced: Array[String] = []
+	for entry in raw_value:
+		coerced.append(String(entry))
+	return coerced

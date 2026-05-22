@@ -1,6 +1,8 @@
 extends Resource
 class_name SavedMazeResource
 
+const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
+
 @export var version: int = 1
 @export var display_name: String = ""
 @export var saved_at_unix: int = 0
@@ -12,6 +14,7 @@ class_name SavedMazeResource
 @export var horizontal_walls: Array[Vector2i] = []
 @export var vertical_walls: Array[Vector2i] = []
 @export var player_spawn: Vector2i = Vector2i.ZERO
+@export var enemy_spawns: Array[Dictionary] = []
 @export var minotaur_spawn: Vector2i = Vector2i.ZERO
 @export var exit_cell: Vector2i = Vector2i.ZERO
 @export var solution_actions: Array[String] = []
@@ -33,6 +36,7 @@ func apply_payload(payload: Dictionary) -> void:
 	vertical_walls = _coerce_vector2i_array(payload.get("vertical_walls", []))
 	player_spawn = _coerce_vector2i(payload.get("player_spawn", player_spawn))
 	minotaur_spawn = _coerce_vector2i(payload.get("minotaur_spawn", minotaur_spawn))
+	enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), minotaur_spawn)
 	exit_cell = _coerce_vector2i(payload.get("exit_cell", exit_cell))
 	solution_actions = _coerce_string_array(payload.get("solution_actions", []))
 	solution_total_steps = int(payload.get("solution_total_steps", solution_total_steps))
@@ -53,6 +57,7 @@ func to_payload() -> Dictionary:
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
 		"player_spawn": player_spawn,
+		"enemy_spawns": enemy_spawns.duplicate(true),
 		"minotaur_spawn": minotaur_spawn,
 		"exit_cell": exit_cell,
 		"solution_actions": solution_actions.duplicate(),

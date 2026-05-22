@@ -102,7 +102,7 @@ func reset_current_board() -> void:
 	replaying_solution = false
 	_state_history.clear()
 	player.set_cell_immediate(board_state.player_spawn)
-	enemy_manager.set_cell_immediate(board_state.minotaur_spawn)
+	enemy_manager.set_cells_immediate(_enemy_spawn_cells())
 	_state_history.append(_snapshot_state("start"))
 	_refresh_visibility()
 	_update_hud("In progress")
@@ -120,7 +120,10 @@ func undo_last_turn() -> void:
 	game_over = false
 	replaying_solution = false
 	player.set_cell_immediate(snapshot["player"])
-	enemy_manager.set_cell_immediate(snapshot["minotaur"])
+	if snapshot.has("enemy_states"):
+		enemy_manager.restore_enemy_states(snapshot["enemy_states"])
+	else:
+		enemy_manager.set_cells_immediate(snapshot.get("enemies", [snapshot.get("minotaur", Vector2i.ZERO)]))
 	_refresh_visibility()
 	_update_hud("In progress")
 	hud.set_message("Move undone. %s" % _controls_message())
@@ -205,7 +208,7 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 	_refresh_visibility()
 
 	var status_text := "In progress"
-	if enemy_manager.get_current_cell() == next_player:
+	if enemy_manager.any_enemy_at_cell(next_player):
 		game_over = true
 		status_text = "You lose"
 	elif next_player == board_state.exit_cell:
@@ -234,8 +237,17 @@ func _snapshot_state(action_name: String) -> Dictionary:
 	return {
 		"action": action_name,
 		"player": player.get_current_cell(),
+		"enemy_states": enemy_manager.get_enemy_states(),
+		"enemies": enemy_manager.get_current_cells(),
 		"minotaur": enemy_manager.get_current_cell(),
 	}
+
+
+func _enemy_spawn_cells() -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for spawn_data in board_state.enemy_spawns:
+		cells.append(spawn_data.get("cell", board_state.minotaur_spawn))
+	return cells
 
 
 func _refresh_visibility() -> void:
