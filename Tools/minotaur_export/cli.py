@@ -41,6 +41,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--greedy-horizontal-count", type=int, default=None)
     parser.add_argument("--greedy-vertical-count", type=int, default=None)
     parser.add_argument("--killer-count", type=int, default=0)
+    parser.add_argument("--trap-count", type=int, default=0)
     parser.add_argument("--additional-check-threshold", type=int, default=50)
     parser.add_argument("--additional-checks", dest="additional_checks", action="store_true")
     parser.add_argument("--no-additional-checks", dest="additional_checks", action="store_false")
@@ -66,6 +67,10 @@ def parse_args(argv: Sequence[str] | None = None) -> GenerationConfig:
         build_parser().error("killer count must be zero or greater")
     if args.killer_count > greedy_horizontal_count + greedy_vertical_count:
         build_parser().error("killer count cannot exceed total enemy count")
+    if args.trap_count < 0:
+        build_parser().error("trap count must be zero or greater")
+    if args.trap_count > args.width * args.height - (greedy_horizontal_count + greedy_vertical_count) - 2:
+        build_parser().error("trap count leaves no room for distinct player, exit, and enemy cells")
 
     return GenerationConfig(
         source_project=args.source_project,
@@ -81,6 +86,7 @@ def parse_args(argv: Sequence[str] | None = None) -> GenerationConfig:
         greedy_horizontal_count=greedy_horizontal_count,
         greedy_vertical_count=greedy_vertical_count,
         killer_count=args.killer_count,
+        trap_count=args.trap_count,
         additional_check_threshold=args.additional_check_threshold,
         additional_checks=args.additional_checks,
     )
@@ -89,7 +95,7 @@ def parse_args(argv: Sequence[str] | None = None) -> GenerationConfig:
 def build_service(config: GenerationConfig | None = None) -> ExportService:
     config = config or GenerationConfig(source_project=DEFAULT_SOURCE_PROJECT, output_dir=DEFAULT_OUTPUT_DIR)
     solver = MazeSolver(rules=GreedyChaserRules())
-    generator = MazeGenerator(solver=solver, rng=random.Random(), enemy_specs=config.enemy_specs)
+    generator = MazeGenerator(solver=solver, rng=random.Random(), enemy_specs=config.enemy_specs, trap_count=config.trap_count)
     return ExportService(
         generator=generator,
         difficulty_assigner=DifficultyAssigner(),

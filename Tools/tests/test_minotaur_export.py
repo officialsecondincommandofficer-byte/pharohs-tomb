@@ -40,6 +40,17 @@ class MazeSolverTests(unittest.TestCase):
         result = MazeSolver().solve(layout, player_start=(0, 0), enemy_starts=((2, 0),), goal=(1, 0))
         self.assertFalse(result.solvable)
 
+    def test_solver_rejects_solution_when_player_must_step_on_trap(self) -> None:
+        layout = MazeLayout(width=2, height=1)
+        result = MazeSolver().solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=((0, 0),),
+            goal=(1, 0),
+            trap_cells=((1, 0),),
+        )
+        self.assertFalse(result.solvable)
+
 
 class GreedyChaserRulesTests(unittest.TestCase):
     def test_horizontal_priority_moves_on_x_axis_first(self) -> None:
@@ -183,14 +194,29 @@ class MazeGeneratorTests(unittest.TestCase):
             rng=random.Random(4),
             enemy_specs=(EnemySpec(move_priority="horizontal"), EnemySpec(move_priority="vertical")),
         )
-        player_start, enemy_spawns, goal = generator._sample_positions(MazeLayout(width=4, height=4))
+        player_start, enemy_spawns, goal, trap_cells = generator._sample_positions(MazeLayout(width=4, height=4))
         occupied = {player_start, goal}
         occupied.update(enemy.cell for enemy in enemy_spawns)
+        occupied.update(trap_cells)
 
         self.assertEqual(len(enemy_spawns), 2)
         self.assertEqual(len(occupied), 4)
         self.assertEqual(enemy_spawns[0].move_priority, "horizontal")
         self.assertEqual(enemy_spawns[1].move_priority, "vertical")
+
+    def test_sample_positions_includes_distinct_traps_when_requested(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            trap_count=2,
+        )
+        player_start, enemy_spawns, goal, trap_cells = generator._sample_positions(MazeLayout(width=4, height=4))
+
+        self.assertEqual(len(trap_cells), 2)
+        self.assertEqual(len(set(trap_cells)), 2)
+        self.assertNotIn(player_start, trap_cells)
+        self.assertNotIn(goal, trap_cells)
+        self.assertTrue(all(enemy.cell not in trap_cells for enemy in enemy_spawns))
 
     def test_generation_config_marks_first_specs_as_killers(self) -> None:
         config = GenerationConfig(
@@ -199,6 +225,7 @@ class MazeGeneratorTests(unittest.TestCase):
             greedy_horizontal_count=1,
             greedy_vertical_count=1,
             killer_count=1,
+            trap_count=2,
         )
 
         specs = config.enemy_specs
@@ -206,6 +233,7 @@ class MazeGeneratorTests(unittest.TestCase):
         self.assertEqual(len(specs), 2)
         self.assertEqual(specs[0].traits, ("killer",))
         self.assertEqual(specs[1].traits, ())
+        self.assertEqual(config.generation_profile_id, "greedy_enemies_1x_1y_1killer_2traps_9x9_batch")
 
 
 class GodotMazeExporterTests(unittest.TestCase):
@@ -215,6 +243,7 @@ class GodotMazeExporterTests(unittest.TestCase):
             width=4,
             height=4,
             walls=(),
+            trap_cells=((2, 2),),
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("greedy_chaser", (3, 3), "horizontal"),),
             goal=(1, 1),
@@ -233,6 +262,7 @@ class GodotMazeExporterTests(unittest.TestCase):
 
         self.assertIn("version = 1", serialized)
         self.assertIn("cell_size = 24", serialized)
+        self.assertIn("trap_cells = Array[Vector2i]([Vector2i(2, 2)])", serialized)
         self.assertIn("enemy_spawns = Array[Dictionary]", serialized)
         self.assertIn('minotaur_spawn = Vector2i(3, 3)', serialized)
         self.assertIn('generation_profile_id = "profile"', serialized)
@@ -243,6 +273,7 @@ class GodotMazeExporterTests(unittest.TestCase):
             width=4,
             height=4,
             walls=(),
+            trap_cells=(),
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("greedy_chaser", (3, 3), "horizontal", traits=("killer",)),),
             goal=(1, 1),

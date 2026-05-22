@@ -202,6 +202,18 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 	else:
 		player.set_cell_immediate(current_player)
 
+	if board_state.is_trap_cell(next_player):
+		move_count += 1
+		_state_history.append(_snapshot_state(action_name))
+		_refresh_visibility()
+		game_over = true
+		_update_hud("You lose")
+		hud.set_message("YOU LOSE!")
+		if not from_replay:
+			input_locked = false
+			player.set_input_enabled(false)
+		return
+
 	await enemy_manager.begin_enemy_phase(next_player)
 	move_count += 1
 	_state_history.append(_snapshot_state(action_name))

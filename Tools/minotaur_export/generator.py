@@ -13,6 +13,7 @@ class MazeGenerator:
     solver: MazeSolver
     rng: random.Random
     enemy_specs: tuple[EnemySpec, ...] = (EnemySpec(),)
+    trap_count: int = 0
 
     def generate_batch(
         self,
@@ -79,7 +80,7 @@ class MazeGenerator:
 
         return walls_remaining
 
-    def _sample_positions(self, layout: MazeLayout) -> tuple[Coord, tuple[EnemySpawn, ...], Coord]:
+    def _sample_positions(self, layout: MazeLayout) -> tuple[Coord, tuple[EnemySpawn, ...], Coord, tuple[Coord, ...]]:
         while True:
             player_start = layout.random_cell(self.rng)
             goal = layout.random_cell(self.rng)
@@ -93,7 +94,13 @@ class MazeGenerator:
                 occupied.add(enemy_cell)
                 enemy_spawns.append(EnemySpawn.from_spec(spec, enemy_cell))
 
-            return player_start, tuple(enemy_spawns), goal
+            trap_cells: list[Coord] = []
+            for _ in range(self.trap_count):
+                trap_cell = self._sample_distinct_cell(layout, occupied)
+                occupied.add(trap_cell)
+                trap_cells.append(trap_cell)
+
+            return player_start, tuple(enemy_spawns), goal, tuple(sorted(trap_cells))
 
     def _sample_distinct_cell(self, layout: MazeLayout, occupied: set[Coord]) -> Coord:
         while True:
@@ -111,9 +118,16 @@ class MazeGenerator:
         board_seed: int,
     ) -> MazeRecord | None:
         layout = MazeLayout(width=width, height=height, walls=frozenset(walls_remaining))
-        player_start, enemy_spawns, goal = self._sample_positions(layout)
+        player_start, enemy_spawns, goal, trap_cells = self._sample_positions(layout)
         enemy_starts = tuple(enemy.cell for enemy in enemy_spawns)
-        result = self.solver.solve(layout, player_start, enemy_starts, goal, enemy_specs=self.enemy_specs)
+        result = self.solver.solve(
+            layout,
+            player_start,
+            enemy_starts,
+            goal,
+            enemy_specs=self.enemy_specs,
+            trap_cells=trap_cells,
+        )
         if not result.solvable or result.total_steps < min_moves:
             return None
 
@@ -122,6 +136,7 @@ class MazeGenerator:
             width=width,
             height=height,
             walls=normalized_walls,
+            trap_cells=trap_cells,
             player_start=player_start,
             enemy_spawns=enemy_spawns,
             goal=goal,
