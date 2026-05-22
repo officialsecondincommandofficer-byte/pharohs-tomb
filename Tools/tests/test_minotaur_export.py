@@ -51,6 +51,28 @@ class MazeSolverTests(unittest.TestCase):
         )
         self.assertFalse(result.solvable)
 
+    def test_shortest_layout_path_can_be_simulated_as_safe(self) -> None:
+        layout = MazeLayout(
+            width=2,
+            height=2,
+            walls=frozenset({normalize_edge((0, 1), (1, 1))}),
+        )
+        solver = MazeSolver()
+        enemy_specs = (EnemySpec(move_priority="horizontal"),)
+        shortest_path = solver.shortest_path_without_enemies(layout, start=(0, 0), goal=(0, 1))
+
+        self.assertEqual(shortest_path, ("down",))
+        self.assertTrue(
+            solver.sequence_is_safe(
+                layout,
+                player_start=(0, 0),
+                enemy_starts=((1, 1),),
+                actions=shortest_path,
+                goal=(0, 1),
+                enemy_specs=enemy_specs,
+            )
+        )
+
 
 class GreedyChaserRulesTests(unittest.TestCase):
     def test_horizontal_priority_moves_on_x_axis_first(self) -> None:
@@ -234,6 +256,38 @@ class MazeGeneratorTests(unittest.TestCase):
         self.assertEqual(specs[0].traits, ("killer",))
         self.assertEqual(specs[1].traits, ())
         self.assertEqual(config.generation_profile_id, "greedy_enemies_1x_1y_1killer_2traps_9x9_batch")
+
+    def test_try_record_rejects_safe_short_solution_before_full_solve(self) -> None:
+        class FixedPositionGenerator(MazeGenerator):
+            def _sample_positions(self, layout: MazeLayout) -> tuple[tuple[int, int], tuple[EnemySpawn, ...], tuple[int, int], tuple[tuple[int, int], ...]]:
+                return (
+                    (0, 0),
+                    (EnemySpawn.from_spec(EnemySpec(move_priority="horizontal"), (1, 1)),),
+                    (0, 1),
+                    (),
+                )
+
+        generator = FixedPositionGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            enemy_specs=(EnemySpec(move_priority="horizontal"),),
+        )
+        layout = MazeLayout(
+            width=2,
+            height=2,
+            walls=frozenset({normalize_edge((0, 1), (1, 1))}),
+        )
+        normalized_walls = tuple(sorted(layout.walls))
+
+        record = generator._try_record(
+            layout=layout,
+            normalized_walls=normalized_walls,
+            min_moves=2,
+            iteration=1,
+            board_seed=0,
+        )
+
+        self.assertIsNone(record)
 
 
 class GodotMazeExporterTests(unittest.TestCase):
