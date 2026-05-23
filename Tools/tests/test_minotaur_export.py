@@ -15,7 +15,8 @@ from minotaur_export.generator import MazeGenerator
 from minotaur_export.grid import MazeLayout, normalize_edge
 from minotaur_export.models import EnemySpec, EnemySpawn, GameState, GenerationConfig, MazeRecord
 from minotaur_export.rules import GreedyChaserRules
-from minotaur_export.solver import MazeSolver
+from minotaur_export.solver_backup import BackupMazeSolver
+from minotaur_export.solver import LegacyMazeSolver, MazeSolver, OptimizedMazeSolver
 
 
 class MazeSolverTests(unittest.TestCase):
@@ -72,6 +73,37 @@ class MazeSolverTests(unittest.TestCase):
                 enemy_specs=enemy_specs,
             )
         )
+
+    def test_solver_dispatches_to_legacy_for_12x12_and_smaller(self) -> None:
+        solver = MazeSolver()
+
+        self.assertFalse(solver.uses_optimized_search(MazeLayout(width=12, height=12)))
+        self.assertFalse(solver.uses_optimized_search(MazeLayout(width=12, height=8)))
+        self.assertTrue(solver.uses_optimized_search(MazeLayout(width=13, height=12)))
+        self.assertIsInstance(solver.legacy_solver, LegacyMazeSolver)
+        self.assertIsInstance(solver.optimized_solver, OptimizedMazeSolver)
+
+    def test_backup_solver_matches_legacy_behavior(self) -> None:
+        layout = MazeLayout(
+            width=2,
+            height=2,
+            walls=frozenset({normalize_edge((0, 1), (1, 1))}),
+        )
+
+        legacy_result = LegacyMazeSolver().solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=((1, 1),),
+            goal=(0, 1),
+        )
+        backup_result = BackupMazeSolver().solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=((1, 1),),
+            goal=(0, 1),
+        )
+
+        self.assertEqual(backup_result, legacy_result)
 
 
 class GreedyChaserRulesTests(unittest.TestCase):
@@ -288,6 +320,16 @@ class MazeGeneratorTests(unittest.TestCase):
         )
 
         self.assertIsNone(record)
+
+    def test_generator_only_uses_optimized_prefilter_above_12x12(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+        )
+
+        self.assertFalse(generator.uses_optimized_generation(MazeLayout(width=12, height=12)))
+        self.assertFalse(generator.uses_optimized_generation(MazeLayout(width=12, height=9)))
+        self.assertTrue(generator.uses_optimized_generation(MazeLayout(width=13, height=12)))
 
 
 class GodotMazeExporterTests(unittest.TestCase):

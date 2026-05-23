@@ -14,6 +14,7 @@ ACTION_DELTAS: dict[Coord, str] = {
     (0, -1): "up",
     (0, 1): "down",
 }
+OPTIMIZED_SOLVER_MIN_DIMENSION = 13
 
 
 @lru_cache(maxsize=None)
@@ -74,7 +75,7 @@ def _reconstruct_cell_path(
 
 
 @dataclass(slots=True)
-class MazeSolver:
+class BaseMazeSolver:
     rules: GreedyChaserRules = field(default_factory=GreedyChaserRules)
 
     def shortest_path_length_without_enemies(self, layout: MazeLayout, start: Coord, goal: Coord) -> int | None:
@@ -105,6 +106,19 @@ class MazeSolver:
 
         return state.player_position == goal
 
+    def _normalize_enemy_specs(
+        self,
+        enemy_starts: tuple[Coord, ...],
+        enemy_specs: tuple[EnemySpec, ...] | None,
+    ) -> tuple[EnemySpec, ...]:
+        return enemy_specs or tuple(
+            EnemySpec(move_priority=self.rules.move_priority, step_count=self.rules.minotaur_steps)
+            for _ in enemy_starts
+        )
+
+
+@dataclass(slots=True)
+class LegacyMazeSolver(BaseMazeSolver):
     def solve(
         self,
         layout: MazeLayout,
@@ -114,10 +128,48 @@ class MazeSolver:
         enemy_specs: tuple[EnemySpec, ...] | None = None,
         trap_cells: tuple[Coord, ...] = (),
     ) -> SolveResult:
-        enemy_specs = enemy_specs or tuple(
-            EnemySpec(move_priority=self.rules.move_priority, step_count=self.rules.minotaur_steps)
-            for _ in enemy_starts
-        )
+        enemy_specs = self._normalize_enemy_specs(enemy_starts, enemy_specs)
+        trap_lookup = set(trap_cells)
+        initial_state = GameState(player_position=player_start, enemy_positions=enemy_starts)
+        if player_start == goal:
+            return SolveResult(solvable=True, actions=())
+
+        queue: deque[tuple[GameState, tuple[str, ...]]] = deque([(initial_state, ())])
+        visited: set[GameState] = {initial_state}
+
+        while queue:
+            state, moves = queue.popleft()
+            for action in self.rules.available_actions(layout, state.player_position, include_skip=True):
+                next_state = self.rules.step_state(layout, state, action, enemy_specs)
+                if next_state is None:
+                    continue
+                if next_state.player_position in trap_lookup:
+                    continue
+
+                next_moves = moves + (action,)
+                if next_state.player_position == goal:
+                    return SolveResult(solvable=True, actions=next_moves)
+                if next_state in visited:
+                    continue
+
+                visited.add(next_state)
+                queue.append((next_state, next_moves))
+
+        return SolveResult(solvable=False, actions=())
+
+
+@dataclass(slots=True)
+class OptimizedMazeSolver(BaseMazeSolver):
+    def solve(
+        self,
+        layout: MazeLayout,
+        player_start: Coord,
+        enemy_starts: tuple[Coord, ...],
+        goal: Coord,
+        enemy_specs: tuple[EnemySpec, ...] | None = None,
+        trap_cells: tuple[Coord, ...] = (),
+    ) -> SolveResult:
+        enemy_specs = self._normalize_enemy_specs(enemy_starts, enemy_specs)
         trap_lookup = set(trap_cells)
         goal_distances = _goal_distances(layout, goal)
         initial_state = GameState(player_position=player_start, enemy_positions=enemy_starts)
@@ -173,3 +225,35 @@ class MazeSolver:
 
         actions.reverse()
         return tuple(actions)
+
+
+@dataclass(slots=True)
+class MazeSolver(BaseMazeSolver):
+    optimized_solver: OptimizedMazeSolver = field(default_factory=OptimizedMazeSolver)
+    legacy_solver: LegacyMazeSolver = field(default_factory=LegacyMazeSolver)
+
+    def __post_init__(self) -> None:
+        self.optimized_solver.rules = self.rules
+        self.legacy_solver.rules = self.rules
+
+    def uses_optimized_search(self, layout: MazeLayout) -> bool:
+        return max(layout.width, layout.height) >= OPTIMIZED_SOLVER_MIN_DIMENSION
+
+    def solve(
+        self,
+        layout: MazeLayout,
+        player_start: Coord,
+        enemy_starts: tuple[Coord, ...],
+        goal: Coord,
+        enemy_specs: tuple[EnemySpec, ...] | None = None,
+        trap_cells: tuple[Coord, ...] = (),
+    ) -> SolveResult:
+        solver = self.optimized_solver if self.uses_optimized_search(layout) else self.legacy_solver
+        return solver.solve(
+            layout,
+            player_start,
+            enemy_starts,
+            goal,
+            enemy_specs=enemy_specs,
+            trap_cells=trap_cells,
+        )

@@ -7,6 +7,8 @@ from .grid import MazeLayout, edge_sort_key
 from .models import Coord, Edge, EnemySpec, EnemySpawn, MazeRecord
 from .solver import MazeSolver
 
+OPTIMIZED_GENERATOR_MIN_DIMENSION = 13
+
 
 @dataclass(slots=True)
 class MazeGenerator:
@@ -14,6 +16,9 @@ class MazeGenerator:
     rng: random.Random
     enemy_specs: tuple[EnemySpec, ...] = (EnemySpec(),)
     trap_count: int = 0
+
+    def uses_optimized_generation(self, layout: MazeLayout) -> bool:
+        return max(layout.width, layout.height) >= OPTIMIZED_GENERATOR_MIN_DIMENSION
 
     def generate_batch(
         self,
@@ -119,19 +124,20 @@ class MazeGenerator:
     ) -> MazeRecord | None:
         player_start, enemy_spawns, goal, trap_cells = self._sample_positions(layout)
         enemy_starts = tuple(enemy.cell for enemy in enemy_spawns)
-        shortest_length = self.solver.shortest_path_length_without_enemies(layout, player_start, goal)
-        if shortest_length is not None and shortest_length < min_moves:
-            shortest_path = self.solver.shortest_path_without_enemies(layout, player_start, goal)
-            if shortest_path is not None and self.solver.sequence_is_safe(
-                layout,
-                player_start,
-                enemy_starts,
-                shortest_path,
-                goal,
-                enemy_specs=self.enemy_specs,
-                trap_cells=trap_cells,
-            ):
-                return None
+        if self.uses_optimized_generation(layout):
+            shortest_length = self.solver.shortest_path_length_without_enemies(layout, player_start, goal)
+            if shortest_length is not None and shortest_length < min_moves:
+                shortest_path = self.solver.shortest_path_without_enemies(layout, player_start, goal)
+                if shortest_path is not None and self.solver.sequence_is_safe(
+                    layout,
+                    player_start,
+                    enemy_starts,
+                    shortest_path,
+                    goal,
+                    enemy_specs=self.enemy_specs,
+                    trap_cells=trap_cells,
+                ):
+                    return None
 
         result = self.solver.solve(
             layout,
