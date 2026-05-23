@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://TileMap/tile_map_controller.gd" id="1"]
 [ext_resource type="TileSet" path="res://Assets/Tilesets/PharaohTileset.tres" id="2"]
 [ext_resource type="Script" path="res://TileMap/thin_wall_overlay.gd" id="3"]
 [ext_resource type="Script" path="res://TileMap/floor_checker_overlay.gd" id="4"]
+[ext_resource type="Script" path="res://TileMap/trap_overlay.gd" id="5"]
 
 [node name="TileMap" type="Node2D"]
 script = ExtResource("1")
@@ -14,6 +15,9 @@ modulate = Color(0.42, 0.42, 0.42, 1)
 
 [node name="FloorCheckerOverlay" type="Node2D" parent="."]
 script = ExtResource("4")
+
+[node name="TrapOverlay" type="Node2D" parent="."]
+script = ExtResource("5")
 
 [node name="WallLayer" type="TileMapLayer" parent="."]
 tile_set = ExtResource("2")

@@ -82,6 +82,7 @@ class GodotMazeExporter:
             f"difficulty_category = {json.dumps(difficulty_label)}",
             f"horizontal_walls = {vector2i_array(horizontal_walls)}",
             f"vertical_walls = {vector2i_array(vertical_walls)}",
+            f"trap_cells = {vector2i_array(record.trap_cells)}",
             f"player_spawn = {vector2i(record.player_start)}",
             f"enemy_spawns = {enemy_spawn_array(record.enemy_spawns)}",
             f"minotaur_spawn = {vector2i(record.minotaur_start)}",

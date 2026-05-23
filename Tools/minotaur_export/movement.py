@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from functools import lru_cache
+
 from .grid import MazeLayout
 from .models import Coord
 
@@ -13,6 +15,11 @@ ACTION_OFFSETS: dict[str, Coord] = {
 
 
 def available_actions(layout: MazeLayout, cell: Coord, include_skip: bool) -> list[str]:
+    return list(_available_actions_cached(layout, cell, include_skip))
+
+
+@lru_cache(maxsize=None)
+def _available_actions_cached(layout: MazeLayout, cell: Coord, include_skip: bool) -> tuple[str, ...]:
     options: list[str] = ["skip"] if include_skip else []
     x, y = cell
     candidates = (
@@ -29,10 +36,15 @@ def available_actions(layout: MazeLayout, cell: Coord, include_skip: bool) -> li
             continue
         options.append(action)
 
-    return options
+    return tuple(options)
 
 
 def apply_action(layout: MazeLayout, cell: Coord, action: str) -> Coord:
+    return _apply_action_cached(layout, cell, action)
+
+
+@lru_cache(maxsize=None)
+def _apply_action_cached(layout: MazeLayout, cell: Coord, action: str) -> Coord:
     if action == "skip":
         return cell
     if action not in ACTION_OFFSETS:

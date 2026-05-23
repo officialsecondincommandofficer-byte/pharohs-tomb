@@ -30,6 +30,7 @@ class ManifestWriter:
                 "greedy_horizontal_count": config.greedy_horizontal_count,
                 "greedy_vertical_count": config.greedy_vertical_count,
                 "killer_count": config.killer_count,
+                "trap_count": config.trap_count,
                 "additional_checks": config.additional_checks,
                 "additional_check_threshold": config.additional_check_threshold,
             },
@@ -42,6 +43,7 @@ class ManifestWriter:
                     "solution_total_steps": exported.record.solution_total_steps,
                     "difficulty_category": exported.difficulty_label,
                     "iteration": exported.record.iteration,
+                    "trap_cells": [list(cell) for cell in exported.record.trap_cells],
                     "player_start": list(exported.record.player_start),
                     "enemy_spawns": [
                         {

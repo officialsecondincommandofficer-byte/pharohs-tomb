@@ -13,6 +13,7 @@ const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
 @export var difficulty_category: String = "easy"
 @export var horizontal_walls: Array[Vector2i] = []
 @export var vertical_walls: Array[Vector2i] = []
+@export var trap_cells: Array[Vector2i] = []
 @export var player_spawn: Vector2i = Vector2i.ZERO
 @export var enemy_spawns: Array[Dictionary] = []
 @export var minotaur_spawn: Vector2i = Vector2i.ZERO
@@ -34,6 +35,7 @@ func apply_payload(payload: Dictionary) -> void:
 	difficulty_category = String(payload.get("difficulty_category", difficulty_category))
 	horizontal_walls = _coerce_vector2i_array(payload.get("horizontal_walls", []))
 	vertical_walls = _coerce_vector2i_array(payload.get("vertical_walls", []))
+	trap_cells = _coerce_vector2i_array(payload.get("trap_cells", []))
 	player_spawn = _coerce_vector2i(payload.get("player_spawn", player_spawn))
 	minotaur_spawn = _coerce_vector2i(payload.get("minotaur_spawn", minotaur_spawn))
 	enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), minotaur_spawn)
@@ -56,6 +58,7 @@ func to_payload() -> Dictionary:
 		"difficulty_category": difficulty_category,
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
+		"trap_cells": trap_cells.duplicate(),
 		"player_spawn": player_spawn,
 		"enemy_spawns": enemy_spawns.duplicate(true),
 		"minotaur_spawn": minotaur_spawn,

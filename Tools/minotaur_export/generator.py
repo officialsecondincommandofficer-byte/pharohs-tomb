@@ -7,12 +7,18 @@ from .grid import MazeLayout, edge_sort_key
 from .models import Coord, Edge, EnemySpec, EnemySpawn, MazeRecord
 from .solver import MazeSolver
 
+OPTIMIZED_GENERATOR_MIN_DIMENSION = 13
+
 
 @dataclass(slots=True)
 class MazeGenerator:
     solver: MazeSolver
     rng: random.Random
     enemy_specs: tuple[EnemySpec, ...] = (EnemySpec(),)
+    trap_count: int = 0
+
+    def uses_optimized_generation(self, layout: MazeLayout) -> bool:
+        return max(layout.width, layout.height) >= OPTIMIZED_GENERATOR_MIN_DIMENSION
 
     def generate_batch(
         self,
@@ -34,14 +40,15 @@ class MazeGenerator:
             walls_remaining = self._build_connected_wall_set(width, height, all_edges)
 
             while len(walls_remaining) > max(width, height):
+                layout = MazeLayout(width=width, height=height, walls=frozenset(walls_remaining))
+                normalized_walls = tuple(sorted(layout.walls, key=edge_sort_key))
                 checks_remaining = len(walls_remaining)
 
                 while checks_remaining > 0:
                     checks_remaining -= 1
                     record = self._try_record(
-                        width=width,
-                        height=height,
-                        walls_remaining=walls_remaining,
+                        layout=layout,
+                        normalized_walls=normalized_walls,
                         min_moves=min_moves,
                         iteration=iteration,
                         board_seed=board_seed,
@@ -79,7 +86,7 @@ class MazeGenerator:
 
         return walls_remaining
 
-    def _sample_positions(self, layout: MazeLayout) -> tuple[Coord, tuple[EnemySpawn, ...], Coord]:
+    def _sample_positions(self, layout: MazeLayout) -> tuple[Coord, tuple[EnemySpawn, ...], Coord, tuple[Coord, ...]]:
         while True:
             player_start = layout.random_cell(self.rng)
             goal = layout.random_cell(self.rng)
@@ -93,7 +100,13 @@ class MazeGenerator:
                 occupied.add(enemy_cell)
                 enemy_spawns.append(EnemySpawn.from_spec(spec, enemy_cell))
 
-            return player_start, tuple(enemy_spawns), goal
+            trap_cells: list[Coord] = []
+            for _ in range(self.trap_count):
+                trap_cell = self._sample_distinct_cell(layout, occupied)
+                occupied.add(trap_cell)
+                trap_cells.append(trap_cell)
+
+            return player_start, tuple(enemy_spawns), goal, tuple(sorted(trap_cells))
 
     def _sample_distinct_cell(self, layout: MazeLayout, occupied: set[Coord]) -> Coord:
         while True:
@@ -103,25 +116,45 @@ class MazeGenerator:
 
     def _try_record(
         self,
-        width: int,
-        height: int,
-        walls_remaining: list[Edge],
+        layout: MazeLayout,
+        normalized_walls: tuple[Edge, ...],
         min_moves: int,
         iteration: int,
         board_seed: int,
     ) -> MazeRecord | None:
-        layout = MazeLayout(width=width, height=height, walls=frozenset(walls_remaining))
-        player_start, enemy_spawns, goal = self._sample_positions(layout)
+        player_start, enemy_spawns, goal, trap_cells = self._sample_positions(layout)
         enemy_starts = tuple(enemy.cell for enemy in enemy_spawns)
-        result = self.solver.solve(layout, player_start, enemy_starts, goal, enemy_specs=self.enemy_specs)
+        if self.uses_optimized_generation(layout):
+            shortest_length = self.solver.shortest_path_length_without_enemies(layout, player_start, goal)
+            if shortest_length is not None and shortest_length < min_moves:
+                shortest_path = self.solver.shortest_path_without_enemies(layout, player_start, goal)
+                if shortest_path is not None and self.solver.sequence_is_safe(
+                    layout,
+                    player_start,
+                    enemy_starts,
+                    shortest_path,
+                    goal,
+                    enemy_specs=self.enemy_specs,
+                    trap_cells=trap_cells,
+                ):
+                    return None
+
+        result = self.solver.solve(
+            layout,
+            player_start,
+            enemy_starts,
+            goal,
+            enemy_specs=self.enemy_specs,
+            trap_cells=trap_cells,
+        )
         if not result.solvable or result.total_steps < min_moves:
             return None
 
-        normalized_walls = tuple(sorted(layout.walls, key=edge_sort_key))
         return MazeRecord(
-            width=width,
-            height=height,
+            width=layout.width,
+            height=layout.height,
             walls=normalized_walls,
+            trap_cells=trap_cells,
             player_start=player_start,
             enemy_spawns=enemy_spawns,
             goal=goal,

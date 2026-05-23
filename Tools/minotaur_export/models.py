@@ -46,6 +46,7 @@ class MazeRecord:
     width: int
     height: int
     walls: tuple[Edge, ...]
+    trap_cells: tuple[Coord, ...]
     player_start: Coord
     enemy_spawns: tuple["EnemySpawn", ...]
     goal: Coord
@@ -75,6 +76,7 @@ class MazeRecord:
         return (
             self.size,
             self.walls,
+            self.trap_cells,
             self.player_start,
             self.enemy_spawns,
             self.goal,
@@ -124,6 +126,7 @@ class GenerationConfig:
     greedy_horizontal_count: int = 1
     greedy_vertical_count: int = 0
     killer_count: int = 0
+    trap_count: int = 0
     additional_check_threshold: int = 50
     additional_checks: bool = True
 
@@ -131,7 +134,7 @@ class GenerationConfig:
     def generation_profile_id(self) -> str:
         return (
             f"greedy_enemies_{self.greedy_horizontal_count}x_{self.greedy_vertical_count}y_"
-            f"{self.killer_count}killer_{self.width}x{self.height}_batch"
+            f"{self.killer_count}killer_{self.trap_count}traps_{self.width}x{self.height}_batch"
         )
 
     @property

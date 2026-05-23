@@ -29,13 +29,14 @@ class ExportService:
         self.logger(f"Source project: {config.source_project}")
         self.logger(f"Output directory: {output_dir}")
         self.logger(
-            "Generating mazes with width=%d height=%d iterations=%d mazes_per_iteration=%d min_moves=%d seed=%s"
+            "Generating mazes with width=%d height=%d iterations=%d mazes_per_iteration=%d min_moves=%d traps=%d seed=%s"
             % (
                 config.width,
                 config.height,
                 config.iterations,
                 config.mazes_per_iteration,
                 config.min_moves,
+                config.trap_count,
                 config.seed if config.seed is not None else "random",
             )
         )
