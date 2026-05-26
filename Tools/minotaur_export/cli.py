@@ -40,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--enemy-move-priority", choices=("horizontal", "vertical"), default="horizontal")
     parser.add_argument("--greedy-horizontal-count", type=int, default=None)
     parser.add_argument("--greedy-vertical-count", type=int, default=None)
+    parser.add_argument("--samurai-count", type=int, default=0)
     parser.add_argument("--killer-count", type=int, default=0)
     parser.add_argument("--trap-count", type=int, default=0)
     parser.add_argument("--additional-check-threshold", type=int, default=50)
@@ -57,19 +58,20 @@ def parse_args(argv: Sequence[str] | None = None) -> GenerationConfig:
     if not any_count_arg and args.enemy_move_priority == "vertical":
         greedy_horizontal_count = 0
         greedy_vertical_count = 1
-    if greedy_horizontal_count < 0 or greedy_vertical_count < 0:
+    if greedy_horizontal_count < 0 or greedy_vertical_count < 0 or args.samurai_count < 0:
         build_parser().error("enemy counts must be zero or greater")
-    if greedy_horizontal_count + greedy_vertical_count <= 0:
-        build_parser().error("at least one greedy enemy is required")
-    if greedy_horizontal_count + greedy_vertical_count > args.width * args.height - 2:
+    total_enemy_count = greedy_horizontal_count + greedy_vertical_count + args.samurai_count
+    if total_enemy_count <= 0:
+        build_parser().error("at least one enemy is required")
+    if total_enemy_count > args.width * args.height - 2:
         build_parser().error("enemy counts leave no room for distinct player and exit cells")
     if args.killer_count < 0:
         build_parser().error("killer count must be zero or greater")
-    if args.killer_count > greedy_horizontal_count + greedy_vertical_count:
+    if args.killer_count > total_enemy_count:
         build_parser().error("killer count cannot exceed total enemy count")
     if args.trap_count < 0:
         build_parser().error("trap count must be zero or greater")
-    if args.trap_count > args.width * args.height - (greedy_horizontal_count + greedy_vertical_count) - 2:
+    if args.trap_count > args.width * args.height - total_enemy_count - 2:
         build_parser().error("trap count leaves no room for distinct player, exit, and enemy cells")
 
     return GenerationConfig(
@@ -85,6 +87,7 @@ def parse_args(argv: Sequence[str] | None = None) -> GenerationConfig:
         enemy_move_priority=args.enemy_move_priority,
         greedy_horizontal_count=greedy_horizontal_count,
         greedy_vertical_count=greedy_vertical_count,
+        samurai_count=args.samurai_count,
         killer_count=args.killer_count,
         trap_count=args.trap_count,
         additional_check_threshold=args.additional_check_threshold,

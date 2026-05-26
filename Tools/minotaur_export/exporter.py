@@ -30,6 +30,7 @@ def enemy_spawn_dictionary(enemy: EnemySpawn) -> str:
         f'"cell": {vector2i(enemy.cell)}',
         f'"move_priority": {json.dumps(enemy.move_priority)}',
         f'"step_count": {enemy.step_count}',
+        f'"facing_index": {enemy.facing_index}',
     ]
     if enemy.traits:
         values.append(f'"traits": {string_array(enemy.traits)}')

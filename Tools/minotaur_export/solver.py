@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 
 from .grid import MazeLayout
-from .models import Coord, EnemySpec, GameState, SolveResult
+from .models import Coord, EnemyRuntimeState, EnemySpec, GameState, SolveResult
 from .rules import GreedyChaserRules
 
 ACTION_DELTAS: dict[Coord, str] = {
@@ -95,7 +95,12 @@ class BaseMazeSolver:
         trap_cells: tuple[Coord, ...] = (),
     ) -> bool:
         trap_lookup = set(trap_cells)
-        state = GameState(player_position=player_start, enemy_positions=enemy_starts)
+        enemy_specs = self._normalize_enemy_specs(enemy_starts, enemy_specs)
+        state = GameState(
+            player_position=player_start,
+            enemy_positions=enemy_starts,
+            enemy_states=self._initial_enemy_states(enemy_specs),
+        )
 
         for action in actions:
             state = self.rules.step_state(layout, state, action, enemy_specs)
@@ -116,6 +121,9 @@ class BaseMazeSolver:
             for _ in enemy_starts
         )
 
+    def _initial_enemy_states(self, enemy_specs: tuple[EnemySpec, ...]) -> tuple[EnemyRuntimeState, ...]:
+        return tuple(EnemyRuntimeState(facing_index=spec.facing_index) for spec in enemy_specs)
+
 
 @dataclass(slots=True)
 class LegacyMazeSolver(BaseMazeSolver):
@@ -130,7 +138,11 @@ class LegacyMazeSolver(BaseMazeSolver):
     ) -> SolveResult:
         enemy_specs = self._normalize_enemy_specs(enemy_starts, enemy_specs)
         trap_lookup = set(trap_cells)
-        initial_state = GameState(player_position=player_start, enemy_positions=enemy_starts)
+        initial_state = GameState(
+            player_position=player_start,
+            enemy_positions=enemy_starts,
+            enemy_states=self._initial_enemy_states(enemy_specs),
+        )
         if player_start == goal:
             return SolveResult(solvable=True, actions=())
 
@@ -172,7 +184,11 @@ class OptimizedMazeSolver(BaseMazeSolver):
         enemy_specs = self._normalize_enemy_specs(enemy_starts, enemy_specs)
         trap_lookup = set(trap_cells)
         goal_distances = _goal_distances(layout, goal)
-        initial_state = GameState(player_position=player_start, enemy_positions=enemy_starts)
+        initial_state = GameState(
+            player_position=player_start,
+            enemy_positions=enemy_starts,
+            enemy_states=self._initial_enemy_states(enemy_specs),
+        )
         if player_start == goal:
             return SolveResult(solvable=True, actions=())
 

@@ -13,7 +13,7 @@ if str(TOOLS_DIR) not in sys.path:
 from minotaur_export.exporter import GodotMazeExporter
 from minotaur_export.generator import MazeGenerator
 from minotaur_export.grid import MazeLayout, normalize_edge
-from minotaur_export.models import EnemySpec, EnemySpawn, GameState, GenerationConfig, MazeRecord
+from minotaur_export.models import EnemyRuntimeState, EnemySpec, EnemySpawn, GameState, GenerationConfig, MazeRecord
 from minotaur_export.rules import GreedyChaserRules
 from minotaur_export.solver_backup import BackupMazeSolver
 from minotaur_export.solver import LegacyMazeSolver, MazeSolver, OptimizedMazeSolver
@@ -240,6 +240,54 @@ class GreedyChaserRulesTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             GreedyChaserRules(move_priority="diagonal")
 
+    def test_player_loses_if_enemy_still_occupies_destination_after_enemy_phase(self) -> None:
+        layout = MazeLayout(width=5, height=5)
+        rules = GreedyChaserRules()
+        next_state = rules.step_state(
+            layout,
+            state=GameState(
+                player_position=(4, 4),
+                enemy_positions=((4, 3),),
+                enemy_states=(EnemyRuntimeState(),),
+            ),
+            action="up",
+            enemy_specs=(EnemySpec(move_priority="horizontal", step_count=2),),
+        )
+        self.assertIsNone(next_state)
+
+    def test_samurai_rotates_then_begins_charge_when_player_is_seen(self) -> None:
+        layout = MazeLayout(width=4, height=4)
+        rules = GreedyChaserRules()
+        next_state = rules.step_state(
+            layout,
+            state=GameState(
+                player_position=(2, 0),
+                enemy_positions=((0, 0),),
+                enemy_states=(EnemyRuntimeState(facing_index=0),),
+            ),
+            action="skip",
+            enemy_specs=(EnemySpec(enemy_type="samurai"),),
+        )
+        self.assertIsNotNone(next_state)
+        self.assertEqual(next_state.enemy_positions, ((0, 0),))
+        self.assertEqual(next_state.enemy_states[0], EnemyRuntimeState(facing_index=1, attack_phase=0, turns_until_dash=3))
+
+    def test_samurai_dashes_after_countdown_and_ignores_walls(self) -> None:
+        layout = MazeLayout(width=6, height=6, walls=frozenset({normalize_edge((0, 0), (0, 1))}))
+        rules = GreedyChaserRules()
+        state = GameState(
+            player_position=(2, 5),
+            enemy_positions=((2, 0),),
+            enemy_states=(EnemyRuntimeState(facing_index=2, attack_phase=0, turns_until_dash=1),),
+        )
+        next_state = rules.step_state(
+            layout,
+            state=state,
+            action="skip",
+            enemy_specs=(EnemySpec(enemy_type="samurai"),),
+        )
+        self.assertIsNone(next_state)
+
 
 class MazeGeneratorTests(unittest.TestCase):
     def test_sample_positions_keeps_player_goal_and_enemies_distinct(self) -> None:
@@ -280,14 +328,16 @@ class MazeGeneratorTests(unittest.TestCase):
             greedy_vertical_count=1,
             killer_count=1,
             trap_count=2,
+            samurai_count=1,
         )
 
         specs = config.enemy_specs
 
-        self.assertEqual(len(specs), 2)
+        self.assertEqual(len(specs), 3)
         self.assertEqual(specs[0].traits, ("killer",))
         self.assertEqual(specs[1].traits, ())
-        self.assertEqual(config.generation_profile_id, "greedy_enemies_1x_1y_1killer_2traps_9x9_batch")
+        self.assertEqual(specs[2].enemy_type, "samurai")
+        self.assertEqual(config.generation_profile_id, "greedy_enemies_1x_1y_1samurai_1killer_2traps_9x9_batch")
 
     def test_try_record_rejects_safe_short_solution_before_full_solve(self) -> None:
         class FixedPositionGenerator(MazeGenerator):
@@ -387,6 +437,31 @@ class GodotMazeExporterTests(unittest.TestCase):
         )
 
         self.assertIn('"traits": Array[String](["killer"])', serialized)
+
+    def test_serialize_writes_enemy_facing_index(self) -> None:
+        exporter = GodotMazeExporter()
+        record = MazeRecord(
+            width=4,
+            height=4,
+            walls=(),
+            trap_cells=(),
+            player_start=(0, 0),
+            enemy_spawns=(EnemySpawn("samurai", (3, 3), "horizontal", facing_index=1),),
+            goal=(1, 1),
+            solution=("right", "down"),
+            iteration=1,
+        )
+
+        serialized = exporter.serialize(
+            record=record,
+            saved_at_unix=123,
+            difficulty_label="easy",
+            index=1,
+            generation_profile_id="profile",
+            cell_size=24,
+        )
+
+        self.assertIn('"facing_index": 1', serialized)
 
 
 if __name__ == "__main__":
