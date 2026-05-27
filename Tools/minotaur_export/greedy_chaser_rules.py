@@ -3,13 +3,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .grid import MazeLayout
-from .models import Coord, EnemySpec, EnemySpawn, GameState
+from .models import Coord, EnemyRuntimeState, EnemySpec, EnemySpawn, GameState
 from .movement import apply_action, available_actions
 
 KILLER_TRAIT = "killer"
 CONTACT_BLOCKED = "blocked"
 CONTACT_TARGET_DIES = "target_dies"
 CONTACT_MOVER_DIES = "mover_dies"
+SAMURAI_ROTATIONS: tuple[Coord, ...] = ((0, -1), (1, 0), (0, 1), (-1, 0))
+SAMURAI_CHARGE_DELAYS: tuple[int, ...] = (3, 2, 1)
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,14 +65,16 @@ class GreedyChaserRules:
                 enemy_type=enemy.enemy_type,
                 move_priority=enemy.move_priority,
                 step_count=enemy.step_count,
+                facing_index=enemy.facing_index,
                 traits=enemy.traits,
             )
             for enemy in enemy_spawns
         )
-        next_enemy_locations = self._step_enemy_positions(
+        next_enemy_locations, _ = self._step_enemy_positions(
             layout=layout,
             player_location=player_location,
             enemy_positions=tuple(enemy.cell for enemy in enemy_spawns),
+            enemy_states=tuple(EnemyRuntimeState(facing_index=enemy.facing_index) for enemy in enemy_spawns),
             enemy_specs=enemy_specs,
         )
         if next_enemy_locations is None:
@@ -85,65 +89,189 @@ class GreedyChaserRules:
         enemy_specs: tuple[EnemySpec, ...],
     ) -> GameState | None:
         player_location = self.apply_action(layout, state.player_position, action)
-        next_enemy_locations = self._step_enemy_positions(
+        next_enemy_locations, next_enemy_states = self._step_enemy_positions(
             layout=layout,
             player_location=player_location,
             enemy_positions=state.enemy_positions,
+            enemy_states=state.enemy_states,
             enemy_specs=enemy_specs,
         )
         if next_enemy_locations is None:
             return None
 
-        return GameState(player_position=player_location, enemy_positions=next_enemy_locations)
+        return GameState(
+            player_position=player_location,
+            enemy_positions=next_enemy_locations,
+            enemy_states=next_enemy_states,
+        )
 
     def _step_enemy_positions(
         self,
         layout: MazeLayout,
         player_location: Coord,
         enemy_positions: tuple[Coord | None, ...],
+        enemy_states: tuple[EnemyRuntimeState, ...],
         enemy_specs: tuple[EnemySpec, ...],
-    ) -> tuple[Coord | None, ...] | None:
+    ) -> tuple[tuple[Coord | None, ...] | None, tuple[EnemyRuntimeState, ...]]:
         next_enemy_locations = list(enemy_positions)
+        next_enemy_states = list(enemy_states)
 
         for enemy_index, enemy_location in enumerate(next_enemy_locations):
             if enemy_location is None:
                 continue
 
             spec = enemy_specs[enemy_index]
-            for _ in range(spec.step_count):
-                current_location = next_enemy_locations[enemy_index]
-                if current_location is None:
-                    break
-
-                blocked_cells = self._blocked_cells_for_mover(enemy_index, next_enemy_locations, enemy_specs)
-                next_enemy_location = self._choose_greedy_step(
+            if spec.enemy_type == "samurai":
+                caught_player = self._step_samurai(
                     layout=layout,
                     player_location=player_location,
-                    enemy_location=current_location,
-                    move_priority=spec.move_priority,
-                    blocked_cells=blocked_cells,
+                    enemy_index=enemy_index,
+                    enemy_positions=next_enemy_locations,
+                    enemy_states=next_enemy_states,
+                    enemy_specs=enemy_specs,
                 )
-                if next_enemy_location == current_location:
-                    continue
+                if caught_player:
+                    return None, tuple(next_enemy_states)
+                continue
 
-                target_index = self._enemy_index_at_position(next_enemy_locations, next_enemy_location, enemy_index)
-                if target_index is not None:
-                    contact_result = self._resolve_enemy_contact(enemy_index, target_index, enemy_specs)
-                    if contact_result == CONTACT_BLOCKED:
-                        continue
+            caught_player = self._step_greedy_enemy(
+                layout=layout,
+                player_location=player_location,
+                enemy_index=enemy_index,
+                enemy_positions=next_enemy_locations,
+                enemy_specs=enemy_specs,
+                move_priority=spec.move_priority,
+                step_count=spec.step_count,
+            )
+            if caught_player:
+                return None, tuple(next_enemy_states)
 
-                    next_enemy_locations[enemy_index] = next_enemy_location
-                    if contact_result == CONTACT_TARGET_DIES:
-                        next_enemy_locations[target_index] = None
-                    elif contact_result == CONTACT_MOVER_DIES:
-                        next_enemy_locations[enemy_index] = None
-                    break
+        if any(enemy_location == player_location for enemy_location in next_enemy_locations if enemy_location is not None):
+            return None, tuple(next_enemy_states)
 
-                next_enemy_locations[enemy_index] = next_enemy_location
-                if next_enemy_location == player_location:
-                    return None
+        return tuple(next_enemy_locations), tuple(next_enemy_states)
 
-        return tuple(next_enemy_locations)
+    def _step_greedy_enemy(
+        self,
+        layout: MazeLayout,
+        player_location: Coord,
+        enemy_index: int,
+        enemy_positions: list[Coord | None],
+        enemy_specs: tuple[EnemySpec, ...],
+        move_priority: str,
+        step_count: int,
+    ) -> bool:
+        for _ in range(step_count):
+            current_location = enemy_positions[enemy_index]
+            if current_location is None:
+                break
+
+            blocked_cells = self._blocked_cells_for_mover(enemy_index, enemy_positions, enemy_specs)
+            next_enemy_location = self._choose_greedy_step(
+                layout=layout,
+                player_location=player_location,
+                enemy_location=current_location,
+                move_priority=move_priority,
+                blocked_cells=blocked_cells,
+            )
+            if next_enemy_location == current_location:
+                continue
+
+            caught_player = self._move_enemy_to_target(
+                player_location=player_location,
+                enemy_index=enemy_index,
+                enemy_positions=enemy_positions,
+                enemy_specs=enemy_specs,
+                next_enemy_location=next_enemy_location,
+            )
+            if caught_player:
+                return True
+            if enemy_positions[enemy_index] is None:
+                break
+
+        return False
+
+    def _step_samurai(
+        self,
+        layout: MazeLayout,
+        player_location: Coord,
+        enemy_index: int,
+        enemy_positions: list[Coord | None],
+        enemy_states: list[EnemyRuntimeState],
+        enemy_specs: tuple[EnemySpec, ...],
+    ) -> bool:
+        current_location = enemy_positions[enemy_index]
+        if current_location is None:
+            return False
+
+        state = enemy_states[enemy_index]
+        if state.attack_phase == -1:
+            rotated_facing = (state.facing_index + 1) % len(SAMURAI_ROTATIONS)
+            updated_state = EnemyRuntimeState(facing_index=rotated_facing)
+            if self._samurai_can_see_player(current_location, player_location, rotated_facing):
+                updated_state = EnemyRuntimeState(
+                    facing_index=rotated_facing,
+                    attack_phase=0,
+                    turns_until_dash=SAMURAI_CHARGE_DELAYS[0],
+                )
+            enemy_states[enemy_index] = updated_state
+            return False
+
+        turns_until_dash = state.turns_until_dash - 1
+        if turns_until_dash > 0:
+            enemy_states[enemy_index] = EnemyRuntimeState(
+                facing_index=state.facing_index,
+                attack_phase=state.attack_phase,
+                turns_until_dash=turns_until_dash,
+            )
+            return False
+
+        blocked_cells = self._blocked_cells_for_mover(enemy_index, enemy_positions, enemy_specs)
+        next_enemy_location = self._choose_samurai_dash_target(
+            player_location=player_location,
+            enemy_location=current_location,
+            facing_index=state.facing_index,
+            blocked_cells=blocked_cells,
+        )
+        enemy_states[enemy_index] = self._advance_samurai_state(state)
+        if next_enemy_location == current_location:
+            return False
+
+        return self._move_enemy_to_target(
+            player_location=player_location,
+            enemy_index=enemy_index,
+            enemy_positions=enemy_positions,
+            enemy_specs=enemy_specs,
+            next_enemy_location=next_enemy_location,
+        )
+
+    def _move_enemy_to_target(
+        self,
+        player_location: Coord,
+        enemy_index: int,
+        enemy_positions: list[Coord | None],
+        enemy_specs: tuple[EnemySpec, ...],
+        next_enemy_location: Coord,
+    ) -> bool:
+        current_location = enemy_positions[enemy_index]
+        if current_location is None or next_enemy_location == current_location:
+            return False
+
+        target_index = self._enemy_index_at_position(enemy_positions, next_enemy_location, enemy_index)
+        if target_index is not None:
+            contact_result = self._resolve_enemy_contact(enemy_index, target_index, enemy_specs)
+            if contact_result == CONTACT_BLOCKED:
+                return False
+
+            enemy_positions[enemy_index] = next_enemy_location
+            if contact_result == CONTACT_TARGET_DIES:
+                enemy_positions[target_index] = None
+            elif contact_result == CONTACT_MOVER_DIES:
+                enemy_positions[enemy_index] = None
+            return False
+
+        enemy_positions[enemy_index] = next_enemy_location
+        return next_enemy_location == player_location
 
     def _choose_greedy_step(
         self,
@@ -231,3 +359,50 @@ class GreedyChaserRules:
                 return (enemy[0], enemy[1] + 1)
 
         return enemy
+
+    def _samurai_can_see_player(self, enemy_location: Coord, player_location: Coord, facing_index: int) -> bool:
+        delta_x = player_location[0] - enemy_location[0]
+        delta_y = player_location[1] - enemy_location[1]
+        facing_x, facing_y = SAMURAI_ROTATIONS[facing_index]
+
+        if facing_x != 0:
+            return delta_y == 0 and delta_x != 0 and (1 if delta_x > 0 else -1) == facing_x
+        return delta_x == 0 and delta_y != 0 and (1 if delta_y > 0 else -1) == facing_y
+
+    def _choose_samurai_dash_target(
+        self,
+        player_location: Coord,
+        enemy_location: Coord,
+        facing_index: int,
+        blocked_cells: set[Coord],
+    ) -> Coord:
+        delta_x = player_location[0] - enemy_location[0]
+        delta_y = player_location[1] - enemy_location[1]
+        if delta_x == 0 and delta_y == 0:
+            return enemy_location
+
+        use_vertical = abs(delta_y) > abs(delta_x)
+        if abs(delta_x) == abs(delta_y):
+            _, facing_y = SAMURAI_ROTATIONS[facing_index]
+            use_vertical = facing_y != 0 and delta_y != 0
+
+        if use_vertical and delta_y != 0:
+            target = (enemy_location[0], player_location[1])
+        elif delta_x != 0:
+            target = (player_location[0], enemy_location[1])
+        else:
+            target = (enemy_location[0], player_location[1])
+
+        if target in blocked_cells:
+            return enemy_location
+        return target
+
+    def _advance_samurai_state(self, state: EnemyRuntimeState) -> EnemyRuntimeState:
+        next_phase = state.attack_phase + 1
+        if next_phase >= len(SAMURAI_CHARGE_DELAYS):
+            return EnemyRuntimeState(facing_index=state.facing_index)
+        return EnemyRuntimeState(
+            facing_index=state.facing_index,
+            attack_phase=next_phase,
+            turns_until_dash=SAMURAI_CHARGE_DELAYS[next_phase],
+        )

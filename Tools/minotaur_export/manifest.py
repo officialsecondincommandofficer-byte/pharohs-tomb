@@ -29,6 +29,7 @@ class ManifestWriter:
                 "enemy_move_priority": config.enemy_move_priority,
                 "greedy_horizontal_count": config.greedy_horizontal_count,
                 "greedy_vertical_count": config.greedy_vertical_count,
+                "samurai_count": config.samurai_count,
                 "killer_count": config.killer_count,
                 "trap_count": config.trap_count,
                 "additional_checks": config.additional_checks,
@@ -51,6 +52,7 @@ class ManifestWriter:
                             "cell": list(enemy.cell),
                             "move_priority": enemy.move_priority,
                             "step_count": enemy.step_count,
+                            "facing_index": enemy.facing_index,
                             "traits": list(enemy.traits),
                         }
                         for enemy in exported.record.enemy_spawns

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -29,6 +29,14 @@ def categorize_size(width: int, height: int) -> str:
 class GameState:
     player_position: Coord
     enemy_positions: tuple[Coord | None, ...]
+    enemy_states: tuple["EnemyRuntimeState", ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True, slots=True)
+class EnemyRuntimeState:
+    facing_index: int = 2
+    attack_phase: int = -1
+    turns_until_dash: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +97,7 @@ class EnemySpec:
     enemy_type: str = "greedy_chaser"
     move_priority: str = "horizontal"
     step_count: int = 2
+    facing_index: int = 2
     traits: tuple[str, ...] = ()
 
 
@@ -98,6 +107,7 @@ class EnemySpawn:
     cell: Coord
     move_priority: str
     step_count: int = 2
+    facing_index: int = 2
     traits: tuple[str, ...] = ()
 
     @classmethod
@@ -107,6 +117,7 @@ class EnemySpawn:
             cell=cell,
             move_priority=spec.move_priority,
             step_count=spec.step_count,
+            facing_index=spec.facing_index,
             traits=spec.traits,
         )
 
@@ -125,6 +136,7 @@ class GenerationConfig:
     enemy_move_priority: str = "horizontal"
     greedy_horizontal_count: int = 1
     greedy_vertical_count: int = 0
+    samurai_count: int = 0
     killer_count: int = 0
     trap_count: int = 0
     additional_check_threshold: int = 50
@@ -134,6 +146,7 @@ class GenerationConfig:
     def generation_profile_id(self) -> str:
         return (
             f"greedy_enemies_{self.greedy_horizontal_count}x_{self.greedy_vertical_count}y_"
+            f"{self.samurai_count}samurai_"
             f"{self.killer_count}killer_{self.trap_count}traps_{self.width}x{self.height}_batch"
         )
 
@@ -142,11 +155,13 @@ class GenerationConfig:
         specs: list[EnemySpec] = []
         specs.extend(EnemySpec(move_priority="horizontal") for _ in range(self.greedy_horizontal_count))
         specs.extend(EnemySpec(move_priority="vertical") for _ in range(self.greedy_vertical_count))
+        specs.extend(EnemySpec(enemy_type="samurai", step_count=1, facing_index=2) for _ in range(self.samurai_count))
         specs = [
             EnemySpec(
                 enemy_type=spec.enemy_type,
                 move_priority=spec.move_priority,
                 step_count=spec.step_count,
+                facing_index=spec.facing_index,
                 traits=("killer",) if index < self.killer_count else (),
             )
             for index, spec in enumerate(specs)

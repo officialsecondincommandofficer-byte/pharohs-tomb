@@ -102,8 +102,31 @@ func has_trait(trait_name: String) -> bool:
 	return traits.has(trait_name)
 
 
+func build_state_snapshot() -> Dictionary:
+	return {
+		"cell": current_cell,
+		"alive": not is_dead,
+		"state": _build_custom_state_snapshot(),
+	}
+
+
+func restore_from_state(enemy_state: Dictionary) -> void:
+	var cell: Vector2i = enemy_state.get("cell", current_cell)
+	var alive := bool(enemy_state.get("alive", true))
+	restore_to_cell(cell, alive)
+	_restore_custom_state_snapshot(enemy_state.get("state", {}))
+
+
 func choose_target_cell(_player_cell: Vector2i, _occupied_lookup: Dictionary) -> Vector2i:
 	return current_cell
+
+
+func _build_custom_state_snapshot() -> Dictionary:
+	return {}
+
+
+func _restore_custom_state_snapshot(_state: Dictionary) -> void:
+	return
 
 
 func _can_enter(cell: Vector2i, occupied_lookup: Dictionary) -> bool:

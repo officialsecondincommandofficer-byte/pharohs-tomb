@@ -12,6 +12,7 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i) -> Arra
 		spawn["cell"] = coerce_vector2i(spawn.get("cell", fallback_cell))
 		spawn["move_priority"] = String(spawn.get("move_priority", "horizontal"))
 		spawn["step_count"] = int(spawn.get("step_count", 2))
+		spawn["facing_index"] = int(spawn.get("facing_index", 2))
 		spawn["traits"] = coerce_string_array(spawn.get("traits", []))
 		coerced.append(spawn)
 
@@ -26,6 +27,7 @@ static func default_greedy_chaser(cell: Vector2i) -> Dictionary:
 		"cell": cell,
 		"move_priority": "horizontal",
 		"step_count": 2,
+		"facing_index": 2,
 		"traits": [],
 	}
 
