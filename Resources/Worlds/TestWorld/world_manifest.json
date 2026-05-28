@@ -1,0 +1,35 @@
+{
+  "id": "test_world",
+  "display_name": "Legacy Tests",
+  "description": "Quick validation boards and older archive test batches from Resources/Test.",
+  "levels": [
+    {
+      "id": "test_smoke_board",
+      "display_name": "Smoke Board",
+      "resource": "res://Resources/Test/minotaur_20260412_044532_4x4_len001_max_001.tres",
+      "width": 4,
+      "height": 4,
+      "difficulty": "max",
+      "solution_total_steps": 1
+    },
+    {
+      "id": "trap_demo",
+      "display_name": "Trap Demo",
+      "resource": "res://Resources/Test/minotaur_trap_demo_4x4_len002_easy_001.tres",
+      "width": 4,
+      "height": 4,
+      "difficulty": "easy",
+      "solution_total_steps": 2
+    }
+  ],
+  "imports": [
+    {
+      "path": "res://Resources/Test/minotaur_export_manifest_20260411_214532.json",
+      "display_name_prefix": "Archive"
+    },
+    {
+      "path": "res://Resources/Test/minotaur_export_manifest_20260411_215125.json",
+      "display_name_prefix": "Archive"
+    }
+  ]
+}

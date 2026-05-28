@@ -1,5 +1,6 @@
 extends Node
 
+const LevelBoardLoaderScript = preload("res://Worlds/level_board_loader.gd")
 const MazeSaveServiceScript = preload("res://MazeGenerator/maze_save_service.gd")
 
 var game_camera: Camera2D
@@ -17,6 +18,9 @@ var input_locked := false
 var replaying_solution := false
 var _state_history: Array[Dictionary] = []
 var _maze_save_service
+var _level_board_loader
+var _selected_world = null
+var _selected_level = null
 
 
 func bootstrap(system_refs: Dictionary) -> void:
@@ -28,9 +32,12 @@ func bootstrap(system_refs: Dictionary) -> void:
 	player = system_refs["player"]
 	enemy_manager = system_refs["enemy_manager"]
 	hud = system_refs["hud"]
+	_selected_world = system_refs.get("selected_world", null)
+	_selected_level = system_refs.get("selected_level", null)
 
 	player.action_requested.connect(_on_player_action_requested)
 	get_viewport().size_changed.connect(_refresh_camera)
+	_level_board_loader = LevelBoardLoaderScript.new()
 	_maze_save_service = MazeSaveServiceScript.new()
 	print("[Startup] GameManager.bootstrap systems connected")
 
@@ -45,10 +52,10 @@ func restart_run() -> void:
 
 	print("[Startup] GameManager.restart_run begin")
 	var restart_started_ms := Time.get_ticks_msec()
-	board_state = maze_generator.generate_floor()
+	board_state = _load_board_for_current_run()
 	var generation_elapsed_ms := Time.get_ticks_msec() - restart_started_ms
 	if board_state == null:
-		push_error("[Startup] GameManager.restart_run maze generation returned null after %d ms" % generation_elapsed_ms)
+		push_error("[Startup] GameManager.restart_run board loading returned null after %d ms" % generation_elapsed_ms)
 		return
 	print(
 		"[Startup] GameManager.restart_run generated board in %d ms (%dx%d %s %s)" % [
@@ -310,7 +317,7 @@ func _update_hud(status_text: String) -> void:
 
 
 func _controls_message() -> String:
-	return "Arrows move, Space waits, Shift undoes, Backspace resets, P shows the solution, K saves, R rerolls."
+	return "Arrows move, Space waits, Shift undoes, Backspace resets, P shows the solution, K saves, R advances, Esc returns to level select."
 
 
 func _get_seed_id() -> String:
@@ -323,3 +330,9 @@ func _get_seed_id() -> String:
 	if not board_state.generation_profile_id.is_empty():
 		return board_state.generation_profile_id
 	return "N/A"
+
+
+func _load_board_for_current_run() -> MazeData:
+	if _selected_level != null and _level_board_loader != null:
+		return _level_board_loader.load_level(_selected_level, maze_generator.cell_size)
+	return maze_generator.generate_floor()
