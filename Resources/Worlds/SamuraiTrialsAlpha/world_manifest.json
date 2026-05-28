@@ -1,0 +1,11 @@
+{
+  "id": "samurai_trials_alpha",
+  "display_name": "Samurai Test Alpha",
+  "description": "First exported batch of samurai test levels from Resources/Test.",
+  "imports": [
+    {
+      "path": "res://Resources/Test/minotaur_export_manifest_20260525_222950.json",
+      "display_name_prefix": "Alpha"
+    }
+  ]
+}

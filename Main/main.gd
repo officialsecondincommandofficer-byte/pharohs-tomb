@@ -1,6 +1,20 @@
 extends Node2D
 
+signal return_to_level_select_requested
+signal next_level_requested
+
 @onready var game_manager: Node = $GameManager
+
+var _selected_world = null
+var _selected_level = null
+
+
+func configure_selected_level(
+	world_definition,
+	level_definition
+) -> void:
+	_selected_world = world_definition
+	_selected_level = level_definition
 
 
 func _ready() -> void:
@@ -15,6 +29,8 @@ func _ready() -> void:
 		"player": $Player,
 		"enemy_manager": $EnemyManager,
 		"hud": $HUD,
+		"selected_world": _selected_world,
+		"selected_level": _selected_level,
 	})
 	print("[Startup] Main._ready end")
 
@@ -24,8 +40,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	match event.keycode:
+		KEY_ESCAPE:
+			return_to_level_select_requested.emit()
 		KEY_R:
-			game_manager.handle_global_action("reroll")
+			if _selected_level != null:
+				next_level_requested.emit()
+			else:
+				game_manager.handle_global_action("reroll")
 		KEY_BACKSPACE:
 			game_manager.handle_global_action("reset")
 		KEY_SHIFT:

@@ -1,0 +1,57 @@
+{
+  "id": "levels",
+  "display_name": "Levels",
+  "description": "Legacy curated levels from Resources/Levels collected into one world.",
+  "levels": [
+    {
+      "id": "legacy_max_8x8",
+      "display_name": "Legacy Max 8x8",
+      "resource": "res://Resources/Levels/20260405_043554_8x8_max.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "max"
+    },
+    {
+      "id": "legacy_easy_12x12",
+      "display_name": "Legacy Easy 12x12",
+      "resource": "res://Resources/Levels/minotaur_20260412_045127_12x12_len053_easy_003.tres",
+      "width": 12,
+      "height": 12,
+      "difficulty": "easy",
+      "solution_total_steps": 53
+    },
+    {
+      "id": "legacy_quick_test",
+      "display_name": "Legacy Quick Test",
+      "resource": "res://Resources/Levels/minotaur_20260422_212747_8x8_len014_max_001.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "max",
+      "solution_total_steps": 14
+    },
+    {
+      "id": "killer_trait_demo",
+      "display_name": "Killer Trait Demo",
+      "resource": "res://Resources/Levels/minotaur_killer_trait_demo_4x4_len003_easy_001.tres",
+      "width": 4,
+      "height": 4,
+      "difficulty": "easy",
+      "solution_total_steps": 3
+    },
+    {
+      "id": "may_easy_variant",
+      "display_name": "May Easy Variant",
+      "resource": "res://Resources/Levels/minotaur_20260522_043128_9x9_len030_easy_002.tres",
+      "width": 9,
+      "height": 9,
+      "difficulty": "easy",
+      "solution_total_steps": 30
+    }
+  ],
+  "imports": [
+    {
+      "path": "res://Resources/Levels/minotaur_export_manifest_20260422_143224.json",
+      "display_name_prefix": "Batch"
+    }
+  ]
+}

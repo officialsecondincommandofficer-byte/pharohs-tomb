@@ -1,0 +1,484 @@
+{
+  "source_project": "C:\\Users\\echri\\Python Projects\\Minotaur-Project",
+  "output_dir": "Resources\\Test",
+  "generated_at_unix": 1779773390,
+  "parameters": {
+    "width": 10,
+    "height": 10,
+    "iterations": 1,
+    "mazes_per_iteration": 10,
+    "min_moves": 25,
+    "seed": null,
+    "cell_size": 16,
+    "enemy_move_priority": "horizontal",
+    "greedy_horizontal_count": 1,
+    "greedy_vertical_count": 0,
+    "samurai_count": 1,
+    "killer_count": 0,
+    "trap_count": 0,
+    "additional_checks": true,
+    "additional_check_threshold": 50
+  },
+  "files": [
+    {
+      "file_name": "minotaur_20260526_052950_10x10_len025_easy_001.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052950_10x10_len025_easy_001.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 25,
+      "difficulty_category": "easy",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        0,
+        8
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            3,
+            0
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            3,
+            1
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        3,
+        0
+      ],
+      "goal": [
+        1,
+        0
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052951_10x10_len025_easy_002.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052951_10x10_len025_easy_002.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 25,
+      "difficulty_category": "easy",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        2,
+        1
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            6,
+            7
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            6,
+            9
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        6,
+        7
+      ],
+      "goal": [
+        7,
+        7
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052952_10x10_len026_easy_003.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052952_10x10_len026_easy_003.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 26,
+      "difficulty_category": "easy",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        1,
+        0
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            8,
+            6
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            6,
+            8
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        8,
+        6
+      ],
+      "goal": [
+        8,
+        5
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052953_10x10_len027_medium_004.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052953_10x10_len027_medium_004.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 27,
+      "difficulty_category": "medium",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        5,
+        5
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            6,
+            3
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            9,
+            3
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        6,
+        3
+      ],
+      "goal": [
+        5,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052954_10x10_len027_medium_005.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052954_10x10_len027_medium_005.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 27,
+      "difficulty_category": "medium",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        8,
+        6
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            9,
+            4
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            7,
+            0
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        9,
+        4
+      ],
+      "goal": [
+        8,
+        4
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052955_10x10_len028_medium_006.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052955_10x10_len028_medium_006.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 28,
+      "difficulty_category": "medium",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        0,
+        8
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            8,
+            0
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            9,
+            1
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        8,
+        0
+      ],
+      "goal": [
+        8,
+        1
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052956_10x10_len028_hard_007.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052956_10x10_len028_hard_007.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 28,
+      "difficulty_category": "hard",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        7,
+        5
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            3,
+            2
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            2,
+            1
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        3,
+        2
+      ],
+      "goal": [
+        8,
+        2
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052957_10x10_len030_hard_008.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052957_10x10_len030_hard_008.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 30,
+      "difficulty_category": "hard",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        0,
+        1
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            3,
+            3
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            7,
+            6
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        3,
+        3
+      ],
+      "goal": [
+        9,
+        3
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052958_10x10_len033_hard_009.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052958_10x10_len033_hard_009.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 33,
+      "difficulty_category": "hard",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        3,
+        1
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            8,
+            5
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            7,
+            8
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        8,
+        5
+      ],
+      "goal": [
+        0,
+        6
+      ]
+    },
+    {
+      "file_name": "minotaur_20260526_052959_10x10_len037_max_010.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260526_052959_10x10_len037_max_010.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 37,
+      "difficulty_category": "max",
+      "iteration": 1,
+      "trap_cells": [],
+      "player_start": [
+        7,
+        7
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            1,
+            2
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "samurai",
+          "cell": [
+            0,
+            2
+          ],
+          "move_priority": "horizontal",
+          "step_count": 1,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        1,
+        2
+      ],
+      "goal": [
+        8,
+        1
+      ]
+    }
+  ]
+}
