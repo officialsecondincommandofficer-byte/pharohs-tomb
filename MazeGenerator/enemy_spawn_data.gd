@@ -2,7 +2,7 @@ extends RefCounted
 class_name EnemySpawnData
 
 
-static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i) -> Array[Dictionary]:
+static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_empty: bool = false) -> Array[Dictionary]:
 	var coerced: Array[Dictionary] = []
 	for entry in raw_value:
 		if not entry is Dictionary:
@@ -16,7 +16,7 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i) -> Arra
 		spawn["traits"] = coerce_string_array(spawn.get("traits", []))
 		coerced.append(spawn)
 
-	if coerced.is_empty():
+	if coerced.is_empty() and not allow_empty:
 		coerced.append(default_greedy_chaser(fallback_cell))
 	return coerced
 

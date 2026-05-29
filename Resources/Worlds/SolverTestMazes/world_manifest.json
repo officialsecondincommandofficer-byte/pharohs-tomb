@@ -65,6 +65,69 @@
       "height": 8,
       "difficulty": "probe",
       "solution_total_steps": 0
+    },
+    {
+      "id": "probe_teleport_barrier_5x4_a",
+      "display_name": "Probe Required Teleport Barrier 5x4",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_barrier_5x4_len005_probe_001.tres",
+      "width": 5,
+      "height": 4,
+      "difficulty": "probe",
+      "solution_total_steps": 5
+    },
+    {
+      "id": "probe_teleport_source_targeting_4x2_a",
+      "display_name": "Probe Teleport Source Targeting 4x2",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_source_targeting_4x2_len001_probe_001.tres",
+      "width": 4,
+      "height": 2,
+      "difficulty": "probe",
+      "solution_total_steps": 1
+    },
+    {
+      "id": "probe_teleport_source_not_safe_3x1_a",
+      "display_name": "Probe Teleport Source Not Safe 3x1",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_source_not_safe_3x1_len000_probe_001.tres",
+      "width": 3,
+      "height": 1,
+      "difficulty": "probe",
+      "solution_total_steps": 0
+    },
+    {
+      "id": "solver_teleport_greedy_8x8_a",
+      "display_name": "Teleport Regression Greedy 8x8 A",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_042110_8x8_len032_probe_001.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "teleport",
+      "solution_total_steps": 32
+    },
+    {
+      "id": "solver_teleport_greedy_8x8_b",
+      "display_name": "Teleport Regression Greedy 8x8 B",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_042114_8x8_len032_probe_002.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "teleport",
+      "solution_total_steps": 32
+    },
+    {
+      "id": "solver_teleport_greedy_8x8_c",
+      "display_name": "Teleport Regression Greedy 8x8 C",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_042115_8x8_len034_probe_003.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "teleport",
+      "solution_total_steps": 34
+    },
+    {
+      "id": "solver_teleport_saturation_8x8_a",
+      "display_name": "Teleport Saturation 8x8",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_044144_8x8_len008_probe_001.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "teleport",
+      "solution_total_steps": 8
     }
   ]
 }

@@ -40,6 +40,17 @@ class EnemyRuntimeState:
 
 
 @dataclass(frozen=True, slots=True)
+class TeleportPair:
+    a: Coord
+    b: Coord
+
+    def normalized(self) -> "TeleportPair":
+        if self.a <= self.b:
+            return self
+        return TeleportPair(self.b, self.a)
+
+
+@dataclass(frozen=True, slots=True)
 class SolveResult:
     solvable: bool
     actions: tuple[str, ...]
@@ -60,6 +71,7 @@ class MazeRecord:
     goal: Coord
     solution: tuple[str, ...]
     iteration: int
+    teleport_pairs: tuple[TeleportPair, ...] = ()
     seed_hint: int | None = None
 
     @property
@@ -84,6 +96,7 @@ class MazeRecord:
         return (
             self.size,
             self.walls,
+            self.teleport_pairs,
             self.trap_cells,
             self.player_start,
             self.enemy_spawns,

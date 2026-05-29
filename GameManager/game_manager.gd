@@ -197,8 +197,10 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 		return
 
 	var current_player: Vector2i = player.get_current_cell()
-	var next_player: Vector2i = board_state.apply_action(current_player, action_name)
-	if next_player == current_player and action_name != "skip":
+	var transition: Dictionary = board_state.resolve_player_transition(current_player, action_name)
+	var stepped_player: Vector2i = transition.get("stepped_cell", current_player)
+	var next_player: Vector2i = transition.get("resolved_cell", current_player)
+	if stepped_player == current_player and action_name != "skip":
 		if not from_replay:
 			hud.set_message("That move is blocked.")
 		return
@@ -207,12 +209,12 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 		input_locked = true
 		player.set_input_enabled(false)
 
-	if next_player != current_player:
-		await player.move_to_cell(next_player)
+	if stepped_player != current_player:
+		await player.move_to_cell(stepped_player)
 	else:
 		player.set_cell_immediate(current_player)
 
-	if board_state.is_trap_cell(next_player):
+	if board_state.is_trap_cell(stepped_player):
 		move_count += 1
 		_state_history.append(_snapshot_state(action_name))
 		_refresh_visibility()
@@ -224,14 +226,20 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 			player.set_input_enabled(false)
 		return
 
-	await enemy_manager.begin_enemy_phase(next_player)
+	await enemy_manager.begin_enemy_phase(stepped_player)
 	move_count += 1
-	_state_history.append(_snapshot_state(action_name))
+	if enemy_manager.any_enemy_at_cell(stepped_player):
+		game_over = true
+	else:
+		if next_player != stepped_player:
+			player.set_cell_immediate(next_player)
+		if board_state.is_trap_cell(next_player):
+			game_over = true
 	_refresh_visibility()
+	_state_history.append(_snapshot_state(action_name))
 
 	var status_text := "In progress"
-	if enemy_manager.any_enemy_at_cell(next_player):
-		game_over = true
+	if game_over:
 		status_text = "You lose"
 	elif next_player == board_state.exit_cell:
 		game_over = true

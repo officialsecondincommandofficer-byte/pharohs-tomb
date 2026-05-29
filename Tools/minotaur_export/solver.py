@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 
 from .grid import MazeLayout
+from .movement import available_actions, resolve_player_action, resolve_player_transition
 from .models import Coord, EnemySpec, GameState, SolveResult
 from .path_reconstruction import reconstruct_actions, reconstruct_cell_path
 from .rules import GreedyChaserRules
@@ -38,11 +39,11 @@ def _goal_distances(layout: MazeLayout, goal: Coord) -> dict[Coord, int]:
     while queue:
         cell = queue.popleft()
         next_distance = distances[cell] + 1
-        for neighbor in layout.neighbors(cell):
-            if layout.is_blocked(cell, neighbor) or neighbor in distances:
+        for predecessor in _player_transition_predecessors(layout, cell):
+            if predecessor in distances:
                 continue
-            distances[neighbor] = next_distance
-            queue.append(neighbor)
+            distances[predecessor] = next_distance
+            queue.append(predecessor)
 
     return distances
 
@@ -57,17 +58,39 @@ def _shortest_layout_path(layout: MazeLayout, start: Coord, goal: Coord) -> tupl
 
     while queue:
         cell = queue.popleft()
-        for neighbor in layout.neighbors(cell):
-            if layout.is_blocked(cell, neighbor) or neighbor in parents:
+        for action in available_actions(layout, cell, include_skip=False):
+            neighbor = resolve_player_transition(layout, cell, action).resolved_cell
+            if neighbor == cell or neighbor in parents:
                 continue
-
-            delta = (neighbor[0] - cell[0], neighbor[1] - cell[1])
-            parents[neighbor] = (cell, ACTION_DELTAS[delta])
+            parents[neighbor] = (cell, action)
             if neighbor == goal:
                 return reconstruct_cell_path(goal, parents)
             queue.append(neighbor)
 
     return None
+
+
+def _player_transition_predecessors(layout: MazeLayout, destination: Coord) -> tuple[Coord, ...]:
+    predecessors: set[Coord] = set()
+
+    if layout.teleport_destination(destination) is None:
+        for neighbor in layout.neighbors(destination):
+            if not layout.is_blocked(neighbor, destination):
+                predecessors.add(neighbor)
+
+    for pair in layout.teleport_pairs:
+        source = None
+        if pair.a == destination:
+            source = pair.b
+        elif pair.b == destination:
+            source = pair.a
+        if source is None:
+            continue
+        for neighbor in layout.neighbors(source):
+            if not layout.is_blocked(neighbor, source):
+                predecessors.add(neighbor)
+
+    return tuple(predecessors)
 
 
 def build_default_search_strategies() -> dict[str, SolverSearchStrategy]:

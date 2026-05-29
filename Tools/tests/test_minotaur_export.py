@@ -13,7 +13,7 @@ if str(TOOLS_DIR) not in sys.path:
 from minotaur_export.exporter import GodotMazeExporter
 from minotaur_export.generator import MazeGenerator
 from minotaur_export.grid import MazeLayout, normalize_edge
-from minotaur_export.models import EnemyRuntimeState, EnemySpec, EnemySpawn, GameState, GenerationConfig, MazeRecord
+from minotaur_export.models import EnemyRuntimeState, EnemySpec, EnemySpawn, GameState, GenerationConfig, MazeRecord, TeleportPair
 from minotaur_export.rules import GreedyChaserRules
 from minotaur_export.solver_backup import BackupMazeSolver
 from minotaur_export.solver import MazeSolver
@@ -72,6 +72,91 @@ class MazeSolverTests(unittest.TestCase):
                 actions=shortest_path,
                 goal=(0, 1),
                 enemy_specs=enemy_specs,
+            )
+        )
+
+    def test_solver_uses_teleport_pairs_in_state_transitions(self) -> None:
+        layout = MazeLayout(
+            width=5,
+            height=4,
+            walls=frozenset(
+                {
+                    normalize_edge((1, 0), (2, 0)),
+                    normalize_edge((1, 1), (2, 1)),
+                    normalize_edge((1, 2), (2, 2)),
+                    normalize_edge((1, 3), (2, 3)),
+                }
+            ),
+            teleport_pairs=(TeleportPair((1, 3), (3, 0)),),
+        )
+
+        result = MazeSolver().solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=(),
+            goal=(4, 0),
+            enemy_specs=(),
+        )
+
+        self.assertTrue(result.solvable)
+        self.assertEqual(result.actions, ("right", "down", "down", "down", "right"))
+
+    def test_shortest_layout_path_uses_teleport_pairs(self) -> None:
+        layout = MazeLayout(
+            width=5,
+            height=4,
+            walls=frozenset(
+                {
+                    normalize_edge((1, 0), (2, 0)),
+                    normalize_edge((1, 1), (2, 1)),
+                    normalize_edge((1, 2), (2, 2)),
+                    normalize_edge((1, 3), (2, 3)),
+                }
+            ),
+            teleport_pairs=(TeleportPair((1, 3), (3, 0)),),
+        )
+
+        solver = MazeSolver()
+
+        self.assertEqual(
+            solver.shortest_path_without_enemies(layout, start=(0, 0), goal=(4, 0)),
+            ("right", "down", "down", "down", "right"),
+        )
+
+    def test_solver_resolves_teleport_after_enemy_phase(self) -> None:
+        layout = MazeLayout(
+            width=3,
+            height=1,
+            teleport_pairs=(TeleportPair((1, 0), (2, 0)),),
+        )
+
+        result = MazeSolver().solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=((2, 0),),
+            goal=(2, 0),
+            enemy_specs=(EnemySpec(move_priority="horizontal", step_count=1),),
+        )
+
+        self.assertFalse(result.solvable)
+
+    def test_solver_triggers_teleport_on_skip_when_waiting_on_portal(self) -> None:
+        layout = MazeLayout(
+            width=3,
+            height=1,
+            teleport_pairs=(TeleportPair((1, 0), (2, 0)),),
+        )
+
+        solver = MazeSolver()
+
+        self.assertTrue(
+            solver.sequence_is_safe(
+                layout,
+                player_start=(1, 0),
+                enemy_starts=(),
+                actions=("skip",),
+                goal=(2, 0),
+                enemy_specs=(),
             )
         )
 
@@ -489,6 +574,7 @@ class GodotMazeExporterTests(unittest.TestCase):
             width=4,
             height=4,
             walls=(),
+            teleport_pairs=(),
             trap_cells=((2, 2),),
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("greedy_chaser", (3, 3), "horizontal"),),
@@ -519,6 +605,7 @@ class GodotMazeExporterTests(unittest.TestCase):
             width=4,
             height=4,
             walls=(),
+            teleport_pairs=(),
             trap_cells=(),
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("greedy_chaser", (3, 3), "horizontal", traits=("killer",)),),
@@ -544,6 +631,7 @@ class GodotMazeExporterTests(unittest.TestCase):
             width=4,
             height=4,
             walls=(),
+            teleport_pairs=(),
             trap_cells=(),
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("samurai", (3, 3), "horizontal", facing_index=1),),
@@ -562,6 +650,32 @@ class GodotMazeExporterTests(unittest.TestCase):
         )
 
         self.assertIn('"facing_index": 1', serialized)
+
+    def test_serialize_writes_teleport_pairs(self) -> None:
+        exporter = GodotMazeExporter()
+        record = MazeRecord(
+            width=5,
+            height=4,
+            walls=(),
+            teleport_pairs=(TeleportPair((1, 3), (3, 0)),),
+            trap_cells=(),
+            player_start=(0, 0),
+            enemy_spawns=(),
+            goal=(4, 0),
+            solution=("right", "down", "down", "down", "right"),
+            iteration=1,
+        )
+
+        serialized = exporter.serialize(
+            record=record,
+            saved_at_unix=123,
+            difficulty_label="probe",
+            index=1,
+            generation_profile_id="teleport_probe",
+            cell_size=16,
+        )
+
+        self.assertIn('teleport_pairs = Array[Dictionary]([{"a": Vector2i(1, 3), "b": Vector2i(3, 0)}])', serialized)
 
 
 if __name__ == "__main__":
