@@ -37,14 +37,24 @@ class MazeLayout:
     height: int
     walls: frozenset[Edge] = field(default_factory=frozenset)
     teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
+    enemy_teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
+    shared_teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         normalized = frozenset(normalize_edge(a, b) for a, b in self.walls)
         normalized_teleports = tuple(
             sorted((pair.normalized() for pair in self.teleport_pairs), key=lambda pair: (pair.a[1], pair.a[0], pair.b[1], pair.b[0]))
         )
+        normalized_enemy_teleports = tuple(
+            sorted((pair.normalized() for pair in self.enemy_teleport_pairs), key=lambda pair: (pair.a[1], pair.a[0], pair.b[1], pair.b[0]))
+        )
+        normalized_shared_teleports = tuple(
+            sorted((pair.normalized() for pair in self.shared_teleport_pairs), key=lambda pair: (pair.a[1], pair.a[0], pair.b[1], pair.b[0]))
+        )
         object.__setattr__(self, "walls", normalized)
         object.__setattr__(self, "teleport_pairs", normalized_teleports)
+        object.__setattr__(self, "enemy_teleport_pairs", normalized_enemy_teleports)
+        object.__setattr__(self, "shared_teleport_pairs", normalized_shared_teleports)
 
     @staticmethod
     def build_all_edges(width: int, height: int) -> tuple[Edge, ...]:
@@ -79,7 +89,17 @@ class MazeLayout:
         return normalize_edge(a, b) in self.walls
 
     def teleport_destination(self, cell: Coord) -> Coord | None:
-        for pair in self.teleport_pairs:
+        return self._teleport_destination_from_pairs(cell, self.teleport_pairs)
+
+    def enemy_teleport_destination(self, cell: Coord) -> Coord | None:
+        return self._teleport_destination_from_pairs(cell, self.enemy_teleport_pairs)
+
+    def shared_teleport_destination(self, cell: Coord) -> Coord | None:
+        return self._teleport_destination_from_pairs(cell, self.shared_teleport_pairs)
+
+    @staticmethod
+    def _teleport_destination_from_pairs(cell: Coord, pairs: tuple[TeleportPair, ...]) -> Coord | None:
+        for pair in pairs:
             if pair.a == cell:
                 return pair.b
             if pair.b == cell:

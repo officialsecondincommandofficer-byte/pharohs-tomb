@@ -98,6 +98,8 @@ class GodotMazeExporter:
             f"horizontal_walls = {vector2i_array(horizontal_walls)}",
             f"vertical_walls = {vector2i_array(vertical_walls)}",
             f"teleport_pairs = {teleport_pair_array(record.teleport_pairs)}",
+            f"enemy_teleport_pairs = {teleport_pair_array(record.enemy_teleport_pairs)}",
+            f"shared_teleport_pairs = {teleport_pair_array(record.shared_teleport_pairs)}",
             f"trap_cells = {vector2i_array(record.trap_cells)}",
             f"player_spawn = {vector2i(record.player_start)}",
             f"enemy_spawns = {enemy_spawn_array(record.enemy_spawns)}",

@@ -94,6 +94,42 @@
       "solution_total_steps": 0
     },
     {
+      "id": "probe_enemy_teleport_4x1_a",
+      "display_name": "Probe Enemy Teleport 4x1",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_enemy_only_4x1_len001_probe_001.tres",
+      "width": 4,
+      "height": 1,
+      "difficulty": "probe",
+      "solution_total_steps": 1
+    },
+    {
+      "id": "probe_shared_turn_end_teleport_4x1_a",
+      "display_name": "Probe Shared Turn-End Teleport 4x1",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_shared_turn_end_4x1_len001_probe_001.tres",
+      "width": 4,
+      "height": 1,
+      "difficulty": "probe",
+      "solution_total_steps": 1
+    },
+    {
+      "id": "solver_mixed_teleport_8x8_a",
+      "display_name": "Mixed Teleport 8x8",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_061000_8x8_len020_probe_001.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "teleport",
+      "solution_total_steps": 20
+    },
+    {
+      "id": "solver_enemy_turn_end_teleport_8x8_a",
+      "display_name": "Enemy Turn-End Teleport 8x8",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_071000_8x8_len022_probe_001.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "teleport",
+      "solution_total_steps": 22
+    },
+    {
       "id": "solver_teleport_greedy_8x8_a",
       "display_name": "Teleport Regression Greedy 8x8 A",
       "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_042110_8x8_len032_probe_001.tres",

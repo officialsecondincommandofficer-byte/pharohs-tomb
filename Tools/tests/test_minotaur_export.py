@@ -160,6 +160,66 @@ class MazeSolverTests(unittest.TestCase):
             )
         )
 
+    def test_enemy_only_teleport_is_used_by_enemy_but_not_player(self) -> None:
+        layout = MazeLayout(
+            width=4,
+            height=1,
+            enemy_teleport_pairs=(TeleportPair((1, 0), (3, 0)),),
+        )
+        rules = GreedyChaserRules(minotaur_steps=1, move_priority="horizontal")
+
+        enemy_destination = rules.move_enemy(
+            layout,
+            player_location=(0, 0),
+            enemy_location=(2, 0),
+            move_priority="horizontal",
+            step_count=1,
+        )
+
+        self.assertEqual(enemy_destination, (3, 0))
+        self.assertEqual(rules.resolve_player_action(layout, (0, 0), "right"), (1, 0))
+
+    def test_enemy_only_teleport_resolves_at_end_of_turn_not_mid_step(self) -> None:
+        layout = MazeLayout(
+            width=5,
+            height=1,
+            enemy_teleport_pairs=(TeleportPair((2, 0), (4, 0)),),
+        )
+        rules = GreedyChaserRules(minotaur_steps=2, move_priority="horizontal")
+
+        enemy_destination = rules.move_enemy(
+            layout,
+            player_location=(0, 0),
+            enemy_location=(3, 0),
+            move_priority="horizontal",
+            step_count=2,
+        )
+
+        self.assertEqual(enemy_destination, (1, 0))
+
+    def test_shared_teleport_is_used_by_player_and_enemy_at_turn_end(self) -> None:
+        layout = MazeLayout(
+            width=4,
+            height=1,
+            shared_teleport_pairs=(TeleportPair((1, 0), (3, 0)),),
+        )
+        rules = GreedyChaserRules(minotaur_steps=1, move_priority="horizontal")
+
+        self.assertEqual(rules.resolve_player_action(layout, (0, 0), "right"), (1, 0))
+        player_state = GameState(player_position=(0, 0), enemy_positions=(), enemy_states=())
+        next_state = rules.step_state(layout, player_state, "right", ())
+        self.assertIsNotNone(next_state)
+        self.assertEqual(next_state.player_position, (3, 0))
+
+        enemy_destination = rules.move_enemy(
+            layout,
+            player_location=(0, 0),
+            enemy_location=(2, 0),
+            move_priority="horizontal",
+            step_count=1,
+        )
+        self.assertEqual(enemy_destination, (3, 0))
+
     def test_solver_defaults_to_goal_ordered_strategy(self) -> None:
         solver = MazeSolver()
 
@@ -575,6 +635,8 @@ class GodotMazeExporterTests(unittest.TestCase):
             height=4,
             walls=(),
             teleport_pairs=(),
+            enemy_teleport_pairs=(),
+            shared_teleport_pairs=(),
             trap_cells=((2, 2),),
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("greedy_chaser", (3, 3), "horizontal"),),
@@ -606,6 +668,8 @@ class GodotMazeExporterTests(unittest.TestCase):
             height=4,
             walls=(),
             teleport_pairs=(),
+            enemy_teleport_pairs=(),
+            shared_teleport_pairs=(),
             trap_cells=(),
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("greedy_chaser", (3, 3), "horizontal", traits=("killer",)),),
@@ -632,6 +696,8 @@ class GodotMazeExporterTests(unittest.TestCase):
             height=4,
             walls=(),
             teleport_pairs=(),
+            enemy_teleport_pairs=(),
+            shared_teleport_pairs=(),
             trap_cells=(),
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("samurai", (3, 3), "horizontal", facing_index=1),),
@@ -658,6 +724,8 @@ class GodotMazeExporterTests(unittest.TestCase):
             height=4,
             walls=(),
             teleport_pairs=(TeleportPair((1, 3), (3, 0)),),
+            enemy_teleport_pairs=(),
+            shared_teleport_pairs=(),
             trap_cells=(),
             player_start=(0, 0),
             enemy_spawns=(),
@@ -676,6 +744,62 @@ class GodotMazeExporterTests(unittest.TestCase):
         )
 
         self.assertIn('teleport_pairs = Array[Dictionary]([{"a": Vector2i(1, 3), "b": Vector2i(3, 0)}])', serialized)
+
+    def test_serialize_writes_enemy_teleport_pairs(self) -> None:
+        exporter = GodotMazeExporter()
+        record = MazeRecord(
+            width=4,
+            height=1,
+            walls=(),
+            teleport_pairs=(),
+            enemy_teleport_pairs=(TeleportPair((1, 0), (3, 0)),),
+            shared_teleport_pairs=(),
+            trap_cells=(),
+            player_start=(0, 0),
+            enemy_spawns=(EnemySpawn("greedy_chaser", (2, 0), "horizontal"),),
+            goal=(0, 0),
+            solution=(),
+            iteration=1,
+        )
+
+        serialized = exporter.serialize(
+            record=record,
+            saved_at_unix=123,
+            difficulty_label="probe",
+            index=1,
+            generation_profile_id="enemy_teleport_probe",
+            cell_size=16,
+        )
+
+        self.assertIn('enemy_teleport_pairs = Array[Dictionary]([{"a": Vector2i(1, 0), "b": Vector2i(3, 0)}])', serialized)
+
+    def test_serialize_writes_shared_teleport_pairs(self) -> None:
+        exporter = GodotMazeExporter()
+        record = MazeRecord(
+            width=4,
+            height=1,
+            walls=(),
+            teleport_pairs=(),
+            enemy_teleport_pairs=(),
+            shared_teleport_pairs=(TeleportPair((1, 0), (3, 0)),),
+            trap_cells=(),
+            player_start=(0, 0),
+            enemy_spawns=(),
+            goal=(0, 0),
+            solution=(),
+            iteration=1,
+        )
+
+        serialized = exporter.serialize(
+            record=record,
+            saved_at_unix=123,
+            difficulty_label="probe",
+            index=1,
+            generation_profile_id="shared_teleport_probe",
+            cell_size=16,
+        )
+
+        self.assertIn('shared_teleport_pairs = Array[Dictionary]([{"a": Vector2i(1, 0), "b": Vector2i(3, 0)}])', serialized)
 
 
 if __name__ == "__main__":
