@@ -1,0 +1,70 @@
+{
+  "id": "solver_test_mazes",
+  "display_name": "Solver Test Mazes",
+  "description": "Manual-playtest world for solver probes and curated regression mazes. Probe entries may be unverified and are meant for investigation, not release difficulty tuning.",
+  "levels": [
+    {
+      "id": "solver_trap_heavy_9x9_a",
+      "display_name": "Trap Heavy 9x9",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260528_202444_9x9_len030_max_001.tres",
+      "width": 9,
+      "height": 9,
+      "difficulty": "max",
+      "solution_total_steps": 30
+    },
+    {
+      "id": "solver_killer_collision_9x9_a",
+      "display_name": "Killer Collision 9x9",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260528_202446_9x9_len036_max_001.tres",
+      "width": 9,
+      "height": 9,
+      "difficulty": "max",
+      "solution_total_steps": 36
+    },
+    {
+      "id": "solver_samurai_timing_8x8_a",
+      "display_name": "Samurai Timing 8x8",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260528_202446_8x8_len016_max_001.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "max",
+      "solution_total_steps": 16
+    },
+    {
+      "id": "solver_unsafe_shortest_10x10_a",
+      "display_name": "Unsafe Shortest Path 10x10",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260528_202447_10x10_len034_max_001.tres",
+      "width": 10,
+      "height": 10,
+      "difficulty": "max",
+      "solution_total_steps": 34
+    },
+    {
+      "id": "solver_required_waiting_9x9_a",
+      "display_name": "Required Waiting 9x9",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260528_202448_9x9_len048_max_001.tres",
+      "width": 9,
+      "height": 9,
+      "difficulty": "max",
+      "solution_total_steps": 48
+    },
+    {
+      "id": "solver_almost_works_12x12_a",
+      "display_name": "Almost Works Corridors 12x12",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260528_202449_12x12_len044_max_001.tres",
+      "width": 12,
+      "height": 12,
+      "difficulty": "max",
+      "solution_total_steps": 44
+    },
+    {
+      "id": "probe_samurai_timing_8x8_a",
+      "display_name": "Probe Samurai Timing 8x8 (Unverified)",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260528_152038_8x8_len000_probe_001.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "probe",
+      "solution_total_steps": 0
+    }
+  ]
+}

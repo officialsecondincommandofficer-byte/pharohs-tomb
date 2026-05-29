@@ -1,8 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://dbx2d1auhhsds"]
+[gd_scene load_steps=7 format=3 uid="uid://dbx2d1auhhsds"]
 
 [ext_resource type="Script" path="res://Main/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://GameManager/GameManager.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://MazeGenerator/MazeGenerator.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://TileMap/TileMap.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://FogOfWar/FogOfWar.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://Player/Player.tscn" id="6"]
@@ -17,8 +16,6 @@ position_smoothing_enabled = false
 enabled = true
 
 [node name="GameManager" parent="." instance=ExtResource("2")]
-
-[node name="MazeGenerator" parent="." instance=ExtResource("3")]
 
 [node name="TileMap" parent="." instance=ExtResource("4")]
 

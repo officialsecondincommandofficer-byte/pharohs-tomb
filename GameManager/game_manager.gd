@@ -4,7 +4,6 @@ const LevelBoardLoaderScript = preload("res://Worlds/level_board_loader.gd")
 const MazeSaveServiceScript = preload("res://MazeGenerator/maze_save_service.gd")
 
 var game_camera: Camera2D
-var maze_generator: Node
 var tile_map: Node
 var fog_of_war: Node2D
 var player: CharacterBody2D
@@ -26,7 +25,6 @@ var _selected_level = null
 func bootstrap(system_refs: Dictionary) -> void:
 	print("[Startup] GameManager.bootstrap begin")
 	game_camera = system_refs["camera"]
-	maze_generator = system_refs["maze_generator"]
 	tile_map = system_refs["tile_map"]
 	fog_of_war = system_refs["fog_of_war"]
 	player = system_refs["player"]
@@ -56,9 +54,14 @@ func restart_run() -> void:
 	var generation_elapsed_ms := Time.get_ticks_msec() - restart_started_ms
 	if board_state == null:
 		push_error("[Startup] GameManager.restart_run board loading returned null after %d ms" % generation_elapsed_ms)
+		if hud != null:
+			hud.set_message("No level selected. Gameplay requires an exported world level.")
+		if player != null:
+			player.set_input_enabled(false)
+		input_locked = true
 		return
 	print(
-		"[Startup] GameManager.restart_run generated board in %d ms (%dx%d %s %s)" % [
+		"[Startup] GameManager.restart_run loaded board in %d ms (%dx%d %s %s)" % [
 			generation_elapsed_ms,
 			board_state.width,
 			board_state.height,
@@ -333,6 +336,10 @@ func _get_seed_id() -> String:
 
 
 func _load_board_for_current_run() -> MazeData:
-	if _selected_level != null and _level_board_loader != null:
-		return _level_board_loader.load_level(_selected_level, maze_generator.cell_size)
-	return maze_generator.generate_floor()
+	if _selected_level == null:
+		push_error("[Startup] GameManager._load_board_for_current_run requires a selected level; runtime generation is no longer supported.")
+		return null
+	if _level_board_loader == null:
+		push_error("[Startup] GameManager._load_board_for_current_run could not create the level board loader.")
+		return null
+	return _level_board_loader.load_level(_selected_level)

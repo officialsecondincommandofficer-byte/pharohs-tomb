@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "2026-05-28 20:24:46 UTC 9x9 Max #001"
+saved_at_unix = 1779999886
+width = 9
+height = 9
+cell_size = 16
+size_category = "large"
+difficulty_category = "max"
+horizontal_walls = Array[Vector2i]([Vector2i(2, 1), Vector2i(0, 2), Vector2i(3, 2), Vector2i(7, 2), Vector2i(0, 4), Vector2i(1, 4), Vector2i(3, 4), Vector2i(8, 4), Vector2i(2, 5), Vector2i(3, 5), Vector2i(0, 7), Vector2i(6, 7), Vector2i(7, 7), Vector2i(2, 8)])
+vertical_walls = Array[Vector2i]([Vector2i(4, 0), Vector2i(5, 0), Vector2i(3, 1), Vector2i(7, 1), Vector2i(1, 2), Vector2i(3, 2), Vector2i(8, 2), Vector2i(6, 3), Vector2i(7, 3), Vector2i(4, 4), Vector2i(3, 5), Vector2i(5, 6), Vector2i(3, 7), Vector2i(1, 8), Vector2i(4, 8), Vector2i(8, 8)])
+trap_cells = Array[Vector2i]([Vector2i(0, 3), Vector2i(4, 1)])
+player_spawn = Vector2i(2, 6)
+enemy_spawns = Array[Dictionary]([{"type": "greedy_chaser", "cell": Vector2i(3, 2), "move_priority": "horizontal", "step_count": 2, "facing_index": 2, "traits": Array[String](["killer"])}, {"type": "greedy_chaser", "cell": Vector2i(6, 0), "move_priority": "horizontal", "step_count": 2, "facing_index": 2}])
+minotaur_spawn = Vector2i(3, 2)
+exit_cell = Vector2i(0, 0)
+solution_actions = Array[String](["left", "right", "right", "right", "left", "left", "down", "left", "down", "right", "right", "up", "right", "right", "up", "right", "right", "right", "down", "up", "left", "left", "up", "up", "up", "up", "left", "left", "left", "down", "left", "left", "up", "up", "left", "up"])
+solution_total_steps = 36
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "greedy_enemies_2x_0y_0samurai_1killer_2traps_9x9_batch"
