@@ -51,6 +51,20 @@ class ManifestWriter:
                         }
                         for pair in exported.record.teleport_pairs
                     ],
+                    "enemy_teleport_pairs": [
+                        {
+                            "a": list(pair.a),
+                            "b": list(pair.b),
+                        }
+                        for pair in exported.record.enemy_teleport_pairs
+                    ],
+                    "shared_teleport_pairs": [
+                        {
+                            "a": list(pair.a),
+                            "b": list(pair.b),
+                        }
+                        for pair in exported.record.shared_teleport_pairs
+                    ],
                     "trap_cells": [list(cell) for cell in exported.record.trap_cells],
                     "player_start": list(exported.record.player_start),
                     "enemy_spawns": [

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from .grid import MazeLayout
 from .models import Coord, EnemyRuntimeState, EnemySpec, EnemySpawn, GameState
-from .movement import apply_action, available_actions, resolve_player_action, resolve_player_transition
+from .movement import apply_action, available_actions, resolve_enemy_turn_end_transition, resolve_player_action, resolve_player_transition, resolve_player_turn_end_transition
 
 KILLER_TRAIT = "killer"
 CONTACT_BLOCKED = "blocked"
@@ -58,6 +58,8 @@ class GreedyChaserRules:
                 blocked_cells=occupied_cells,
             )
 
+        enemy = resolve_enemy_turn_end_transition(layout, enemy).resolved_cell
+
         return enemy
 
     def step_enemies(
@@ -105,8 +107,10 @@ class GreedyChaserRules:
         if next_enemy_locations is None:
             return None
 
+        turn_end_transition = resolve_player_turn_end_transition(layout, transition.resolved_cell)
+
         return GameState(
-            player_position=transition.resolved_cell,
+            player_position=turn_end_transition.resolved_cell,
             enemy_positions=next_enemy_locations,
             enemy_states=next_enemy_states,
         )
@@ -167,6 +171,7 @@ class GreedyChaserRules:
         move_priority: str,
         step_count: int,
     ) -> bool:
+        final_location: Coord | None = None
         for _ in range(step_count):
             current_location = enemy_positions[enemy_index]
             if current_location is None:
@@ -194,8 +199,24 @@ class GreedyChaserRules:
                 return True
             if enemy_positions[enemy_index] is None:
                 break
+            final_location = enemy_positions[enemy_index]
 
-        return False
+        if final_location is None:
+            final_location = enemy_positions[enemy_index]
+        if final_location is None:
+            return False
+
+        turn_end_transition = resolve_enemy_turn_end_transition(layout, final_location)
+        if not turn_end_transition.used_teleport:
+            return False
+
+        return self._move_enemy_to_target(
+            player_location=player_location,
+            enemy_index=enemy_index,
+            enemy_positions=enemy_positions,
+            enemy_specs=enemy_specs,
+            next_enemy_location=turn_end_transition.resolved_cell,
+        )
 
     def _step_samurai(
         self,
@@ -242,13 +263,30 @@ class GreedyChaserRules:
         enemy_states[enemy_index] = self._advance_samurai_state(state)
         if next_enemy_location == current_location:
             return False
+        caught_player = self._move_enemy_to_target(
+            player_location=player_location,
+            enemy_index=enemy_index,
+            enemy_positions=enemy_positions,
+            enemy_specs=enemy_specs,
+            next_enemy_location=next_enemy_location,
+        )
+        if caught_player:
+            return True
+
+        current_location = enemy_positions[enemy_index]
+        if current_location is None:
+            return False
+
+        turn_end_transition = resolve_enemy_turn_end_transition(layout, current_location)
+        if not turn_end_transition.used_teleport:
+            return False
 
         return self._move_enemy_to_target(
             player_location=player_location,
             enemy_index=enemy_index,
             enemy_positions=enemy_positions,
             enemy_specs=enemy_specs,
-            next_enemy_location=next_enemy_location,
+            next_enemy_location=turn_end_transition.resolved_cell,
         )
 
     def _move_enemy_to_target(
