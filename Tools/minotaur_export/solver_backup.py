@@ -1,56 +1,54 @@
 from __future__ import annotations
 
-from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from .grid import MazeLayout
-from .models import Coord, EnemySpec, GameState, SolveResult
-from .rules import GreedyChaserRules
+from .models import GameState, SolveResult
+from .path_reconstruction import reconstruct_actions
+from .search import breadth_first_search
+from .solver import BaseMazeSolver
+from .solver_context import SolverContext
 
 
 @dataclass(slots=True)
-class BackupMazeSolver:
-    """Preserves the legacy BFS solver behavior as a standalone backup."""
-
-    rules: GreedyChaserRules = field(default_factory=GreedyChaserRules)
+class BackupMazeSolver(BaseMazeSolver):
+    """Standalone rollback-safe copy of the legacy BFS solver behavior."""
 
     def solve(
         self,
-        layout: MazeLayout,
-        player_start: Coord,
-        enemy_starts: tuple[Coord, ...],
-        goal: Coord,
-        enemy_specs: tuple[EnemySpec, ...] | None = None,
-        trap_cells: tuple[Coord, ...] = (),
-    ) -> SolveResult:
-        enemy_specs = enemy_specs or tuple(
-            EnemySpec(move_priority=self.rules.move_priority, step_count=self.rules.minotaur_steps)
-            for _ in enemy_starts
+        layout,
+        player_start,
+        enemy_starts,
+        goal,
+        enemy_specs=None,
+        trap_cells=(),
+    ):
+        context = self._build_context(
+            layout,
+            player_start,
+            enemy_starts,
+            goal,
+            enemy_specs=enemy_specs,
+            trap_cells=trap_cells,
         )
-        trap_lookup = set(trap_cells)
-        initial_state = GameState(player_position=player_start, enemy_positions=enemy_starts)
         if player_start == goal:
             return SolveResult(solvable=True, actions=())
 
-        queue: deque[tuple[GameState, tuple[str, ...]]] = deque([(initial_state, ())])
-        visited: set[GameState] = {initial_state}
+        search_tree = breadth_first_search(
+            initial_state=context.initial_state,
+            available_actions=lambda state: self.rules.available_actions(
+                context.layout,
+                state.player_position,
+                include_skip=True,
+            ),
+            transition=lambda state, action: self._transition(context, state, action),
+            is_goal=lambda state: state.player_position == context.goal,
+        )
+        if search_tree is None:
+            return SolveResult(solvable=False, actions=())
+        return SolveResult(solvable=True, actions=reconstruct_actions(search_tree.goal_state, search_tree.parents))
 
-        while queue:
-            state, moves = queue.popleft()
-            for action in self.rules.available_actions(layout, state.player_position, include_skip=True):
-                next_state = self.rules.step_state(layout, state, action, enemy_specs)
-                if next_state is None:
-                    continue
-                if next_state.player_position in trap_lookup:
-                    continue
-
-                next_moves = moves + (action,)
-                if next_state.player_position == goal:
-                    return SolveResult(solvable=True, actions=next_moves)
-                if next_state in visited:
-                    continue
-
-                visited.add(next_state)
-                queue.append((next_state, next_moves))
-
-        return SolveResult(solvable=False, actions=())
+    def _transition(self, context: SolverContext, state: GameState, action: str) -> GameState | None:
+        next_state = self.rules.step_state(context.layout, state, action, context.enemy_specs)
+        if next_state is None or next_state.player_position in context.trap_lookup:
+            return None
+        return next_state

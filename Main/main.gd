@@ -23,7 +23,6 @@ func _ready() -> void:
 	print("[Startup] Main input actions ready")
 	game_manager.bootstrap({
 		"camera": $GameCamera,
-		"maze_generator": $MazeGenerator,
 		"tile_map": $TileMap,
 		"fog_of_war": $FogOfWar,
 		"player": $Player,

@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
+from typing import Callable
 
 from .grid import MazeLayout, edge_sort_key
 from .models import Coord, Edge, EnemySpec, EnemySpawn, MazeRecord
 from .solver import MazeSolver
-
-OPTIMIZED_GENERATOR_MIN_DIMENSION = 13
 
 
 @dataclass(slots=True)
@@ -17,8 +16,8 @@ class MazeGenerator:
     enemy_specs: tuple[EnemySpec, ...] = (EnemySpec(),)
     trap_count: int = 0
 
-    def uses_optimized_generation(self, layout: MazeLayout) -> bool:
-        return max(layout.width, layout.height) >= OPTIMIZED_GENERATOR_MIN_DIMENSION
+    def uses_generation_prefilter(self, layout: MazeLayout) -> bool:
+        return self.solver.dispatch_policy.uses_generation_prefilter(layout)
 
     def generate_batch(
         self,
@@ -29,23 +28,70 @@ class MazeGenerator:
         iteration: int,
         additional_checks: bool,
         additional_check_threshold: int,
+        progress_callback: Callable[[dict], None] | None = None,
     ) -> list[MazeRecord]:
         generated: list[MazeRecord] = []
         seen_signatures: set[tuple] = set()
         all_edges = list(MazeLayout.build_all_edges(width, height))
         largest_solution = 0
         board_seed = 0
+        layouts_examined = 0
+        attempts = 0
+        rejections = 0
 
         while len(generated) < target_count:
             walls_remaining = self._build_connected_wall_set(width, height, all_edges)
+            if progress_callback is not None:
+                progress_callback(
+                    {
+                        "event": "board_seed_started",
+                        "board_seed": board_seed,
+                        "walls_remaining": len(walls_remaining),
+                        "generated_count": len(generated),
+                        "layouts_examined": layouts_examined,
+                        "attempts": attempts,
+                        "rejections": rejections,
+                        "largest_solution": largest_solution,
+                    }
+                )
 
             while len(walls_remaining) > max(width, height):
                 layout = MazeLayout(width=width, height=height, walls=frozenset(walls_remaining))
                 normalized_walls = tuple(sorted(layout.walls, key=edge_sort_key))
                 checks_remaining = len(walls_remaining)
+                layouts_examined += 1
+                if progress_callback is not None:
+                    progress_callback(
+                        {
+                            "event": "layout_started",
+                            "board_seed": board_seed,
+                            "layout_index": layouts_examined,
+                            "walls_remaining": len(walls_remaining),
+                            "checks_remaining": checks_remaining,
+                            "generated_count": len(generated),
+                            "attempts": attempts,
+                            "rejections": rejections,
+                            "largest_solution": largest_solution,
+                        }
+                    )
 
                 while checks_remaining > 0:
                     checks_remaining -= 1
+                    attempts += 1
+                    if progress_callback is not None and attempts % 500 == 0:
+                        progress_callback(
+                            {
+                                "event": "progress",
+                                "board_seed": board_seed,
+                                "layout_index": layouts_examined,
+                                "walls_remaining": len(walls_remaining),
+                                "checks_remaining": checks_remaining,
+                                "generated_count": len(generated),
+                                "attempts": attempts,
+                                "rejections": rejections,
+                                "largest_solution": largest_solution,
+                            }
+                        )
                     record = self._try_record(
                         layout=layout,
                         normalized_walls=normalized_walls,
@@ -54,16 +100,48 @@ class MazeGenerator:
                         board_seed=board_seed,
                     )
                     if record is None:
+                        rejections += 1
                         continue
                     if record.signature() in seen_signatures:
+                        rejections += 1
                         continue
 
                     seen_signatures.add(record.signature())
                     generated.append(record)
+                    if progress_callback is not None:
+                        progress_callback(
+                            {
+                                "event": "record_found",
+                                "board_seed": board_seed,
+                                "layout_index": layouts_examined,
+                                "walls_remaining": len(walls_remaining),
+                                "generated_count": len(generated),
+                                "attempts": attempts,
+                                "rejections": rejections,
+                                "largest_solution": largest_solution,
+                                "solution_total_steps": record.solution_total_steps,
+                                "player_start": record.player_start,
+                                "goal": record.goal,
+                                "trap_count": len(record.trap_cells),
+                            }
+                        )
                     if record.solution_total_steps >= largest_solution:
                         largest_solution = record.solution_total_steps
                         if additional_checks and largest_solution >= additional_check_threshold:
                             checks_remaining += largest_solution * largest_solution
+                            if progress_callback is not None:
+                                progress_callback(
+                                    {
+                                        "event": "additional_checks_expanded",
+                                        "board_seed": board_seed,
+                                        "layout_index": layouts_examined,
+                                        "generated_count": len(generated),
+                                        "attempts": attempts,
+                                        "rejections": rejections,
+                                        "largest_solution": largest_solution,
+                                        "checks_remaining": checks_remaining,
+                                    }
+                                )
 
                     if len(generated) >= target_count:
                         return generated
@@ -124,7 +202,7 @@ class MazeGenerator:
     ) -> MazeRecord | None:
         player_start, enemy_spawns, goal, trap_cells = self._sample_positions(layout)
         enemy_starts = tuple(enemy.cell for enemy in enemy_spawns)
-        if self.uses_optimized_generation(layout):
+        if self.uses_generation_prefilter(layout):
             shortest_length = self.solver.shortest_path_length_without_enemies(layout, player_start, goal)
             if shortest_length is not None and shortest_length < min_moves:
                 shortest_path = self.solver.shortest_path_without_enemies(layout, player_start, goal)

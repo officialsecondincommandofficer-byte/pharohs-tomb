@@ -1,0 +1,84 @@
+{
+  "source_project": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb",
+  "output_dir": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Worlds\\SolverTestMazes",
+  "generated_at_unix": 1779999884,
+  "parameters": {
+    "width": 9,
+    "height": 9,
+    "iterations": 1,
+    "mazes_per_iteration": 1,
+    "min_moves": 30,
+    "seed": 1000,
+    "cell_size": 16,
+    "enemy_move_priority": "horizontal",
+    "greedy_horizontal_count": 0,
+    "greedy_vertical_count": 1,
+    "samurai_count": 0,
+    "killer_count": 0,
+    "trap_count": 6,
+    "additional_checks": false,
+    "additional_check_threshold": 50
+  },
+  "files": [
+    {
+      "file_name": "minotaur_20260528_202444_9x9_len030_max_001.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Worlds\\SolverTestMazes\\minotaur_20260528_202444_9x9_len030_max_001.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 30,
+      "difficulty_category": "max",
+      "iteration": 1,
+      "trap_cells": [
+        [
+          2,
+          6
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          5
+        ],
+        [
+          8,
+          3
+        ]
+      ],
+      "player_start": [
+        8,
+        1
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            6,
+            8
+          ],
+          "move_priority": "vertical",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        6,
+        8
+      ],
+      "goal": [
+        7,
+        6
+      ]
+    }
+  ]
+}

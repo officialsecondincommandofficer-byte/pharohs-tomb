@@ -1,0 +1,83 @@
+{
+  "source_project": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb",
+  "output_dir": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Worlds\\SolverTestMazes",
+  "generated_at_unix": 1779999889,
+  "parameters": {
+    "width": 12,
+    "height": 12,
+    "iterations": 1,
+    "mazes_per_iteration": 1,
+    "min_moves": 42,
+    "seed": 1005,
+    "cell_size": 16,
+    "enemy_move_priority": "horizontal",
+    "greedy_horizontal_count": 1,
+    "greedy_vertical_count": 1,
+    "samurai_count": 0,
+    "killer_count": 0,
+    "trap_count": 3,
+    "additional_checks": false,
+    "additional_check_threshold": 50
+  },
+  "files": [
+    {
+      "file_name": "minotaur_20260528_202449_12x12_len044_max_001.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Worlds\\SolverTestMazes\\minotaur_20260528_202449_12x12_len044_max_001.tres",
+      "width": 12,
+      "height": 12,
+      "solution_total_steps": 44,
+      "difficulty_category": "max",
+      "iteration": 1,
+      "trap_cells": [
+        [
+          0,
+          6
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          11,
+          11
+        ]
+      ],
+      "player_start": [
+        10,
+        0
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            10,
+            11
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        },
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            9,
+            10
+          ],
+          "move_priority": "vertical",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        10,
+        11
+      ],
+      "goal": [
+        10,
+        8
+      ]
+    }
+  ]
+}

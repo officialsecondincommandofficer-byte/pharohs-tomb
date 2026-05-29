@@ -4,7 +4,7 @@ class_name LevelBoardLoader
 const MazeDataScript = preload("res://MazeGenerator/maze_data.gd")
 
 
-func load_level(level_definition, cell_size_override: int = 16) -> MazeData:
+func load_level(level_definition) -> MazeData:
 	if level_definition == null or level_definition.resource_path.is_empty():
 		return null
 
@@ -14,7 +14,6 @@ func load_level(level_definition, cell_size_override: int = 16) -> MazeData:
 		push_warning("LevelBoardLoader could not load board resource: %s" % level_definition.resource_path)
 		return null
 
-	board_state.cell_size = cell_size_override
 	board_state.display_name = level_definition.display_name
 	board_state.generation_mode = "WORLD_LEVEL"
 	board_state.generation_profile_id = level_definition.level_id

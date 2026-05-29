@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "2026-05-28 15:20:38 UTC 8x8 Probe #001"
+saved_at_unix = 1779981638
+width = 8
+height = 8
+cell_size = 16
+size_category = "large"
+difficulty_category = "probe"
+horizontal_walls = Array[Vector2i]([Vector2i(3, 2), Vector2i(6, 2), Vector2i(0, 4), Vector2i(3, 4), Vector2i(5, 4), Vector2i(0, 5), Vector2i(6, 6), Vector2i(2, 7)])
+vertical_walls = Array[Vector2i]([Vector2i(5, 3), Vector2i(4, 5)])
+trap_cells = Array[Vector2i]([Vector2i(0, 7)])
+player_spawn = Vector2i(4, 7)
+enemy_spawns = Array[Dictionary]([{"type": "samurai", "cell": Vector2i(2, 3), "move_priority": "horizontal", "step_count": 1, "facing_index": 2}, {"type": "samurai", "cell": Vector2i(0, 3), "move_priority": "horizontal", "step_count": 1, "facing_index": 2}])
+minotaur_spawn = Vector2i(2, 3)
+exit_cell = Vector2i(6, 6)
+solution_actions = Array[String]([])
+solution_total_steps = 0
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "unverified_probe"
