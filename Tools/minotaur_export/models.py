@@ -72,6 +72,8 @@ class MazeRecord:
     solution: tuple[str, ...]
     iteration: int
     teleport_pairs: tuple[TeleportPair, ...] = ()
+    enemy_teleport_pairs: tuple[TeleportPair, ...] = ()
+    shared_teleport_pairs: tuple[TeleportPair, ...] = ()
     seed_hint: int | None = None
 
     @property
@@ -97,6 +99,8 @@ class MazeRecord:
             self.size,
             self.walls,
             self.teleport_pairs,
+            self.enemy_teleport_pairs,
+            self.shared_teleport_pairs,
             self.trap_cells,
             self.player_start,
             self.enemy_spawns,

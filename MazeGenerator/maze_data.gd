@@ -23,6 +23,8 @@ var wall_cells: Array[Vector2i] = []
 var horizontal_walls: Array[Vector2i] = []
 var vertical_walls: Array[Vector2i] = []
 var teleport_pairs: Array[Dictionary] = []
+var enemy_teleport_pairs: Array[Dictionary] = []
+var shared_teleport_pairs: Array[Dictionary] = []
 var trap_cells: Array[Vector2i] = []
 var player_spawn: Vector2i = Vector2i.ZERO
 var enemy_spawns: Array[Dictionary] = []
@@ -40,6 +42,8 @@ var _floor_lookup: Dictionary = {}
 var _horizontal_wall_lookup: Dictionary = {}
 var _vertical_wall_lookup: Dictionary = {}
 var _teleport_lookup: Dictionary = {}
+var _enemy_teleport_lookup: Dictionary = {}
+var _shared_teleport_lookup: Dictionary = {}
 var _trap_lookup: Dictionary = {}
 
 
@@ -60,6 +64,8 @@ func configure_from_maze_key(
 	horizontal_walls.clear()
 	vertical_walls.clear()
 	teleport_pairs.clear()
+	enemy_teleport_pairs.clear()
+	shared_teleport_pairs.clear()
 	trap_cells.clear()
 	enemy_spawns.clear()
 	solution_actions.clear()
@@ -67,6 +73,8 @@ func configure_from_maze_key(
 	_horizontal_wall_lookup.clear()
 	_vertical_wall_lookup.clear()
 	_teleport_lookup.clear()
+	_enemy_teleport_lookup.clear()
+	_shared_teleport_lookup.clear()
 	_trap_lookup.clear()
 
 	for y in range(height):
@@ -77,6 +85,10 @@ func configure_from_maze_key(
 		_add_wall_from_edge(raw_wall)
 	for raw_teleport_pair in next_maze_key.get("teleport_pairs", []):
 		add_teleport_pair(raw_teleport_pair)
+	for raw_enemy_teleport_pair in next_maze_key.get("enemy_teleport_pairs", []):
+		add_enemy_teleport_pair(raw_enemy_teleport_pair)
+	for raw_shared_teleport_pair in next_maze_key.get("shared_teleport_pairs", []):
+		add_shared_teleport_pair(raw_shared_teleport_pair)
 
 	player_spawn = _coerce_vector2i(next_maze_key.get("player_start", Vector2i.ZERO))
 	minotaur_spawn = _coerce_vector2i(next_maze_key.get("mino_start", Vector2i.ZERO))
@@ -167,6 +179,50 @@ func add_teleport_pair(raw_pair) -> void:
 	_teleport_lookup[b] = a
 
 
+func add_enemy_teleport_pair(raw_pair) -> void:
+	if not raw_pair is Dictionary:
+		return
+
+	var a: Vector2i = _coerce_vector2i(raw_pair.get("a", Vector2i.ZERO))
+	var b: Vector2i = _coerce_vector2i(raw_pair.get("b", Vector2i.ZERO))
+	if a == b:
+		return
+	if not is_in_bounds(a) or not is_in_bounds(b):
+		return
+	if _enemy_teleport_lookup.has(a) or _enemy_teleport_lookup.has(b):
+		return
+
+	var pair := {
+		"a": a,
+		"b": b,
+	}
+	enemy_teleport_pairs.append(pair)
+	_enemy_teleport_lookup[a] = b
+	_enemy_teleport_lookup[b] = a
+
+
+func add_shared_teleport_pair(raw_pair) -> void:
+	if not raw_pair is Dictionary:
+		return
+
+	var a: Vector2i = _coerce_vector2i(raw_pair.get("a", Vector2i.ZERO))
+	var b: Vector2i = _coerce_vector2i(raw_pair.get("b", Vector2i.ZERO))
+	if a == b:
+		return
+	if not is_in_bounds(a) or not is_in_bounds(b):
+		return
+	if _shared_teleport_lookup.has(a) or _shared_teleport_lookup.has(b):
+		return
+
+	var pair := {
+		"a": a,
+		"b": b,
+	}
+	shared_teleport_pairs.append(pair)
+	_shared_teleport_lookup[a] = b
+	_shared_teleport_lookup[b] = a
+
+
 func has_horizontal_wall(edge: Vector2i) -> bool:
 	return _horizontal_wall_lookup.has(edge)
 
@@ -185,6 +241,18 @@ func get_teleport_destination(cell: Vector2i) -> Vector2i:
 	return cell
 
 
+func get_enemy_teleport_destination(cell: Vector2i) -> Vector2i:
+	if _enemy_teleport_lookup.has(cell):
+		return _enemy_teleport_lookup[cell]
+	return cell
+
+
+func get_shared_teleport_destination(cell: Vector2i) -> Vector2i:
+	if _shared_teleport_lookup.has(cell):
+		return _shared_teleport_lookup[cell]
+	return cell
+
+
 func resolve_player_transition(cell: Vector2i, action: String) -> Dictionary:
 	var stepped_cell: Vector2i = apply_cardinal_action(cell, action)
 	var resolved_cell: Vector2i = get_teleport_destination(stepped_cell)
@@ -192,6 +260,26 @@ func resolve_player_transition(cell: Vector2i, action: String) -> Dictionary:
 		"stepped_cell": stepped_cell,
 		"resolved_cell": resolved_cell,
 		"used_teleport": resolved_cell != stepped_cell,
+	}
+
+
+func resolve_enemy_turn_end_transition(final_cell: Vector2i) -> Dictionary:
+	var resolved_cell: Vector2i = get_enemy_teleport_destination(final_cell)
+	if resolved_cell == final_cell:
+		resolved_cell = get_shared_teleport_destination(final_cell)
+	return {
+		"stepped_cell": final_cell,
+		"resolved_cell": resolved_cell,
+		"used_teleport": resolved_cell != final_cell,
+	}
+
+
+func resolve_player_turn_end_transition(final_cell: Vector2i) -> Dictionary:
+	var resolved_cell: Vector2i = get_shared_teleport_destination(final_cell)
+	return {
+		"stepped_cell": final_cell,
+		"resolved_cell": resolved_cell,
+		"used_teleport": resolved_cell != final_cell,
 	}
 
 
@@ -269,6 +357,8 @@ func to_saved_payload(display_name: String = "", saved_at_unix: int = 0) -> Dict
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
 		"teleport_pairs": teleport_pairs.duplicate(true),
+		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
+		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),
 		"trap_cells": trap_cells.duplicate(),
 		"player_spawn": player_spawn,
 		"enemy_spawns": enemy_spawns.duplicate(true),
@@ -311,6 +401,10 @@ static func from_saved_payload(payload: Dictionary) -> MazeData:
 
 	for teleport_pair in payload.get("teleport_pairs", []):
 		board.add_teleport_pair(teleport_pair)
+	for enemy_teleport_pair in payload.get("enemy_teleport_pairs", []):
+		board.add_enemy_teleport_pair(enemy_teleport_pair)
+	for shared_teleport_pair in payload.get("shared_teleport_pairs", []):
+		board.add_shared_teleport_pair(shared_teleport_pair)
 
 	for trap_cell in payload.get("trap_cells", []):
 		board.add_trap_cell(board._coerce_vector2i(trap_cell))
@@ -370,6 +464,8 @@ func _build_maze_key_from_state() -> Dictionary:
 		"size_board": [width, height],
 		"walls": serialized_walls,
 		"teleport_pairs": teleport_pairs.duplicate(true),
+		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
+		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),
 		"trap_cells": trap_cells.duplicate(),
 		"player_start": [player_spawn.x, player_spawn.y],
 		"enemy_spawns": enemy_spawns.duplicate(true),

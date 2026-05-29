@@ -231,6 +231,8 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 	if enemy_manager.any_enemy_at_cell(stepped_player):
 		game_over = true
 	else:
+		var turn_end_transition: Dictionary = board_state.resolve_player_turn_end_transition(next_player)
+		next_player = turn_end_transition.get("resolved_cell", next_player)
 		if next_player != stepped_player:
 			player.set_cell_immediate(next_player)
 		if board_state.is_trap_cell(next_player):

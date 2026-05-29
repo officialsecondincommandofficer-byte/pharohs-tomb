@@ -87,3 +87,35 @@ def resolve_player_transition(layout: MazeLayout, cell: Coord, action: str) -> M
         resolved_cell=stepped_cell,
         used_teleport=False,
     )
+
+
+def resolve_player_turn_end_transition(layout: MazeLayout, final_cell: Coord) -> MoveResolution:
+    teleport_destination = layout.shared_teleport_destination(final_cell)
+    if teleport_destination is not None:
+        return MoveResolution(
+            stepped_cell=final_cell,
+            resolved_cell=teleport_destination,
+            used_teleport=True,
+        )
+    return MoveResolution(
+        stepped_cell=final_cell,
+        resolved_cell=final_cell,
+        used_teleport=False,
+    )
+
+
+def resolve_enemy_turn_end_transition(layout: MazeLayout, final_cell: Coord) -> MoveResolution:
+    teleport_destination = layout.enemy_teleport_destination(final_cell)
+    if teleport_destination is None:
+        teleport_destination = layout.shared_teleport_destination(final_cell)
+    if teleport_destination is not None:
+        return MoveResolution(
+            stepped_cell=final_cell,
+            resolved_cell=teleport_destination,
+            used_teleport=True,
+        )
+    return MoveResolution(
+        stepped_cell=final_cell,
+        resolved_cell=final_cell,
+        used_teleport=False,
+    )

@@ -133,7 +133,6 @@ func _take_enemy_turn(enemy_index: int, player_cell: Vector2i) -> Dictionary:
 		var next_cell: Vector2i = enemy.choose_target_cell(player_cell, blocked_lookup)
 		if next_cell == enemy.current_cell:
 			continue
-
 		var target_index := _active_enemy_index_at_cell(next_cell, enemy_index)
 		if target_index != -1:
 			var contact_result := _resolve_enemy_contact(enemy_index, target_index)
@@ -157,6 +156,28 @@ func _take_enemy_turn(enemy_index: int, player_cell: Vector2i) -> Dictionary:
 		if enemy.current_cell == player_cell:
 			result["contact_player"] = true
 			break
+
+	if not enemy.is_dead:
+		var turn_end_transition: Dictionary = board_state.resolve_enemy_turn_end_transition(enemy.current_cell)
+		var resolved_cell: Vector2i = turn_end_transition.get("resolved_cell", enemy.current_cell)
+		if resolved_cell != enemy.current_cell:
+			var target_index := _active_enemy_index_at_cell(resolved_cell, enemy_index)
+			if target_index != -1:
+				var contact_result := _resolve_enemy_contact(enemy_index, target_index)
+				if contact_result == CONTACT_TARGET_DIES:
+					enemy.restore_to_cell(resolved_cell, true)
+					result["new_cell"] = enemy.current_cell
+					var target = get_child(target_index)
+					result["killed_spawn_order"] = target.spawn_order
+					target.mark_dead()
+				elif contact_result == CONTACT_MOVER_DIES:
+					enemy.mark_dead()
+					result["died"] = true
+			else:
+				enemy.restore_to_cell(resolved_cell, true)
+				result["new_cell"] = enemy.current_cell
+				if enemy.current_cell == player_cell:
+					result["contact_player"] = true
 
 	result["new_cell"] = enemy.current_cell
 	return result

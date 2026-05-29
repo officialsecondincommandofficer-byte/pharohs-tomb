@@ -14,6 +14,8 @@ const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
 @export var horizontal_walls: Array[Vector2i] = []
 @export var vertical_walls: Array[Vector2i] = []
 @export var teleport_pairs: Array[Dictionary] = []
+@export var enemy_teleport_pairs: Array[Dictionary] = []
+@export var shared_teleport_pairs: Array[Dictionary] = []
 @export var trap_cells: Array[Vector2i] = []
 @export var player_spawn: Vector2i = Vector2i.ZERO
 @export var enemy_spawns: Array[Dictionary] = []
@@ -37,6 +39,8 @@ func apply_payload(payload: Dictionary) -> void:
 	horizontal_walls = _coerce_vector2i_array(payload.get("horizontal_walls", []))
 	vertical_walls = _coerce_vector2i_array(payload.get("vertical_walls", []))
 	teleport_pairs = _coerce_teleport_pair_array(payload.get("teleport_pairs", []))
+	enemy_teleport_pairs = _coerce_teleport_pair_array(payload.get("enemy_teleport_pairs", []))
+	shared_teleport_pairs = _coerce_teleport_pair_array(payload.get("shared_teleport_pairs", []))
 	trap_cells = _coerce_vector2i_array(payload.get("trap_cells", []))
 	player_spawn = _coerce_vector2i(payload.get("player_spawn", player_spawn))
 	minotaur_spawn = _coerce_vector2i(payload.get("minotaur_spawn", minotaur_spawn))
@@ -61,6 +65,8 @@ func to_payload() -> Dictionary:
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
 		"teleport_pairs": teleport_pairs.duplicate(true),
+		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
+		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),
 		"trap_cells": trap_cells.duplicate(),
 		"player_spawn": player_spawn,
 		"enemy_spawns": enemy_spawns.duplicate(true),
