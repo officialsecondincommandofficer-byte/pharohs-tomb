@@ -44,6 +44,13 @@ class ManifestWriter:
                     "solution_total_steps": exported.record.solution_total_steps,
                     "difficulty_category": exported.difficulty_label,
                     "iteration": exported.record.iteration,
+                    "teleport_pairs": [
+                        {
+                            "a": list(pair.a),
+                            "b": list(pair.b),
+                        }
+                        for pair in exported.record.teleport_pairs
+                    ],
                     "trap_cells": [list(cell) for cell in exported.record.trap_cells],
                     "player_start": list(exported.record.player_start),
                     "enemy_spawns": [

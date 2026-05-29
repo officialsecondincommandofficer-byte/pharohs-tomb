@@ -5,7 +5,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Iterable
 
-from .models import Coord, Edge
+from .models import Coord, Edge, TeleportPair
 
 
 def normalize_edge(a: Coord, b: Coord) -> Edge:
@@ -36,10 +36,15 @@ class MazeLayout:
     width: int
     height: int
     walls: frozenset[Edge] = field(default_factory=frozenset)
+    teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         normalized = frozenset(normalize_edge(a, b) for a, b in self.walls)
+        normalized_teleports = tuple(
+            sorted((pair.normalized() for pair in self.teleport_pairs), key=lambda pair: (pair.a[1], pair.a[0], pair.b[1], pair.b[0]))
+        )
         object.__setattr__(self, "walls", normalized)
+        object.__setattr__(self, "teleport_pairs", normalized_teleports)
 
     @staticmethod
     def build_all_edges(width: int, height: int) -> tuple[Edge, ...]:
@@ -72,6 +77,14 @@ class MazeLayout:
 
     def is_blocked(self, a: Coord, b: Coord) -> bool:
         return normalize_edge(a, b) in self.walls
+
+    def teleport_destination(self, cell: Coord) -> Coord | None:
+        for pair in self.teleport_pairs:
+            if pair.a == cell:
+                return pair.b
+            if pair.b == cell:
+                return pair.a
+        return None
 
     def is_connected(self) -> bool:
         start = (0, 0)

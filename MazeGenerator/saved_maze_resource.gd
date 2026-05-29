@@ -13,6 +13,7 @@ const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
 @export var difficulty_category: String = "easy"
 @export var horizontal_walls: Array[Vector2i] = []
 @export var vertical_walls: Array[Vector2i] = []
+@export var teleport_pairs: Array[Dictionary] = []
 @export var trap_cells: Array[Vector2i] = []
 @export var player_spawn: Vector2i = Vector2i.ZERO
 @export var enemy_spawns: Array[Dictionary] = []
@@ -35,10 +36,11 @@ func apply_payload(payload: Dictionary) -> void:
 	difficulty_category = String(payload.get("difficulty_category", difficulty_category))
 	horizontal_walls = _coerce_vector2i_array(payload.get("horizontal_walls", []))
 	vertical_walls = _coerce_vector2i_array(payload.get("vertical_walls", []))
+	teleport_pairs = _coerce_teleport_pair_array(payload.get("teleport_pairs", []))
 	trap_cells = _coerce_vector2i_array(payload.get("trap_cells", []))
 	player_spawn = _coerce_vector2i(payload.get("player_spawn", player_spawn))
 	minotaur_spawn = _coerce_vector2i(payload.get("minotaur_spawn", minotaur_spawn))
-	enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), minotaur_spawn)
+	enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), minotaur_spawn, true)
 	exit_cell = _coerce_vector2i(payload.get("exit_cell", exit_cell))
 	solution_actions = _coerce_string_array(payload.get("solution_actions", []))
 	solution_total_steps = int(payload.get("solution_total_steps", solution_total_steps))
@@ -58,6 +60,7 @@ func to_payload() -> Dictionary:
 		"difficulty_category": difficulty_category,
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
+		"teleport_pairs": teleport_pairs.duplicate(true),
 		"trap_cells": trap_cells.duplicate(),
 		"player_spawn": player_spawn,
 		"enemy_spawns": enemy_spawns.duplicate(true),
@@ -84,6 +87,18 @@ func _coerce_vector2i_array(raw_value) -> Array[Vector2i]:
 	var coerced: Array[Vector2i] = []
 	for entry in raw_value:
 		coerced.append(_coerce_vector2i(entry))
+	return coerced
+
+
+func _coerce_teleport_pair_array(raw_value) -> Array[Dictionary]:
+	var coerced: Array[Dictionary] = []
+	for entry in raw_value:
+		if not entry is Dictionary:
+			continue
+		coerced.append({
+			"a": _coerce_vector2i(entry.get("a", Vector2i.ZERO)),
+			"b": _coerce_vector2i(entry.get("b", Vector2i.ZERO)),
+		})
 	return coerced
 
 

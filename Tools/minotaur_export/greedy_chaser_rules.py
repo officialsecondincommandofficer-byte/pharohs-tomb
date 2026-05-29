@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from .grid import MazeLayout
 from .models import Coord, EnemyRuntimeState, EnemySpec, EnemySpawn, GameState
-from .movement import apply_action, available_actions
+from .movement import apply_action, available_actions, resolve_player_action, resolve_player_transition
 
 KILLER_TRAIT = "killer"
 CONTACT_BLOCKED = "blocked"
@@ -28,6 +28,12 @@ class GreedyChaserRules:
 
     def apply_action(self, layout: MazeLayout, cell: Coord, action: str) -> Coord:
         return apply_action(layout, cell, action)
+
+    def resolve_player_action(self, layout: MazeLayout, cell: Coord, action: str) -> Coord:
+        return resolve_player_action(layout, cell, action)
+
+    def resolve_player_transition(self, layout: MazeLayout, cell: Coord, action: str):
+        return resolve_player_transition(layout, cell, action)
 
     def move_enemy(
         self,
@@ -88,10 +94,10 @@ class GreedyChaserRules:
         action: str,
         enemy_specs: tuple[EnemySpec, ...],
     ) -> GameState | None:
-        player_location = self.apply_action(layout, state.player_position, action)
+        transition = self.resolve_player_transition(layout, state.player_position, action)
         next_enemy_locations, next_enemy_states = self._step_enemy_positions(
             layout=layout,
-            player_location=player_location,
+            player_location=transition.stepped_cell,
             enemy_positions=state.enemy_positions,
             enemy_states=state.enemy_states,
             enemy_specs=enemy_specs,
@@ -100,7 +106,7 @@ class GreedyChaserRules:
             return None
 
         return GameState(
-            player_position=player_location,
+            player_position=transition.resolved_cell,
             enemy_positions=next_enemy_locations,
             enemy_states=next_enemy_states,
         )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import lru_cache
 
 from .grid import MazeLayout
@@ -12,6 +13,13 @@ ACTION_OFFSETS: dict[str, Coord] = {
     "up": (0, -1),
     "down": (0, 1),
 }
+
+
+@dataclass(frozen=True, slots=True)
+class MoveResolution:
+    stepped_cell: Coord
+    resolved_cell: Coord
+    used_teleport: bool
 
 
 def available_actions(layout: MazeLayout, cell: Coord, include_skip: bool) -> list[str]:
@@ -58,3 +66,24 @@ def _apply_action_cached(layout: MazeLayout, cell: Coord, action: str) -> Coord:
     if layout.is_blocked(cell, nxt):
         return cell
     return nxt
+
+
+def resolve_player_action(layout: MazeLayout, cell: Coord, action: str) -> Coord:
+    return resolve_player_transition(layout, cell, action).resolved_cell
+
+
+def resolve_player_transition(layout: MazeLayout, cell: Coord, action: str) -> MoveResolution:
+    stepped_cell = apply_action(layout, cell, action)
+    teleport_destination = layout.teleport_destination(stepped_cell)
+    if teleport_destination is not None:
+        return MoveResolution(
+            stepped_cell=stepped_cell,
+            resolved_cell=teleport_destination,
+            used_teleport=True,
+        )
+
+    return MoveResolution(
+        stepped_cell=stepped_cell,
+        resolved_cell=stepped_cell,
+        used_teleport=False,
+    )

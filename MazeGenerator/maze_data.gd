@@ -22,6 +22,7 @@ var floor_cells: Array[Vector2i] = []
 var wall_cells: Array[Vector2i] = []
 var horizontal_walls: Array[Vector2i] = []
 var vertical_walls: Array[Vector2i] = []
+var teleport_pairs: Array[Dictionary] = []
 var trap_cells: Array[Vector2i] = []
 var player_spawn: Vector2i = Vector2i.ZERO
 var enemy_spawns: Array[Dictionary] = []
@@ -38,6 +39,7 @@ var saved_at_unix: int = 0
 var _floor_lookup: Dictionary = {}
 var _horizontal_wall_lookup: Dictionary = {}
 var _vertical_wall_lookup: Dictionary = {}
+var _teleport_lookup: Dictionary = {}
 var _trap_lookup: Dictionary = {}
 
 
@@ -57,12 +59,14 @@ func configure_from_maze_key(
 	wall_cells.clear()
 	horizontal_walls.clear()
 	vertical_walls.clear()
+	teleport_pairs.clear()
 	trap_cells.clear()
 	enemy_spawns.clear()
 	solution_actions.clear()
 	_floor_lookup.clear()
 	_horizontal_wall_lookup.clear()
 	_vertical_wall_lookup.clear()
+	_teleport_lookup.clear()
 	_trap_lookup.clear()
 
 	for y in range(height):
@@ -71,6 +75,8 @@ func configure_from_maze_key(
 
 	for raw_wall in next_maze_key.get("walls", []):
 		_add_wall_from_edge(raw_wall)
+	for raw_teleport_pair in next_maze_key.get("teleport_pairs", []):
+		add_teleport_pair(raw_teleport_pair)
 
 	player_spawn = _coerce_vector2i(next_maze_key.get("player_start", Vector2i.ZERO))
 	minotaur_spawn = _coerce_vector2i(next_maze_key.get("mino_start", Vector2i.ZERO))
@@ -139,6 +145,28 @@ func add_trap_cell(cell: Vector2i) -> void:
 	_trap_lookup[cell] = true
 
 
+func add_teleport_pair(raw_pair) -> void:
+	if not raw_pair is Dictionary:
+		return
+
+	var a: Vector2i = _coerce_vector2i(raw_pair.get("a", Vector2i.ZERO))
+	var b: Vector2i = _coerce_vector2i(raw_pair.get("b", Vector2i.ZERO))
+	if a == b:
+		return
+	if not is_in_bounds(a) or not is_in_bounds(b):
+		return
+	if _teleport_lookup.has(a) or _teleport_lookup.has(b):
+		return
+
+	var pair := {
+		"a": a,
+		"b": b,
+	}
+	teleport_pairs.append(pair)
+	_teleport_lookup[a] = b
+	_teleport_lookup[b] = a
+
+
 func has_horizontal_wall(edge: Vector2i) -> bool:
 	return _horizontal_wall_lookup.has(edge)
 
@@ -149,6 +177,22 @@ func has_vertical_wall(edge: Vector2i) -> bool:
 
 func is_trap_cell(cell: Vector2i) -> bool:
 	return _trap_lookup.has(cell)
+
+
+func get_teleport_destination(cell: Vector2i) -> Vector2i:
+	if _teleport_lookup.has(cell):
+		return _teleport_lookup[cell]
+	return cell
+
+
+func resolve_player_transition(cell: Vector2i, action: String) -> Dictionary:
+	var stepped_cell: Vector2i = apply_cardinal_action(cell, action)
+	var resolved_cell: Vector2i = get_teleport_destination(stepped_cell)
+	return {
+		"stepped_cell": stepped_cell,
+		"resolved_cell": resolved_cell,
+		"used_teleport": resolved_cell != stepped_cell,
+	}
 
 
 func has_wall_between(a: Vector2i, b: Vector2i) -> bool:
@@ -190,7 +234,7 @@ func get_move_options(cell: Vector2i, include_skip: bool = true) -> Array[String
 	return options
 
 
-func apply_action(cell: Vector2i, action: String) -> Vector2i:
+func apply_cardinal_action(cell: Vector2i, action: String) -> Vector2i:
 	if action == "skip":
 		return cell
 
@@ -202,6 +246,10 @@ func apply_action(cell: Vector2i, action: String) -> Vector2i:
 		return cell
 
 	return next_cell
+
+
+func apply_action(cell: Vector2i, action: String) -> Vector2i:
+	return resolve_player_transition(cell, action).get("resolved_cell", cell)
 
 
 func build_floor_lookup() -> Dictionary:
@@ -220,6 +268,7 @@ func to_saved_payload(display_name: String = "", saved_at_unix: int = 0) -> Dict
 		"difficulty_category": difficulty_category,
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
+		"teleport_pairs": teleport_pairs.duplicate(true),
 		"trap_cells": trap_cells.duplicate(),
 		"player_spawn": player_spawn,
 		"enemy_spawns": enemy_spawns.duplicate(true),
@@ -243,7 +292,7 @@ static func from_saved_payload(payload: Dictionary) -> MazeData:
 	board.saved_at_unix = int(payload.get("saved_at_unix", 0))
 	board.player_spawn = board._coerce_vector2i(payload.get("player_spawn", Vector2i.ZERO))
 	board.minotaur_spawn = board._coerce_vector2i(payload.get("minotaur_spawn", Vector2i.ZERO))
-	board.enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), board.minotaur_spawn)
+	board.enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), board.minotaur_spawn, true)
 	board.minotaur_spawn = EnemySpawnDataScript.first_enemy_cell(board.enemy_spawns, board.minotaur_spawn)
 	board.exit_cell = board._coerce_vector2i(payload.get("exit_cell", Vector2i.ZERO))
 	board.generation_mode = String(payload.get("generation_mode", "RUNTIME_GENERATED"))
@@ -259,6 +308,9 @@ static func from_saved_payload(payload: Dictionary) -> MazeData:
 
 	for vertical_wall in payload.get("vertical_walls", []):
 		board.add_vertical_wall(board._coerce_vector2i(vertical_wall))
+
+	for teleport_pair in payload.get("teleport_pairs", []):
+		board.add_teleport_pair(teleport_pair)
 
 	for trap_cell in payload.get("trap_cells", []):
 		board.add_trap_cell(board._coerce_vector2i(trap_cell))
@@ -317,6 +369,7 @@ func _build_maze_key_from_state() -> Dictionary:
 	return {
 		"size_board": [width, height],
 		"walls": serialized_walls,
+		"teleport_pairs": teleport_pairs.duplicate(true),
 		"trap_cells": trap_cells.duplicate(),
 		"player_start": [player_spawn.x, player_spawn.y],
 		"enemy_spawns": enemy_spawns.duplicate(true),

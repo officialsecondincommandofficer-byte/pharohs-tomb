@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "2026-05-28 21:10:00 UTC 4x2 Teleport Source Targeting Probe #001"
+saved_at_unix = 1780002600
+width = 4
+height = 2
+cell_size = 16
+size_category = "small"
+difficulty_category = "probe"
+horizontal_walls = Array[Vector2i]([])
+vertical_walls = Array[Vector2i]([])
+teleport_pairs = Array[Dictionary]([{"a": Vector2i(1, 1), "b": Vector2i(3, 0)}])
+trap_cells = Array[Vector2i]([])
+player_spawn = Vector2i(0, 1)
+enemy_spawns = Array[Dictionary]([{"type": "greedy_chaser", "cell": Vector2i(3, 1), "move_priority": "horizontal", "step_count": 1, "facing_index": 2}])
+minotaur_spawn = Vector2i(3, 1)
+exit_cell = Vector2i(3, 0)
+solution_actions = Array[String](["right"])
+solution_total_steps = 1
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "teleport_source_targeting_probe"

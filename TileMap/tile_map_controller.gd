@@ -11,6 +11,7 @@ const EXIT_UNLOCKED_TILE := Vector2i(3, 0)
 @onready var goal_layer: TileMapLayer = $GoalLayer
 @onready var floor_checker_overlay: Node2D = $FloorCheckerOverlay
 @onready var trap_overlay: Node2D = $TrapOverlay
+@onready var teleport_overlay: Node2D = $TeleportOverlay
 @onready var thin_wall_overlay: Node2D = $ThinWallOverlay
 
 var _board_state
@@ -31,6 +32,7 @@ func render_board(board_state, exit_unlocked: bool) -> void:
 
 	floor_checker_overlay.call("render_checker", board_state)
 	trap_overlay.call("render_traps", board_state)
+	teleport_overlay.call("render_teleports", board_state)
 	_draw_perimeter_border()
 	_draw_exit()
 

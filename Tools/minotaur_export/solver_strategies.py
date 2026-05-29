@@ -48,7 +48,7 @@ class GoalDistanceActionOrder:
             available_actions,
             key=lambda action: (
                 goal_distances.get(
-                    context.rules.apply_action(context.layout, state.player_position, action),
+                    context.rules.resolve_player_action(context.layout, state.player_position, action),
                     float("inf"),
                 ),
                 1 if action == "skip" else 0,

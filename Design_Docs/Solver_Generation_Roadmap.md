@@ -77,6 +77,19 @@ Preferred transition order:
 4. teleports / falls / floor transitions
 5. hazard validation
 
+Teleport rule for the current exported-board model:
+- the player first steps onto the teleport source tile
+- the enemy phase targets that stepped/source tile, not the destination
+- if the player survives the enemy phase, the teleport resolves to the destination
+- waiting on a teleport tile also re-triggers that same teleport after the enemy phase
+- exit and trap validation happen against the resolved destination after the warp
+
+Recommended naming:
+- `stepped_cell`: the location reached by ordinary movement before teleport resolution
+- `resolved_cell`: the final player location after teleport resolution
+
+This keeps teleport timing explicit in both the Python solver transition layer and the Godot runtime turn resolver.
+
 ### 3. Search modes
 
 We should support multiple generation/search modes rather than forcing one global policy:
