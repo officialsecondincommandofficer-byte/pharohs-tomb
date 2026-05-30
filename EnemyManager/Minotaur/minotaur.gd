@@ -52,20 +52,20 @@ func _resolve_minotaur_turn(current_cell: Vector2i, player_cell: Vector2i) -> Di
 func _choose_minotaur_step(current_cell: Vector2i, player_cell: Vector2i) -> Vector2i:
 	if player_cell.x > current_cell.x:
 		var right_cell := current_cell + Vector2i.RIGHT
-		if board_state.can_step(current_cell, right_cell):
+		if board_state.can_enemy_step(current_cell, right_cell):
 			return right_cell
 	elif player_cell.x < current_cell.x:
 		var left_cell := current_cell + Vector2i.LEFT
-		if board_state.can_step(current_cell, left_cell):
+		if board_state.can_enemy_step(current_cell, left_cell):
 			return left_cell
 
 	if player_cell.y < current_cell.y:
 		var up_cell := current_cell + Vector2i.UP
-		if board_state.can_step(current_cell, up_cell):
+		if board_state.can_enemy_step(current_cell, up_cell):
 			return up_cell
 	elif player_cell.y > current_cell.y:
 		var down_cell := current_cell + Vector2i.DOWN
-		if board_state.can_step(current_cell, down_cell):
+		if board_state.can_enemy_step(current_cell, down_cell):
 			return down_cell
 
 	return current_cell

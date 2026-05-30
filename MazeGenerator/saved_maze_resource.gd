@@ -13,6 +13,10 @@ const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
 @export var difficulty_category: String = "easy"
 @export var horizontal_walls: Array[Vector2i] = []
 @export var vertical_walls: Array[Vector2i] = []
+@export var player_horizontal_walls: Array[Vector2i] = []
+@export var player_vertical_walls: Array[Vector2i] = []
+@export var enemy_horizontal_walls: Array[Vector2i] = []
+@export var enemy_vertical_walls: Array[Vector2i] = []
 @export var teleport_pairs: Array[Dictionary] = []
 @export var enemy_teleport_pairs: Array[Dictionary] = []
 @export var shared_teleport_pairs: Array[Dictionary] = []
@@ -38,6 +42,10 @@ func apply_payload(payload: Dictionary) -> void:
 	difficulty_category = String(payload.get("difficulty_category", difficulty_category))
 	horizontal_walls = _coerce_vector2i_array(payload.get("horizontal_walls", []))
 	vertical_walls = _coerce_vector2i_array(payload.get("vertical_walls", []))
+	player_horizontal_walls = _coerce_vector2i_array(payload.get("player_horizontal_walls", []))
+	player_vertical_walls = _coerce_vector2i_array(payload.get("player_vertical_walls", []))
+	enemy_horizontal_walls = _coerce_vector2i_array(payload.get("enemy_horizontal_walls", []))
+	enemy_vertical_walls = _coerce_vector2i_array(payload.get("enemy_vertical_walls", []))
 	teleport_pairs = _coerce_teleport_pair_array(payload.get("teleport_pairs", []))
 	enemy_teleport_pairs = _coerce_teleport_pair_array(payload.get("enemy_teleport_pairs", []))
 	shared_teleport_pairs = _coerce_teleport_pair_array(payload.get("shared_teleport_pairs", []))
@@ -64,6 +72,10 @@ func to_payload() -> Dictionary:
 		"difficulty_category": difficulty_category,
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
+		"player_horizontal_walls": player_horizontal_walls.duplicate(),
+		"player_vertical_walls": player_vertical_walls.duplicate(),
+		"enemy_horizontal_walls": enemy_horizontal_walls.duplicate(),
+		"enemy_vertical_walls": enemy_vertical_walls.duplicate(),
 		"teleport_pairs": teleport_pairs.duplicate(true),
 		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
 		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),

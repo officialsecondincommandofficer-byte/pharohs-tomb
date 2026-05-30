@@ -32,6 +32,8 @@ class ManifestWriter:
                 "samurai_count": config.samurai_count,
                 "killer_count": config.killer_count,
                 "trap_count": config.trap_count,
+                "player_only_wall_count": config.player_only_wall_count,
+                "enemy_only_wall_count": config.enemy_only_wall_count,
                 "additional_checks": config.additional_checks,
                 "additional_check_threshold": config.additional_check_threshold,
             },
@@ -44,6 +46,8 @@ class ManifestWriter:
                     "solution_total_steps": exported.record.solution_total_steps,
                     "difficulty_category": exported.difficulty_label,
                     "iteration": exported.record.iteration,
+                    "player_only_walls": [[list(a), list(b)] for a, b in exported.record.player_only_walls],
+                    "enemy_only_walls": [[list(a), list(b)] for a, b in exported.record.enemy_only_walls],
                     "teleport_pairs": [
                         {
                             "a": list(pair.a),

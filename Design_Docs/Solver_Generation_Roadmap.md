@@ -130,6 +130,102 @@ Recommended order of complexity growth:
 
 This order keeps topology changes ahead of fully dynamic board-state changes.
 
+## Wall Mechanics Foundation
+
+Wall mechanics should stay split by responsibility rather than getting folded into one broad "movement rules" bucket.
+
+Recommended ownership:
+- board/layout representation owns which edges exist and which actor classes those edges block
+- movement legality / transitions owns how a player or enemy tests one attempted step against that layout
+- solver state transitions own only mechanic state that actually changes over time
+- export format owns a lossless serialized description of shared walls plus any actor- or state-specific wall layers
+- Godot runtime loading and gameplay behavior own replaying the same legality rules during play, not redefining them
+- regression coverage owns explicit probes for each new wall family plus at least one playable curated level
+
+### Mechanic Categories
+
+#### 1. One-way walls or actor-specific walls
+
+These are the safest first expansion because they are still topology-centric.
+
+Actor-specific walls:
+- change which actor class may traverse an edge
+- do not add per-turn or per-state memory
+- fit the current solver architecture cleanly because legality can stay in the transition layer
+
+Recommended naming:
+- `player_only_walls`: only the player may pass through these edges
+- `enemy_only_walls`: only enemies may pass through these edges
+
+One-way walls:
+- are also static topology, but they make the graph directed
+- require more care in reverse-distance helpers and predecessor logic
+- remain lower risk than stateful mechanics, but are slightly more invasive than actor-specific walls
+
+#### 2. Breakable walls
+
+Breakable walls are a stateful transition mechanic.
+
+They require:
+- tracking which walls have already been broken
+- deciding whether enemies can break them too
+- expanding solver state to encode board mutation
+
+This is the point where wall mechanics stop being "just topology" and start materially increasing dynamic solver state.
+
+#### 3. Locked passages, gates, or keyed barriers
+
+Locked passages are allowed as a design mechanic, including cases where they fully enclose an area or the exit, but generation and validation must treat that as explicit gated access rather than ordinary reachability.
+
+Required rule:
+- a locked enclosure is valid only if the gating condition is modeled and validated end to end
+
+This means we must not treat "the exit is unreachable in the base graph" as automatically invalid once locked passages exist, but we also must not silently allow unreachable exits when no valid unlock path exists.
+
+### Generation Implications
+
+Static topology changes:
+- shared walls
+- actor-specific walls
+- one-way walls
+
+These change graph shape but do not change solver memory size by themselves.
+
+Stateful transition changes:
+- breakable walls
+- locked passages that unlock mid-run
+- gates driven by switches, items, or triggers
+
+These change both graph behavior and the search state space.
+
+Guardrail for locked enclosures:
+- allowing the exit to sit behind locked passages is dangerous if generation still assumes plain reachability from the start state
+- without explicit gating validation, generation can export mazes that look deliberate but are actually impossible or misleading
+- the risk is higher than teleports because the invalidity can hide behind a seemingly reasonable outer layout
+
+Recommended policy:
+- curated content: allowed once the unlock condition is explicit and solver-validated
+- procedural generation: disallowed by default until generation has a dedicated gated-reachability validator and an explicit opt-in rule
+
+In practice, generation should require:
+- a base-state reachability check
+- a post-unlock reachability check
+- proof that the unlock path itself is achievable without circular dependence
+- explicit reporting when an exit is enclosed behind a locked passage
+
+### Recommended Implementation Order
+
+1. Actor-specific walls
+2. One-way walls
+3. Locked passages / gates
+4. Breakable walls
+
+Why:
+- actor-specific walls preserve the current solver architecture best
+- one-way walls are still static but require directed-graph care
+- locked passages are where generation correctness risk becomes much sharper, especially around enclosed exits
+- breakable walls materially increase dynamic solver state and should come only after the transition/state model is ready
+
 ## Native Core Flags
 
 The following should be treated as explicit signals that a native compiled solver core is becoming warranted.

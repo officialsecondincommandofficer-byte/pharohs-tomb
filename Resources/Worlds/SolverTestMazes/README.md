@@ -24,6 +24,7 @@ Intended categories:
 8. Boards with required waiting
 9. Boards with multiple almost-works corridors
 10. Large max-stress boards
+11. Mechanic probes such as teleports and actor-specific wall layouts
 
 Source of truth for the exact planned maze specs and benchmark matrix:
 - `Tools/solver_test_mazes_regression_matrix.json`
@@ -38,3 +39,8 @@ When the mazes are generated:
 - exported `.tres` files should live in this world folder or an imported manifest path associated with this folder
 - add a `world_manifest.json` that points at the curated resources
 - keep the level ids stable so replay and regression references do not drift
+
+Wall mechanics note:
+- actor-specific wall probes should prefer small curated layouts first because they exercise runtime legality without inflating solver state
+- use `player-only` to mean only the player can pass through the edge, and `enemy-only` to mean only enemies can pass through it
+- locked-passage probes should not be added to procedural generation flows until gated-reachability validation exists explicitly

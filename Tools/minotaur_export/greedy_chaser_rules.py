@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from .grid import MazeLayout
 from .models import Coord, EnemyRuntimeState, EnemySpec, EnemySpawn, GameState
-from .movement import apply_action, available_actions, resolve_enemy_turn_end_transition, resolve_player_action, resolve_player_transition, resolve_player_turn_end_transition
+from .movement import apply_enemy_action, apply_action, available_actions, available_enemy_actions, resolve_enemy_turn_end_transition, resolve_player_action, resolve_player_transition, resolve_player_turn_end_transition
 
 KILLER_TRAIT = "killer"
 CONTACT_BLOCKED = "blocked"
@@ -26,8 +26,14 @@ class GreedyChaserRules:
     def available_actions(self, layout: MazeLayout, cell: Coord, include_skip: bool) -> list[str]:
         return available_actions(layout, cell, include_skip)
 
+    def available_enemy_actions(self, layout: MazeLayout, cell: Coord, include_skip: bool) -> list[str]:
+        return available_enemy_actions(layout, cell, include_skip)
+
     def apply_action(self, layout: MazeLayout, cell: Coord, action: str) -> Coord:
         return apply_action(layout, cell, action)
+
+    def apply_enemy_action(self, layout: MazeLayout, cell: Coord, action: str) -> Coord:
+        return apply_enemy_action(layout, cell, action)
 
     def resolve_player_action(self, layout: MazeLayout, cell: Coord, action: str) -> Coord:
         return resolve_player_action(layout, cell, action)
@@ -325,8 +331,8 @@ class GreedyChaserRules:
         move_priority: str,
         blocked_cells: set[Coord],
     ) -> Coord:
-        options = set(self.available_actions(layout, enemy_location, include_skip=False))
-        options = {option for option in options if self.apply_action(layout, enemy_location, option) not in blocked_cells}
+        options = set(self.available_enemy_actions(layout, enemy_location, include_skip=False))
+        options = {option for option in options if self.apply_enemy_action(layout, enemy_location, option) not in blocked_cells}
 
         for axis in self._preferred_axes(move_priority):
             next_cell = self._greedy_axis_step(enemy_location, player_location, axis, options)

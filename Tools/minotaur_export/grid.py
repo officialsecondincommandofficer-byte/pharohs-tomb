@@ -36,12 +36,16 @@ class MazeLayout:
     width: int
     height: int
     walls: frozenset[Edge] = field(default_factory=frozenset)
+    player_only_walls: frozenset[Edge] = field(default_factory=frozenset)
+    enemy_only_walls: frozenset[Edge] = field(default_factory=frozenset)
     teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
     enemy_teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
     shared_teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         normalized = frozenset(normalize_edge(a, b) for a, b in self.walls)
+        normalized_player_only = frozenset(normalize_edge(a, b) for a, b in self.player_only_walls)
+        normalized_enemy_only = frozenset(normalize_edge(a, b) for a, b in self.enemy_only_walls)
         normalized_teleports = tuple(
             sorted((pair.normalized() for pair in self.teleport_pairs), key=lambda pair: (pair.a[1], pair.a[0], pair.b[1], pair.b[0]))
         )
@@ -52,6 +56,8 @@ class MazeLayout:
             sorted((pair.normalized() for pair in self.shared_teleport_pairs), key=lambda pair: (pair.a[1], pair.a[0], pair.b[1], pair.b[0]))
         )
         object.__setattr__(self, "walls", normalized)
+        object.__setattr__(self, "player_only_walls", normalized_player_only)
+        object.__setattr__(self, "enemy_only_walls", normalized_enemy_only)
         object.__setattr__(self, "teleport_pairs", normalized_teleports)
         object.__setattr__(self, "enemy_teleport_pairs", normalized_enemy_teleports)
         object.__setattr__(self, "shared_teleport_pairs", normalized_shared_teleports)
@@ -87,6 +93,14 @@ class MazeLayout:
 
     def is_blocked(self, a: Coord, b: Coord) -> bool:
         return normalize_edge(a, b) in self.walls
+
+    def is_player_blocked(self, a: Coord, b: Coord) -> bool:
+        edge = normalize_edge(a, b)
+        return edge in self.walls or edge in self.enemy_only_walls
+
+    def is_enemy_blocked(self, a: Coord, b: Coord) -> bool:
+        edge = normalize_edge(a, b)
+        return edge in self.walls or edge in self.player_only_walls
 
     def teleport_destination(self, cell: Coord) -> Coord | None:
         return self._teleport_destination_from_pairs(cell, self.teleport_pairs)
