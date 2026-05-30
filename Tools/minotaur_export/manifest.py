@@ -34,6 +34,7 @@ class ManifestWriter:
                 "trap_count": config.trap_count,
                 "player_only_wall_count": config.player_only_wall_count,
                 "enemy_only_wall_count": config.enemy_only_wall_count,
+                "one_way_passage_count": config.one_way_passage_count,
                 "additional_checks": config.additional_checks,
                 "additional_check_threshold": config.additional_check_threshold,
             },
@@ -48,6 +49,13 @@ class ManifestWriter:
                     "iteration": exported.record.iteration,
                     "player_only_walls": [[list(a), list(b)] for a, b in exported.record.player_only_walls],
                     "enemy_only_walls": [[list(a), list(b)] for a, b in exported.record.enemy_only_walls],
+                    "one_way_passages": [
+                        {
+                            "from": list(a),
+                            "to": list(b),
+                        }
+                        for a, b in exported.record.one_way_passages
+                    ],
                     "teleport_pairs": [
                         {
                             "a": list(pair.a),

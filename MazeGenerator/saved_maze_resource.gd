@@ -17,6 +17,7 @@ const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
 @export var player_vertical_walls: Array[Vector2i] = []
 @export var enemy_horizontal_walls: Array[Vector2i] = []
 @export var enemy_vertical_walls: Array[Vector2i] = []
+@export var one_way_passages: Array[Dictionary] = []
 @export var teleport_pairs: Array[Dictionary] = []
 @export var enemy_teleport_pairs: Array[Dictionary] = []
 @export var shared_teleport_pairs: Array[Dictionary] = []
@@ -46,6 +47,7 @@ func apply_payload(payload: Dictionary) -> void:
 	player_vertical_walls = _coerce_vector2i_array(payload.get("player_vertical_walls", []))
 	enemy_horizontal_walls = _coerce_vector2i_array(payload.get("enemy_horizontal_walls", []))
 	enemy_vertical_walls = _coerce_vector2i_array(payload.get("enemy_vertical_walls", []))
+	one_way_passages = _coerce_directed_edge_array(payload.get("one_way_passages", []))
 	teleport_pairs = _coerce_teleport_pair_array(payload.get("teleport_pairs", []))
 	enemy_teleport_pairs = _coerce_teleport_pair_array(payload.get("enemy_teleport_pairs", []))
 	shared_teleport_pairs = _coerce_teleport_pair_array(payload.get("shared_teleport_pairs", []))
@@ -76,6 +78,7 @@ func to_payload() -> Dictionary:
 		"player_vertical_walls": player_vertical_walls.duplicate(),
 		"enemy_horizontal_walls": enemy_horizontal_walls.duplicate(),
 		"enemy_vertical_walls": enemy_vertical_walls.duplicate(),
+		"one_way_passages": one_way_passages.duplicate(true),
 		"teleport_pairs": teleport_pairs.duplicate(true),
 		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
 		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),
@@ -116,6 +119,18 @@ func _coerce_teleport_pair_array(raw_value) -> Array[Dictionary]:
 		coerced.append({
 			"a": _coerce_vector2i(entry.get("a", Vector2i.ZERO)),
 			"b": _coerce_vector2i(entry.get("b", Vector2i.ZERO)),
+		})
+	return coerced
+
+
+func _coerce_directed_edge_array(raw_value) -> Array[Dictionary]:
+	var coerced: Array[Dictionary] = []
+	for entry in raw_value:
+		if not entry is Dictionary:
+			continue
+		coerced.append({
+			"from": _coerce_vector2i(entry.get("from", Vector2i.ZERO)),
+			"to": _coerce_vector2i(entry.get("to", Vector2i.ZERO)),
 		})
 	return coerced
 

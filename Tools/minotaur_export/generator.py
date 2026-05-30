@@ -4,7 +4,7 @@ import random
 from dataclasses import dataclass
 from typing import Callable
 
-from .grid import MazeLayout, edge_sort_key
+from .grid import MazeLayout, directed_edge_sort_key, edge_sort_key
 from .models import Coord, Edge, EnemySpec, EnemySpawn, MazeRecord
 from .solver import MazeSolver
 
@@ -17,6 +17,7 @@ class MazeGenerator:
     trap_count: int = 0
     player_only_wall_count: int = 0
     enemy_only_wall_count: int = 0
+    one_way_passage_count: int = 0
 
     def uses_generation_prefilter(self, layout: MazeLayout) -> bool:
         return self.solver.dispatch_policy.uses_generation_prefilter(layout)
@@ -240,6 +241,7 @@ class MazeGenerator:
             walls=normalized_walls,
             player_only_walls=tuple(sorted(augmented_layout.player_only_walls, key=edge_sort_key)),
             enemy_only_walls=tuple(sorted(augmented_layout.enemy_only_walls, key=edge_sort_key)),
+            one_way_passages=tuple(sorted(augmented_layout.one_way_passages, key=directed_edge_sort_key)),
             trap_cells=trap_cells,
             player_start=player_start,
             enemy_spawns=enemy_spawns,
@@ -250,22 +252,24 @@ class MazeGenerator:
         )
 
     def _augment_layout_with_actor_walls(self, layout: MazeLayout) -> MazeLayout | None:
-        if self.player_only_wall_count <= 0 and self.enemy_only_wall_count <= 0:
+        if self.player_only_wall_count <= 0 and self.enemy_only_wall_count <= 0 and self.one_way_passage_count <= 0:
             return layout
 
         available_edges = [
             edge for edge in MazeLayout.build_all_edges(layout.width, layout.height)
             if edge not in layout.walls
         ]
-        if len(available_edges) < self.player_only_wall_count + self.enemy_only_wall_count:
+        if len(available_edges) < self.player_only_wall_count + self.enemy_only_wall_count + self.one_way_passage_count:
             return None
 
         available_edges.sort(key=edge_sort_key)
         remaining_edges = list(available_edges)
         player_only_walls = self._sample_edge_subset(remaining_edges, self.player_only_wall_count)
         enemy_only_walls = self._sample_edge_subset(remaining_edges, self.enemy_only_wall_count)
-        if player_only_walls is None or enemy_only_walls is None:
+        one_way_edges = self._sample_edge_subset(remaining_edges, self.one_way_passage_count)
+        if player_only_walls is None or enemy_only_walls is None or one_way_edges is None:
             return None
+        one_way_passages = [self._orient_edge(edge) for edge in one_way_edges]
 
         return MazeLayout(
             width=layout.width,
@@ -273,6 +277,7 @@ class MazeGenerator:
             walls=layout.walls,
             player_only_walls=frozenset(player_only_walls),
             enemy_only_walls=frozenset(enemy_only_walls),
+            one_way_passages=frozenset(one_way_passages),
             teleport_pairs=layout.teleport_pairs,
             enemy_teleport_pairs=layout.enemy_teleport_pairs,
             shared_teleport_pairs=layout.shared_teleport_pairs,
@@ -290,3 +295,9 @@ class MazeGenerator:
             selected_edges.append(remaining_edges.pop(index))
         selected_edges.sort(key=edge_sort_key)
         return selected_edges
+
+    def _orient_edge(self, edge: Edge) -> Edge:
+        a, b = edge
+        if self.rng.randrange(2) == 0:
+            return (a, b)
+        return (b, a)

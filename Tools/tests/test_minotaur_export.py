@@ -260,6 +260,43 @@ class MazeSolverTests(unittest.TestCase):
         self.assertTrue(result.solvable)
         self.assertEqual(result.actions, ("right", "down", "right", "up"))
 
+    def test_one_way_passage_blocks_reverse_direction_for_player_and_enemy(self) -> None:
+        layout = MazeLayout(
+            width=3,
+            height=1,
+            one_way_passages=frozenset({((1, 0), (0, 0))}),
+        )
+        rules = GreedyChaserRules(minotaur_steps=1, move_priority="horizontal")
+
+        self.assertEqual(rules.resolve_player_action(layout, (0, 0), "right"), (0, 0))
+        self.assertEqual(rules.resolve_player_action(layout, (1, 0), "left"), (0, 0))
+        self.assertEqual(rules.move_enemy(layout, player_location=(2, 0), enemy_location=(0, 0), step_count=1), (0, 0))
+
+    def test_one_way_passage_updates_shortest_path_and_goal_distances(self) -> None:
+        layout = MazeLayout(
+            width=3,
+            height=2,
+            one_way_passages=frozenset({((2, 0), (1, 0))}),
+        )
+        solver = MazeSolver()
+
+        self.assertEqual(solver.shortest_path_length_without_enemies(layout, start=(0, 0), goal=(2, 0)), 4)
+        self.assertEqual(
+            solver.shortest_path_without_enemies(layout, start=(0, 0), goal=(2, 0)),
+            ("right", "down", "right", "up"),
+        )
+
+        result = solver.solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=(),
+            goal=(2, 0),
+            enemy_specs=(),
+        )
+
+        self.assertTrue(result.solvable)
+        self.assertEqual(result.actions, ("right", "down", "right", "up"))
+
     def test_solver_uses_player_only_wall_as_escape_barrier(self) -> None:
         layout = MazeLayout(
             width=4,
@@ -644,7 +681,7 @@ class MazeGeneratorTests(unittest.TestCase):
         self.assertEqual(specs[2].enemy_type, "samurai")
         self.assertEqual(
             config.generation_profile_id,
-            "greedy_enemies_1x_1y_1samurai_1killer_2traps_2playerwalls_1enemywalls_9x9_batch",
+            "greedy_enemies_1x_1y_1samurai_1killer_2traps_2playerwalls_1enemywalls_0oneways_9x9_batch",
         )
 
     def test_actor_specific_walls_are_added_after_shared_layout_generation(self) -> None:
@@ -670,6 +707,31 @@ class MazeGeneratorTests(unittest.TestCase):
         self.assertTrue(augmented_layout.player_only_walls.isdisjoint(augmented_layout.enemy_only_walls))
         self.assertTrue(augmented_layout.player_only_walls.isdisjoint(layout.walls))
         self.assertTrue(augmented_layout.enemy_only_walls.isdisjoint(layout.walls))
+
+    def test_one_way_passages_are_added_disjoint_from_other_wall_layers(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            enemy_specs=(),
+            player_only_wall_count=1,
+            enemy_only_wall_count=1,
+            one_way_passage_count=1,
+        )
+        layout = MazeLayout(
+            width=3,
+            height=2,
+            walls=frozenset({normalize_edge((0, 0), (1, 0))}),
+        )
+
+        augmented_layout = generator._augment_layout_with_actor_walls(layout)
+
+        self.assertIsNotNone(augmented_layout)
+        self.assertEqual(len(augmented_layout.one_way_passages), 1)
+        one_way_edge = next(iter(augmented_layout.one_way_passages))
+        undirected_one_way_edge = normalize_edge(*one_way_edge)
+        self.assertNotIn(undirected_one_way_edge, layout.walls)
+        self.assertNotIn(undirected_one_way_edge, augmented_layout.player_only_walls)
+        self.assertNotIn(undirected_one_way_edge, augmented_layout.enemy_only_walls)
 
     def test_try_record_rejects_safe_short_solution_before_full_solve(self) -> None:
         class FixedPositionGenerator(MazeGenerator):
@@ -918,6 +980,37 @@ class GodotMazeExporterTests(unittest.TestCase):
 
         self.assertIn("player_vertical_walls = Array[Vector2i]([Vector2i(1, 0)])", serialized)
         self.assertIn("enemy_horizontal_walls = Array[Vector2i]([Vector2i(2, 1)])", serialized)
+
+    def test_serialize_writes_one_way_passages(self) -> None:
+        exporter = GodotMazeExporter()
+        record = MazeRecord(
+            width=3,
+            height=2,
+            walls=(),
+            player_only_walls=(),
+            enemy_only_walls=(),
+            one_way_passages=(((2, 0), (1, 0)),),
+            teleport_pairs=(),
+            enemy_teleport_pairs=(),
+            shared_teleport_pairs=(),
+            trap_cells=(),
+            player_start=(0, 0),
+            enemy_spawns=(),
+            goal=(2, 0),
+            solution=("down", "right", "right", "up"),
+            iteration=1,
+        )
+
+        serialized = exporter.serialize(
+            record=record,
+            saved_at_unix=123,
+            difficulty_label="probe",
+            index=1,
+            generation_profile_id="one_way_probe",
+            cell_size=16,
+        )
+
+        self.assertIn('one_way_passages = Array[Dictionary]([{"from": Vector2i(2, 0), "to": Vector2i(1, 0)}])', serialized)
 
 
 if __name__ == "__main__":

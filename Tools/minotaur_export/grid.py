@@ -5,14 +5,23 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Iterable
 
-from .models import Coord, Edge, TeleportPair
+from .models import Coord, DirectedEdge, Edge, TeleportPair
 
 
 def normalize_edge(a: Coord, b: Coord) -> Edge:
     return (a, b) if a <= b else (b, a)
 
 
+def normalize_directed_edge(a: Coord, b: Coord) -> DirectedEdge:
+    return (a, b)
+
+
 def edge_sort_key(edge: Edge) -> tuple[int, int, int, int]:
+    (ax, ay), (bx, by) = edge
+    return (ay, ax, by, bx)
+
+
+def directed_edge_sort_key(edge: DirectedEdge) -> tuple[int, int, int, int]:
     (ax, ay), (bx, by) = edge
     return (ay, ax, by, bx)
 
@@ -38,6 +47,7 @@ class MazeLayout:
     walls: frozenset[Edge] = field(default_factory=frozenset)
     player_only_walls: frozenset[Edge] = field(default_factory=frozenset)
     enemy_only_walls: frozenset[Edge] = field(default_factory=frozenset)
+    one_way_passages: frozenset[DirectedEdge] = field(default_factory=frozenset)
     teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
     enemy_teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
     shared_teleport_pairs: tuple[TeleportPair, ...] = field(default_factory=tuple)
@@ -46,6 +56,7 @@ class MazeLayout:
         normalized = frozenset(normalize_edge(a, b) for a, b in self.walls)
         normalized_player_only = frozenset(normalize_edge(a, b) for a, b in self.player_only_walls)
         normalized_enemy_only = frozenset(normalize_edge(a, b) for a, b in self.enemy_only_walls)
+        normalized_one_way = frozenset(normalize_directed_edge(a, b) for a, b in self.one_way_passages)
         normalized_teleports = tuple(
             sorted((pair.normalized() for pair in self.teleport_pairs), key=lambda pair: (pair.a[1], pair.a[0], pair.b[1], pair.b[0]))
         )
@@ -58,6 +69,7 @@ class MazeLayout:
         object.__setattr__(self, "walls", normalized)
         object.__setattr__(self, "player_only_walls", normalized_player_only)
         object.__setattr__(self, "enemy_only_walls", normalized_enemy_only)
+        object.__setattr__(self, "one_way_passages", normalized_one_way)
         object.__setattr__(self, "teleport_pairs", normalized_teleports)
         object.__setattr__(self, "enemy_teleport_pairs", normalized_enemy_teleports)
         object.__setattr__(self, "shared_teleport_pairs", normalized_shared_teleports)
@@ -96,11 +108,16 @@ class MazeLayout:
 
     def is_player_blocked(self, a: Coord, b: Coord) -> bool:
         edge = normalize_edge(a, b)
-        return edge in self.walls or edge in self.enemy_only_walls
+        return edge in self.walls or edge in self.enemy_only_walls or self.is_one_way_blocked(a, b)
 
     def is_enemy_blocked(self, a: Coord, b: Coord) -> bool:
         edge = normalize_edge(a, b)
-        return edge in self.walls or edge in self.player_only_walls
+        return edge in self.walls or edge in self.player_only_walls or self.is_one_way_blocked(a, b)
+
+    def is_one_way_blocked(self, a: Coord, b: Coord) -> bool:
+        if (a, b) in self.one_way_passages:
+            return False
+        return (b, a) in self.one_way_passages
 
     def teleport_destination(self, cell: Coord) -> Coord | None:
         return self._teleport_destination_from_pairs(cell, self.teleport_pairs)

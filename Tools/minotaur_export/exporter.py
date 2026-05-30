@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterable
 
 from .grid import partition_walls
-from .models import Coord, EnemySpawn, ExportedMaze, MazeRecord, TeleportPair
+from .models import Coord, DirectedEdge, EnemySpawn, ExportedMaze, MazeRecord, TeleportPair
 
 
 def vector2i(value: Coord) -> str:
@@ -56,6 +56,20 @@ def teleport_pair_array(values: Iterable[TeleportPair]) -> str:
     return f"Array[Dictionary]([{serialized}])"
 
 
+def directed_edge_dictionary(edge: DirectedEdge) -> str:
+    return '{%s}' % ", ".join(
+        [
+            f'"from": {vector2i(edge[0])}',
+            f'"to": {vector2i(edge[1])}',
+        ]
+    )
+
+
+def directed_edge_array(values: Iterable[DirectedEdge]) -> str:
+    serialized = ", ".join(directed_edge_dictionary(value) for value in values)
+    return f"Array[Dictionary]([{serialized}])"
+
+
 @dataclass(frozen=True, slots=True)
 class GodotMazeExporter:
     resource_script_path: str = "res://MazeGenerator/saved_maze_resource.gd"
@@ -101,6 +115,7 @@ class GodotMazeExporter:
             f"player_vertical_walls = {vector2i_array(partition_walls(record.player_only_walls)[1])}",
             f"enemy_horizontal_walls = {vector2i_array(partition_walls(record.enemy_only_walls)[0])}",
             f"enemy_vertical_walls = {vector2i_array(partition_walls(record.enemy_only_walls)[1])}",
+            f"one_way_passages = {directed_edge_array(record.one_way_passages)}",
             f"teleport_pairs = {teleport_pair_array(record.teleport_pairs)}",
             f"enemy_teleport_pairs = {teleport_pair_array(record.enemy_teleport_pairs)}",
             f"shared_teleport_pairs = {teleport_pair_array(record.shared_teleport_pairs)}",

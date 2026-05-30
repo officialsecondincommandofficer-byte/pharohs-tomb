@@ -29,7 +29,7 @@ class ExportService:
         self.logger(f"Source project: {config.source_project}")
         self.logger(f"Output directory: {output_dir}")
         self.logger(
-            "Generating mazes with width=%d height=%d iterations=%d mazes_per_iteration=%d min_moves=%d traps=%d player_only_walls=%d enemy_only_walls=%d seed=%s"
+            "Generating mazes with width=%d height=%d iterations=%d mazes_per_iteration=%d min_moves=%d traps=%d player_only_walls=%d enemy_only_walls=%d one_way_passages=%d seed=%s"
             % (
                 config.width,
                 config.height,
@@ -39,6 +39,7 @@ class ExportService:
                 config.trap_count,
                 config.player_only_wall_count,
                 config.enemy_only_wall_count,
+                config.one_way_passage_count,
                 config.seed if config.seed is not None else "random",
             )
         )

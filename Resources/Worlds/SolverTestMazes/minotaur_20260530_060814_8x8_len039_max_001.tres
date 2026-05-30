@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "2026-05-30 06:08:14 UTC 8x8 Max #001"
+saved_at_unix = 1780121294
+width = 8
+height = 8
+cell_size = 16
+size_category = "large"
+difficulty_category = "max"
+horizontal_walls = Array[Vector2i]([Vector2i(1, 2), Vector2i(3, 2), Vector2i(4, 2), Vector2i(4, 3), Vector2i(5, 3), Vector2i(6, 3), Vector2i(1, 4), Vector2i(5, 4), Vector2i(3, 5), Vector2i(4, 5), Vector2i(0, 6), Vector2i(1, 6), Vector2i(5, 7)])
+vertical_walls = Array[Vector2i]([Vector2i(1, 1), Vector2i(4, 1), Vector2i(4, 5), Vector2i(2, 6), Vector2i(4, 6), Vector2i(1, 7)])
+player_horizontal_walls = Array[Vector2i]([Vector2i(7, 4)])
+player_vertical_walls = Array[Vector2i]([])
+enemy_horizontal_walls = Array[Vector2i]([Vector2i(2, 4)])
+enemy_vertical_walls = Array[Vector2i]([])
+one_way_passages = Array[Dictionary]([{"from": Vector2i(2, 2), "to": Vector2i(2, 3)}, {"from": Vector2i(5, 2), "to": Vector2i(5, 1)}])
+teleport_pairs = Array[Dictionary]([])
+enemy_teleport_pairs = Array[Dictionary]([])
+shared_teleport_pairs = Array[Dictionary]([])
+trap_cells = Array[Vector2i]([])
+player_spawn = Vector2i(4, 7)
+enemy_spawns = Array[Dictionary]([{"type": "greedy_chaser", "cell": Vector2i(0, 7), "move_priority": "horizontal", "step_count": 2, "facing_index": 2}, {"type": "greedy_chaser", "cell": Vector2i(6, 2), "move_priority": "vertical", "step_count": 2, "facing_index": 2}])
+minotaur_spawn = Vector2i(0, 7)
+exit_cell = Vector2i(2, 5)
+solution_actions = Array[String](["left", "left", "skip", "right", "right", "up", "right", "up", "up", "left", "left", "up", "up", "right", "right", "up", "left", "up", "left", "left", "left", "left", "right", "down", "right", "right", "up", "right", "down", "right", "right", "down", "left", "left", "left", "down", "down", "left", "down"])
+solution_total_steps = 39
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "greedy_enemies_1x_1y_0samurai_0killer_0traps_1playerwalls_1enemywalls_2oneways_8x8_batch"

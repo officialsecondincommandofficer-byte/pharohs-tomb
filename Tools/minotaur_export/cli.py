@@ -45,6 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--trap-count", type=int, default=0)
     parser.add_argument("--player-only-wall-count", type=int, default=0)
     parser.add_argument("--enemy-only-wall-count", type=int, default=0)
+    parser.add_argument("--one-way-passage-count", type=int, default=0)
     parser.add_argument("--additional-check-threshold", type=int, default=50)
     parser.add_argument("--additional-checks", dest="additional_checks", action="store_true")
     parser.add_argument("--no-additional-checks", dest="additional_checks", action="store_false")
@@ -75,8 +76,8 @@ def parse_args(argv: Sequence[str] | None = None) -> GenerationConfig:
         build_parser().error("trap count must be zero or greater")
     if args.trap_count > args.width * args.height - total_enemy_count - 2:
         build_parser().error("trap count leaves no room for distinct player, exit, and enemy cells")
-    if args.player_only_wall_count < 0 or args.enemy_only_wall_count < 0:
-        build_parser().error("actor-specific wall counts must be zero or greater")
+    if args.player_only_wall_count < 0 or args.enemy_only_wall_count < 0 or args.one_way_passage_count < 0:
+        build_parser().error("wall mechanic counts must be zero or greater")
 
     return GenerationConfig(
         source_project=args.source_project,
@@ -96,6 +97,7 @@ def parse_args(argv: Sequence[str] | None = None) -> GenerationConfig:
         trap_count=args.trap_count,
         player_only_wall_count=args.player_only_wall_count,
         enemy_only_wall_count=args.enemy_only_wall_count,
+        one_way_passage_count=args.one_way_passage_count,
         additional_check_threshold=args.additional_check_threshold,
         additional_checks=args.additional_checks,
     )
@@ -111,6 +113,7 @@ def build_service(config: GenerationConfig | None = None) -> ExportService:
         trap_count=config.trap_count,
         player_only_wall_count=config.player_only_wall_count,
         enemy_only_wall_count=config.enemy_only_wall_count,
+        one_way_passage_count=config.one_way_passage_count,
     )
     return ExportService(
         generator=generator,
