@@ -42,5 +42,6 @@ When the mazes are generated:
 
 Wall mechanics note:
 - actor-specific wall probes should prefer small curated layouts first because they exercise runtime legality without inflating solver state
+- one-way passage probes should stay small too, with at least one case that forces reverse-search helpers to respect directed movement
 - use `player-only` to mean only the player can pass through the edge, and `enemy-only` to mean only enemies can pass through it
 - locked-passage probes should not be added to procedural generation flows until gated-reachability validation exists explicitly

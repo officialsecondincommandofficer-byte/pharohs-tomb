@@ -130,6 +130,33 @@
       "solution_total_steps": 2
     },
     {
+      "id": "probe_one_way_passage_3x2_a",
+      "display_name": "Probe One-Way Passage 3x2",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/one_way_passage_3x2_len004_probe_001.tres",
+      "width": 3,
+      "height": 2,
+      "difficulty": "probe",
+      "solution_total_steps": 4
+    },
+    {
+      "id": "solver_wall_mechanics_8x8_a",
+      "display_name": "Wall Mechanics 8x8",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260530_060814_8x8_len039_max_001.tres",
+      "width": 8,
+      "height": 8,
+      "difficulty": "max",
+      "solution_total_steps": 39
+    },
+    {
+      "id": "solver_wall_mechanics_12x12_a",
+      "display_name": "Wall Mechanics 12x12",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260530_061931_12x12_len057_max_001.tres",
+      "width": 12,
+      "height": 12,
+      "difficulty": "max",
+      "solution_total_steps": 57
+    },
+    {
       "id": "solver_mixed_teleport_8x8_a",
       "display_name": "Mixed Teleport 8x8",
       "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_061000_8x8_len020_probe_001.tres",

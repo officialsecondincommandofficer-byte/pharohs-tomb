@@ -26,6 +26,7 @@ var player_horizontal_walls: Array[Vector2i] = []
 var player_vertical_walls: Array[Vector2i] = []
 var enemy_horizontal_walls: Array[Vector2i] = []
 var enemy_vertical_walls: Array[Vector2i] = []
+var one_way_passages: Array[Dictionary] = []
 var teleport_pairs: Array[Dictionary] = []
 var enemy_teleport_pairs: Array[Dictionary] = []
 var shared_teleport_pairs: Array[Dictionary] = []
@@ -49,6 +50,7 @@ var _player_horizontal_wall_lookup: Dictionary = {}
 var _player_vertical_wall_lookup: Dictionary = {}
 var _enemy_horizontal_wall_lookup: Dictionary = {}
 var _enemy_vertical_wall_lookup: Dictionary = {}
+var _one_way_passage_lookup: Dictionary = {}
 var _teleport_lookup: Dictionary = {}
 var _enemy_teleport_lookup: Dictionary = {}
 var _shared_teleport_lookup: Dictionary = {}
@@ -75,6 +77,7 @@ func configure_from_maze_key(
 	player_vertical_walls.clear()
 	enemy_horizontal_walls.clear()
 	enemy_vertical_walls.clear()
+	one_way_passages.clear()
 	teleport_pairs.clear()
 	enemy_teleport_pairs.clear()
 	shared_teleport_pairs.clear()
@@ -88,6 +91,7 @@ func configure_from_maze_key(
 	_player_vertical_wall_lookup.clear()
 	_enemy_horizontal_wall_lookup.clear()
 	_enemy_vertical_wall_lookup.clear()
+	_one_way_passage_lookup.clear()
 	_teleport_lookup.clear()
 	_enemy_teleport_lookup.clear()
 	_shared_teleport_lookup.clear()
@@ -103,6 +107,8 @@ func configure_from_maze_key(
 		_add_wall_from_edge(raw_wall, "player")
 	for raw_wall in next_maze_key.get("enemy_only_walls", []):
 		_add_wall_from_edge(raw_wall, "enemy")
+	for raw_passage in next_maze_key.get("one_way_passages", []):
+		add_one_way_passage(raw_passage)
 	for raw_teleport_pair in next_maze_key.get("teleport_pairs", []):
 		add_teleport_pair(raw_teleport_pair)
 	for raw_enemy_teleport_pair in next_maze_key.get("enemy_teleport_pairs", []):
@@ -205,6 +211,31 @@ func add_enemy_vertical_wall(edge: Vector2i) -> void:
 	_enemy_vertical_wall_lookup[edge] = true
 
 
+func add_one_way_passage(raw_passage) -> void:
+	if not raw_passage is Dictionary:
+		return
+
+	var from_cell: Vector2i = _coerce_vector2i(raw_passage.get("from", Vector2i.ZERO))
+	var to_cell: Vector2i = _coerce_vector2i(raw_passage.get("to", Vector2i.ZERO))
+	var delta := to_cell - from_cell
+	if abs(delta.x) + abs(delta.y) != 1:
+		return
+	if not is_in_bounds(from_cell) or not is_in_bounds(to_cell):
+		return
+
+	var forward_key := _directed_edge_key(from_cell, to_cell)
+	var reverse_key := _directed_edge_key(to_cell, from_cell)
+	if _one_way_passage_lookup.has(forward_key) or _one_way_passage_lookup.has(reverse_key):
+		return
+
+	var passage := {
+		"from": from_cell,
+		"to": to_cell,
+	}
+	one_way_passages.append(passage)
+	_one_way_passage_lookup[forward_key] = true
+
+
 func add_teleport_pair(raw_pair) -> void:
 	if not raw_pair is Dictionary:
 		return
@@ -295,6 +326,10 @@ func has_enemy_vertical_wall(edge: Vector2i) -> bool:
 	return _enemy_vertical_wall_lookup.has(edge)
 
 
+func has_one_way_passage(a: Vector2i, b: Vector2i) -> bool:
+	return _one_way_passage_lookup.has(_directed_edge_key(a, b))
+
+
 func is_trap_cell(cell: Vector2i) -> bool:
 	return _trap_lookup.has(cell)
 
@@ -370,9 +405,9 @@ func has_player_wall_between(a: Vector2i, b: Vector2i) -> bool:
 		return true
 
 	if delta.x != 0:
-		return has_enemy_vertical_wall(Vector2i(max(a.x, b.x), a.y))
+		return has_enemy_vertical_wall(Vector2i(max(a.x, b.x), a.y)) or has_one_way_passage(b, a)
 
-	return has_enemy_horizontal_wall(Vector2i(a.x, max(a.y, b.y)))
+	return has_enemy_horizontal_wall(Vector2i(a.x, max(a.y, b.y))) or has_one_way_passage(b, a)
 
 
 func has_enemy_wall_between(a: Vector2i, b: Vector2i) -> bool:
@@ -383,9 +418,9 @@ func has_enemy_wall_between(a: Vector2i, b: Vector2i) -> bool:
 		return true
 
 	if delta.x != 0:
-		return has_player_vertical_wall(Vector2i(max(a.x, b.x), a.y))
+		return has_player_vertical_wall(Vector2i(max(a.x, b.x), a.y)) or has_one_way_passage(b, a)
 
-	return has_player_horizontal_wall(Vector2i(a.x, max(a.y, b.y)))
+	return has_player_horizontal_wall(Vector2i(a.x, max(a.y, b.y))) or has_one_way_passage(b, a)
 
 
 func can_step(a: Vector2i, b: Vector2i) -> bool:
@@ -477,6 +512,7 @@ func to_saved_payload(display_name: String = "", saved_at_unix: int = 0) -> Dict
 		"player_vertical_walls": player_vertical_walls.duplicate(),
 		"enemy_horizontal_walls": enemy_horizontal_walls.duplicate(),
 		"enemy_vertical_walls": enemy_vertical_walls.duplicate(),
+		"one_way_passages": one_way_passages.duplicate(true),
 		"teleport_pairs": teleport_pairs.duplicate(true),
 		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
 		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),
@@ -531,6 +567,9 @@ static func from_saved_payload(payload: Dictionary) -> MazeData:
 
 	for vertical_wall in payload.get("enemy_vertical_walls", []):
 		board.add_enemy_vertical_wall(board._coerce_vector2i(vertical_wall))
+
+	for raw_passage in payload.get("one_way_passages", []):
+		board.add_one_way_passage(raw_passage)
 
 	for teleport_pair in payload.get("teleport_pairs", []):
 		board.add_teleport_pair(teleport_pair)
@@ -638,6 +677,7 @@ func _build_maze_key_from_state() -> Dictionary:
 		"walls": serialized_walls,
 		"player_only_walls": serialized_player_only_walls,
 		"enemy_only_walls": serialized_enemy_only_walls,
+		"one_way_passages": one_way_passages.duplicate(true),
 		"teleport_pairs": teleport_pairs.duplicate(true),
 		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
 		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),
@@ -653,6 +693,10 @@ func _build_maze_key_from_state() -> Dictionary:
 
 func _edge_count() -> int:
 	return width * max(height - 1, 0) + max(width - 1, 0) * height
+
+
+func _directed_edge_key(a: Vector2i, b: Vector2i) -> String:
+	return "%d,%d>%d,%d" % [a.x, a.y, b.x, b.y]
 
 
 func _coerce_vector2i(raw_value) -> Vector2i:

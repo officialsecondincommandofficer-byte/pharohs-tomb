@@ -6,6 +6,7 @@ from pathlib import Path
 
 Coord = tuple[int, int]
 Edge = tuple[Coord, Coord]
+DirectedEdge = tuple[Coord, Coord]
 
 SMALL_SIZES = {(4, 4), (5, 5), (3, 5), (4, 3), (5, 3), (5, 4)}
 MEDIUM_SIZES = {(6, 6), (7, 7), (7, 5)}
@@ -73,6 +74,7 @@ class MazeRecord:
     iteration: int
     player_only_walls: tuple[Edge, ...] = ()
     enemy_only_walls: tuple[Edge, ...] = ()
+    one_way_passages: tuple[DirectedEdge, ...] = ()
     teleport_pairs: tuple[TeleportPair, ...] = ()
     enemy_teleport_pairs: tuple[TeleportPair, ...] = ()
     shared_teleport_pairs: tuple[TeleportPair, ...] = ()
@@ -102,6 +104,7 @@ class MazeRecord:
             self.walls,
             self.player_only_walls,
             self.enemy_only_walls,
+            self.one_way_passages,
             self.teleport_pairs,
             self.enemy_teleport_pairs,
             self.shared_teleport_pairs,
@@ -162,6 +165,7 @@ class GenerationConfig:
     trap_count: int = 0
     player_only_wall_count: int = 0
     enemy_only_wall_count: int = 0
+    one_way_passage_count: int = 0
     additional_check_threshold: int = 50
     additional_checks: bool = True
 
@@ -172,6 +176,7 @@ class GenerationConfig:
             f"{self.samurai_count}samurai_"
             f"{self.killer_count}killer_{self.trap_count}traps_"
             f"{self.player_only_wall_count}playerwalls_{self.enemy_only_wall_count}enemywalls_"
+            f"{self.one_way_passage_count}oneways_"
             f"{self.width}x{self.height}_batch"
         )
 
