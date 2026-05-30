@@ -22,6 +22,10 @@ var floor_cells: Array[Vector2i] = []
 var wall_cells: Array[Vector2i] = []
 var horizontal_walls: Array[Vector2i] = []
 var vertical_walls: Array[Vector2i] = []
+var player_horizontal_walls: Array[Vector2i] = []
+var player_vertical_walls: Array[Vector2i] = []
+var enemy_horizontal_walls: Array[Vector2i] = []
+var enemy_vertical_walls: Array[Vector2i] = []
 var teleport_pairs: Array[Dictionary] = []
 var enemy_teleport_pairs: Array[Dictionary] = []
 var shared_teleport_pairs: Array[Dictionary] = []
@@ -41,6 +45,10 @@ var saved_at_unix: int = 0
 var _floor_lookup: Dictionary = {}
 var _horizontal_wall_lookup: Dictionary = {}
 var _vertical_wall_lookup: Dictionary = {}
+var _player_horizontal_wall_lookup: Dictionary = {}
+var _player_vertical_wall_lookup: Dictionary = {}
+var _enemy_horizontal_wall_lookup: Dictionary = {}
+var _enemy_vertical_wall_lookup: Dictionary = {}
 var _teleport_lookup: Dictionary = {}
 var _enemy_teleport_lookup: Dictionary = {}
 var _shared_teleport_lookup: Dictionary = {}
@@ -63,6 +71,10 @@ func configure_from_maze_key(
 	wall_cells.clear()
 	horizontal_walls.clear()
 	vertical_walls.clear()
+	player_horizontal_walls.clear()
+	player_vertical_walls.clear()
+	enemy_horizontal_walls.clear()
+	enemy_vertical_walls.clear()
 	teleport_pairs.clear()
 	enemy_teleport_pairs.clear()
 	shared_teleport_pairs.clear()
@@ -72,6 +84,10 @@ func configure_from_maze_key(
 	_floor_lookup.clear()
 	_horizontal_wall_lookup.clear()
 	_vertical_wall_lookup.clear()
+	_player_horizontal_wall_lookup.clear()
+	_player_vertical_wall_lookup.clear()
+	_enemy_horizontal_wall_lookup.clear()
+	_enemy_vertical_wall_lookup.clear()
 	_teleport_lookup.clear()
 	_enemy_teleport_lookup.clear()
 	_shared_teleport_lookup.clear()
@@ -83,6 +99,10 @@ func configure_from_maze_key(
 
 	for raw_wall in next_maze_key.get("walls", []):
 		_add_wall_from_edge(raw_wall)
+	for raw_wall in next_maze_key.get("player_only_walls", []):
+		_add_wall_from_edge(raw_wall, "player")
+	for raw_wall in next_maze_key.get("enemy_only_walls", []):
+		_add_wall_from_edge(raw_wall, "enemy")
 	for raw_teleport_pair in next_maze_key.get("teleport_pairs", []):
 		add_teleport_pair(raw_teleport_pair)
 	for raw_enemy_teleport_pair in next_maze_key.get("enemy_teleport_pairs", []):
@@ -155,6 +175,34 @@ func add_trap_cell(cell: Vector2i) -> void:
 		return
 	trap_cells.append(cell)
 	_trap_lookup[cell] = true
+
+
+func add_player_horizontal_wall(edge: Vector2i) -> void:
+	if _player_horizontal_wall_lookup.has(edge):
+		return
+	player_horizontal_walls.append(edge)
+	_player_horizontal_wall_lookup[edge] = true
+
+
+func add_player_vertical_wall(edge: Vector2i) -> void:
+	if _player_vertical_wall_lookup.has(edge):
+		return
+	player_vertical_walls.append(edge)
+	_player_vertical_wall_lookup[edge] = true
+
+
+func add_enemy_horizontal_wall(edge: Vector2i) -> void:
+	if _enemy_horizontal_wall_lookup.has(edge):
+		return
+	enemy_horizontal_walls.append(edge)
+	_enemy_horizontal_wall_lookup[edge] = true
+
+
+func add_enemy_vertical_wall(edge: Vector2i) -> void:
+	if _enemy_vertical_wall_lookup.has(edge):
+		return
+	enemy_vertical_walls.append(edge)
+	_enemy_vertical_wall_lookup[edge] = true
 
 
 func add_teleport_pair(raw_pair) -> void:
@@ -231,6 +279,22 @@ func has_vertical_wall(edge: Vector2i) -> bool:
 	return _vertical_wall_lookup.has(edge)
 
 
+func has_player_horizontal_wall(edge: Vector2i) -> bool:
+	return _player_horizontal_wall_lookup.has(edge)
+
+
+func has_player_vertical_wall(edge: Vector2i) -> bool:
+	return _player_vertical_wall_lookup.has(edge)
+
+
+func has_enemy_horizontal_wall(edge: Vector2i) -> bool:
+	return _enemy_horizontal_wall_lookup.has(edge)
+
+
+func has_enemy_vertical_wall(edge: Vector2i) -> bool:
+	return _enemy_vertical_wall_lookup.has(edge)
+
+
 func is_trap_cell(cell: Vector2i) -> bool:
 	return _trap_lookup.has(cell)
 
@@ -284,6 +348,10 @@ func resolve_player_turn_end_transition(final_cell: Vector2i) -> Dictionary:
 
 
 func has_wall_between(a: Vector2i, b: Vector2i) -> bool:
+	return has_shared_wall_between(a, b)
+
+
+func has_shared_wall_between(a: Vector2i, b: Vector2i) -> bool:
 	var delta := b - a
 	if abs(delta.x) + abs(delta.y) != 1:
 		return true
@@ -294,17 +362,66 @@ func has_wall_between(a: Vector2i, b: Vector2i) -> bool:
 	return has_horizontal_wall(Vector2i(a.x, max(a.y, b.y)))
 
 
+func has_player_wall_between(a: Vector2i, b: Vector2i) -> bool:
+	var delta := b - a
+	if abs(delta.x) + abs(delta.y) != 1:
+		return true
+	if has_shared_wall_between(a, b):
+		return true
+
+	if delta.x != 0:
+		return has_enemy_vertical_wall(Vector2i(max(a.x, b.x), a.y))
+
+	return has_enemy_horizontal_wall(Vector2i(a.x, max(a.y, b.y)))
+
+
+func has_enemy_wall_between(a: Vector2i, b: Vector2i) -> bool:
+	var delta := b - a
+	if abs(delta.x) + abs(delta.y) != 1:
+		return true
+	if has_shared_wall_between(a, b):
+		return true
+
+	if delta.x != 0:
+		return has_player_vertical_wall(Vector2i(max(a.x, b.x), a.y))
+
+	return has_player_horizontal_wall(Vector2i(a.x, max(a.y, b.y)))
+
+
 func can_step(a: Vector2i, b: Vector2i) -> bool:
+	return can_player_step(a, b)
+
+
+func can_player_step(a: Vector2i, b: Vector2i) -> bool:
 	if not is_in_bounds(a) or not is_in_bounds(b):
 		return false
-	return not has_wall_between(a, b)
+	return not has_player_wall_between(a, b)
+
+
+func can_enemy_step(a: Vector2i, b: Vector2i) -> bool:
+	if not is_in_bounds(a) or not is_in_bounds(b):
+		return false
+	return not has_enemy_wall_between(a, b)
 
 
 func get_cardinal_neighbors(cell: Vector2i) -> Array[Vector2i]:
+	return get_player_cardinal_neighbors(cell)
+
+
+func get_player_cardinal_neighbors(cell: Vector2i) -> Array[Vector2i]:
 	var neighbors: Array[Vector2i] = []
 	for direction in ACTION_TO_DIRECTION.values():
 		var next_cell: Vector2i = cell + direction
-		if can_step(cell, next_cell):
+		if can_player_step(cell, next_cell):
+			neighbors.append(next_cell)
+	return neighbors
+
+
+func get_enemy_cardinal_neighbors(cell: Vector2i) -> Array[Vector2i]:
+	var neighbors: Array[Vector2i] = []
+	for direction in ACTION_TO_DIRECTION.values():
+		var next_cell: Vector2i = cell + direction
+		if can_enemy_step(cell, next_cell):
 			neighbors.append(next_cell)
 	return neighbors
 
@@ -330,7 +447,7 @@ func apply_cardinal_action(cell: Vector2i, action: String) -> Vector2i:
 		return cell
 
 	var next_cell: Vector2i = cell + ACTION_TO_DIRECTION[action]
-	if not can_step(cell, next_cell):
+	if not can_player_step(cell, next_cell):
 		return cell
 
 	return next_cell
@@ -356,6 +473,10 @@ func to_saved_payload(display_name: String = "", saved_at_unix: int = 0) -> Dict
 		"difficulty_category": difficulty_category,
 		"horizontal_walls": horizontal_walls.duplicate(),
 		"vertical_walls": vertical_walls.duplicate(),
+		"player_horizontal_walls": player_horizontal_walls.duplicate(),
+		"player_vertical_walls": player_vertical_walls.duplicate(),
+		"enemy_horizontal_walls": enemy_horizontal_walls.duplicate(),
+		"enemy_vertical_walls": enemy_vertical_walls.duplicate(),
 		"teleport_pairs": teleport_pairs.duplicate(true),
 		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
 		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),
@@ -399,6 +520,18 @@ static func from_saved_payload(payload: Dictionary) -> MazeData:
 	for vertical_wall in payload.get("vertical_walls", []):
 		board.add_vertical_wall(board._coerce_vector2i(vertical_wall))
 
+	for horizontal_wall in payload.get("player_horizontal_walls", []):
+		board.add_player_horizontal_wall(board._coerce_vector2i(horizontal_wall))
+
+	for vertical_wall in payload.get("player_vertical_walls", []):
+		board.add_player_vertical_wall(board._coerce_vector2i(vertical_wall))
+
+	for horizontal_wall in payload.get("enemy_horizontal_walls", []):
+		board.add_enemy_horizontal_wall(board._coerce_vector2i(horizontal_wall))
+
+	for vertical_wall in payload.get("enemy_vertical_walls", []):
+		board.add_enemy_vertical_wall(board._coerce_vector2i(vertical_wall))
+
 	for teleport_pair in payload.get("teleport_pairs", []):
 		board.add_teleport_pair(teleport_pair)
 	for enemy_teleport_pair in payload.get("enemy_teleport_pairs", []):
@@ -428,7 +561,7 @@ static func from_saved_resource(saved_resource: Resource) -> MazeData:
 	return null
 
 
-func _add_wall_from_edge(raw_wall) -> void:
+func _add_wall_from_edge(raw_wall, wall_scope: String = "shared") -> void:
 	var nodes: Array = raw_wall
 	if nodes.size() != 2:
 		return
@@ -440,13 +573,29 @@ func _add_wall_from_edge(raw_wall) -> void:
 		return
 
 	if delta.x != 0:
-		add_vertical_wall(Vector2i(max(a.x, b.x), a.y))
+		var vertical_edge := Vector2i(max(a.x, b.x), a.y)
+		match wall_scope:
+			"player":
+				add_player_vertical_wall(vertical_edge)
+			"enemy":
+				add_enemy_vertical_wall(vertical_edge)
+			_:
+				add_vertical_wall(vertical_edge)
 	else:
-		add_horizontal_wall(Vector2i(a.x, max(a.y, b.y)))
+		var horizontal_edge := Vector2i(a.x, max(a.y, b.y))
+		match wall_scope:
+			"player":
+				add_player_horizontal_wall(horizontal_edge)
+			"enemy":
+				add_enemy_horizontal_wall(horizontal_edge)
+			_:
+				add_horizontal_wall(horizontal_edge)
 
 
 func _build_maze_key_from_state() -> Dictionary:
 	var serialized_walls: Array = []
+	var serialized_player_only_walls: Array = []
+	var serialized_enemy_only_walls: Array = []
 
 	for edge in horizontal_walls:
 		serialized_walls.append([
@@ -460,9 +609,35 @@ func _build_maze_key_from_state() -> Dictionary:
 			[edge.x, edge.y],
 		])
 
+	for edge in player_horizontal_walls:
+		serialized_player_only_walls.append([
+			[edge.x, edge.y - 1],
+			[edge.x, edge.y],
+		])
+
+	for edge in player_vertical_walls:
+		serialized_player_only_walls.append([
+			[edge.x - 1, edge.y],
+			[edge.x, edge.y],
+		])
+
+	for edge in enemy_horizontal_walls:
+		serialized_enemy_only_walls.append([
+			[edge.x, edge.y - 1],
+			[edge.x, edge.y],
+		])
+
+	for edge in enemy_vertical_walls:
+		serialized_enemy_only_walls.append([
+			[edge.x - 1, edge.y],
+			[edge.x, edge.y],
+		])
+
 	return {
 		"size_board": [width, height],
 		"walls": serialized_walls,
+		"player_only_walls": serialized_player_only_walls,
+		"enemy_only_walls": serialized_enemy_only_walls,
 		"teleport_pairs": teleport_pairs.duplicate(true),
 		"enemy_teleport_pairs": enemy_teleport_pairs.duplicate(true),
 		"shared_teleport_pairs": shared_teleport_pairs.duplicate(true),

@@ -112,6 +112,24 @@
       "solution_total_steps": 1
     },
     {
+      "id": "probe_actor_wall_enemy_only_3x2_a",
+      "display_name": "Probe Actor Wall Enemy-Only 3x2",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/actor_wall_enemy_only_3x2_len004_probe_001.tres",
+      "width": 3,
+      "height": 2,
+      "difficulty": "probe",
+      "solution_total_steps": 4
+    },
+    {
+      "id": "probe_actor_wall_player_only_4x1_a",
+      "display_name": "Probe Actor Wall Player-Only 4x1",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/actor_wall_player_only_4x1_len002_probe_001.tres",
+      "width": 4,
+      "height": 1,
+      "difficulty": "probe",
+      "solution_total_steps": 2
+    },
+    {
       "id": "solver_mixed_teleport_8x8_a",
       "display_name": "Mixed Teleport 8x8",
       "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_061000_8x8_len020_probe_001.tres",

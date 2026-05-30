@@ -220,6 +220,64 @@ class MazeSolverTests(unittest.TestCase):
         )
         self.assertEqual(enemy_destination, (3, 0))
 
+    def test_player_only_walls_allow_player_but_block_enemy(self) -> None:
+        layout = MazeLayout(
+            width=3,
+            height=1,
+            player_only_walls=frozenset({normalize_edge((1, 0), (2, 0))}),
+        )
+        rules = GreedyChaserRules(minotaur_steps=1, move_priority="horizontal")
+
+        self.assertEqual(rules.resolve_player_action(layout, (1, 0), "right"), (2, 0))
+        self.assertEqual(rules.move_enemy(layout, player_location=(0, 0), enemy_location=(2, 0), step_count=1), (2, 0))
+
+    def test_enemy_only_walls_allow_enemy_but_block_player(self) -> None:
+        layout = MazeLayout(
+            width=3,
+            height=1,
+            enemy_only_walls=frozenset({normalize_edge((0, 0), (1, 0))}),
+        )
+        rules = GreedyChaserRules(minotaur_steps=1, move_priority="horizontal")
+
+        self.assertEqual(rules.resolve_player_action(layout, (0, 0), "right"), (0, 0))
+        self.assertEqual(rules.move_enemy(layout, player_location=(2, 0), enemy_location=(0, 0), step_count=1), (1, 0))
+
+    def test_solver_uses_enemy_only_wall_in_pathfinding(self) -> None:
+        layout = MazeLayout(
+            width=3,
+            height=2,
+            enemy_only_walls=frozenset({normalize_edge((1, 0), (2, 0))}),
+        )
+
+        result = MazeSolver().solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=(),
+            goal=(2, 0),
+            enemy_specs=(),
+        )
+
+        self.assertTrue(result.solvable)
+        self.assertEqual(result.actions, ("right", "down", "right", "up"))
+
+    def test_solver_uses_player_only_wall_as_escape_barrier(self) -> None:
+        layout = MazeLayout(
+            width=4,
+            height=1,
+            player_only_walls=frozenset({normalize_edge((1, 0), (2, 0))}),
+        )
+
+        result = MazeSolver().solve(
+            layout,
+            player_start=(1, 0),
+            enemy_starts=((0, 0),),
+            goal=(3, 0),
+            enemy_specs=(EnemySpec(move_priority="horizontal", step_count=2),),
+        )
+
+        self.assertTrue(result.solvable)
+        self.assertEqual(result.actions, ("right", "right"))
+
     def test_solver_defaults_to_goal_ordered_strategy(self) -> None:
         solver = MazeSolver()
 
@@ -574,6 +632,8 @@ class MazeGeneratorTests(unittest.TestCase):
             killer_count=1,
             trap_count=2,
             samurai_count=1,
+            player_only_wall_count=2,
+            enemy_only_wall_count=1,
         )
 
         specs = config.enemy_specs
@@ -582,7 +642,34 @@ class MazeGeneratorTests(unittest.TestCase):
         self.assertEqual(specs[0].traits, ("killer",))
         self.assertEqual(specs[1].traits, ())
         self.assertEqual(specs[2].enemy_type, "samurai")
-        self.assertEqual(config.generation_profile_id, "greedy_enemies_1x_1y_1samurai_1killer_2traps_9x9_batch")
+        self.assertEqual(
+            config.generation_profile_id,
+            "greedy_enemies_1x_1y_1samurai_1killer_2traps_2playerwalls_1enemywalls_9x9_batch",
+        )
+
+    def test_actor_specific_walls_are_added_after_shared_layout_generation(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            enemy_specs=(),
+            player_only_wall_count=1,
+            enemy_only_wall_count=1,
+        )
+        layout = MazeLayout(
+            width=3,
+            height=2,
+            walls=frozenset({normalize_edge((0, 0), (1, 0))}),
+        )
+
+        augmented_layout = generator._augment_layout_with_actor_walls(layout)
+
+        self.assertIsNotNone(augmented_layout)
+        self.assertEqual(augmented_layout.walls, layout.walls)
+        self.assertEqual(len(augmented_layout.player_only_walls), 1)
+        self.assertEqual(len(augmented_layout.enemy_only_walls), 1)
+        self.assertTrue(augmented_layout.player_only_walls.isdisjoint(augmented_layout.enemy_only_walls))
+        self.assertTrue(augmented_layout.player_only_walls.isdisjoint(layout.walls))
+        self.assertTrue(augmented_layout.enemy_only_walls.isdisjoint(layout.walls))
 
     def test_try_record_rejects_safe_short_solution_before_full_solve(self) -> None:
         class FixedPositionGenerator(MazeGenerator):
@@ -800,6 +887,37 @@ class GodotMazeExporterTests(unittest.TestCase):
         )
 
         self.assertIn('shared_teleport_pairs = Array[Dictionary]([{"a": Vector2i(1, 0), "b": Vector2i(3, 0)}])', serialized)
+
+    def test_serialize_writes_actor_specific_wall_layers(self) -> None:
+        exporter = GodotMazeExporter()
+        record = MazeRecord(
+            width=4,
+            height=2,
+            walls=(),
+            player_only_walls=(normalize_edge((0, 0), (1, 0)),),
+            enemy_only_walls=(normalize_edge((2, 0), (2, 1)),),
+            teleport_pairs=(),
+            enemy_teleport_pairs=(),
+            shared_teleport_pairs=(),
+            trap_cells=(),
+            player_start=(0, 0),
+            enemy_spawns=(),
+            goal=(3, 1),
+            solution=("right",),
+            iteration=1,
+        )
+
+        serialized = exporter.serialize(
+            record=record,
+            saved_at_unix=123,
+            difficulty_label="probe",
+            index=1,
+            generation_profile_id="actor_wall_probe",
+            cell_size=16,
+        )
+
+        self.assertIn("player_vertical_walls = Array[Vector2i]([Vector2i(1, 0)])", serialized)
+        self.assertIn("enemy_horizontal_walls = Array[Vector2i]([Vector2i(2, 1)])", serialized)
 
 
 if __name__ == "__main__":

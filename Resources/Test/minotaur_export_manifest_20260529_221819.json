@@ -1,0 +1,88 @@
+{
+  "source_project": "C:\\Users\\echri\\Python Projects\\Minotaur-Project",
+  "output_dir": "Resources\\Test",
+  "generated_at_unix": 1780118299,
+  "parameters": {
+    "width": 4,
+    "height": 4,
+    "iterations": 1,
+    "mazes_per_iteration": 1,
+    "min_moves": 4,
+    "seed": 42,
+    "cell_size": 16,
+    "enemy_move_priority": "horizontal",
+    "greedy_horizontal_count": 1,
+    "greedy_vertical_count": 0,
+    "samurai_count": 0,
+    "killer_count": 0,
+    "trap_count": 0,
+    "player_only_wall_count": 1,
+    "enemy_only_wall_count": 1,
+    "additional_checks": true,
+    "additional_check_threshold": 50
+  },
+  "files": [
+    {
+      "file_name": "minotaur_20260530_051819_4x4_len007_max_001.tres",
+      "path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Test\\minotaur_20260530_051819_4x4_len007_max_001.tres",
+      "width": 4,
+      "height": 4,
+      "solution_total_steps": 7,
+      "difficulty_category": "max",
+      "iteration": 1,
+      "player_only_walls": [
+        [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ]
+        ]
+      ],
+      "enemy_only_walls": [
+        [
+          [
+            2,
+            0
+          ],
+          [
+            2,
+            1
+          ]
+        ]
+      ],
+      "teleport_pairs": [],
+      "enemy_teleport_pairs": [],
+      "shared_teleport_pairs": [],
+      "trap_cells": [],
+      "player_start": [
+        1,
+        3
+      ],
+      "enemy_spawns": [
+        {
+          "type": "greedy_chaser",
+          "cell": [
+            3,
+            1
+          ],
+          "move_priority": "horizontal",
+          "step_count": 2,
+          "facing_index": 2,
+          "traits": []
+        }
+      ],
+      "minotaur_start": [
+        3,
+        1
+      ],
+      "goal": [
+        1,
+        2
+      ]
+    }
+  ]
+}

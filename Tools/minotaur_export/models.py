@@ -71,6 +71,8 @@ class MazeRecord:
     goal: Coord
     solution: tuple[str, ...]
     iteration: int
+    player_only_walls: tuple[Edge, ...] = ()
+    enemy_only_walls: tuple[Edge, ...] = ()
     teleport_pairs: tuple[TeleportPair, ...] = ()
     enemy_teleport_pairs: tuple[TeleportPair, ...] = ()
     shared_teleport_pairs: tuple[TeleportPair, ...] = ()
@@ -98,6 +100,8 @@ class MazeRecord:
         return (
             self.size,
             self.walls,
+            self.player_only_walls,
+            self.enemy_only_walls,
             self.teleport_pairs,
             self.enemy_teleport_pairs,
             self.shared_teleport_pairs,
@@ -156,6 +160,8 @@ class GenerationConfig:
     samurai_count: int = 0
     killer_count: int = 0
     trap_count: int = 0
+    player_only_wall_count: int = 0
+    enemy_only_wall_count: int = 0
     additional_check_threshold: int = 50
     additional_checks: bool = True
 
@@ -164,7 +170,9 @@ class GenerationConfig:
         return (
             f"greedy_enemies_{self.greedy_horizontal_count}x_{self.greedy_vertical_count}y_"
             f"{self.samurai_count}samurai_"
-            f"{self.killer_count}killer_{self.trap_count}traps_{self.width}x{self.height}_batch"
+            f"{self.killer_count}killer_{self.trap_count}traps_"
+            f"{self.player_only_wall_count}playerwalls_{self.enemy_only_wall_count}enemywalls_"
+            f"{self.width}x{self.height}_batch"
         )
 
     @property

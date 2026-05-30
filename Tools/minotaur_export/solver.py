@@ -75,7 +75,7 @@ def _player_transition_predecessors(layout: MazeLayout, destination: Coord) -> t
 
     if layout.teleport_destination(destination) is None:
         for neighbor in layout.neighbors(destination):
-            if not layout.is_blocked(neighbor, destination):
+            if not layout.is_player_blocked(neighbor, destination):
                 predecessors.add(neighbor)
 
     for pair in layout.teleport_pairs:
@@ -87,7 +87,7 @@ def _player_transition_predecessors(layout: MazeLayout, destination: Coord) -> t
         if source is None:
             continue
         for neighbor in layout.neighbors(source):
-            if not layout.is_blocked(neighbor, source):
+            if not layout.is_player_blocked(neighbor, source):
                 predecessors.add(neighbor)
 
     return tuple(predecessors)

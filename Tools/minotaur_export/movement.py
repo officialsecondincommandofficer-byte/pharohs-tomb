@@ -23,11 +23,15 @@ class MoveResolution:
 
 
 def available_actions(layout: MazeLayout, cell: Coord, include_skip: bool) -> list[str]:
-    return list(_available_actions_cached(layout, cell, include_skip))
+    return list(_available_actions_cached(layout, cell, include_skip, "player"))
+
+
+def available_enemy_actions(layout: MazeLayout, cell: Coord, include_skip: bool) -> list[str]:
+    return list(_available_actions_cached(layout, cell, include_skip, "enemy"))
 
 
 @lru_cache(maxsize=None)
-def _available_actions_cached(layout: MazeLayout, cell: Coord, include_skip: bool) -> tuple[str, ...]:
+def _available_actions_cached(layout: MazeLayout, cell: Coord, include_skip: bool, actor: str) -> tuple[str, ...]:
     options: list[str] = ["skip"] if include_skip else []
     x, y = cell
     candidates = (
@@ -40,7 +44,7 @@ def _available_actions_cached(layout: MazeLayout, cell: Coord, include_skip: boo
     for action, nxt in candidates:
         if not layout.contains(nxt):
             continue
-        if layout.is_blocked(cell, nxt):
+        if _is_blocked_for_actor(layout, cell, nxt, actor):
             continue
         options.append(action)
 
@@ -48,11 +52,15 @@ def _available_actions_cached(layout: MazeLayout, cell: Coord, include_skip: boo
 
 
 def apply_action(layout: MazeLayout, cell: Coord, action: str) -> Coord:
-    return _apply_action_cached(layout, cell, action)
+    return _apply_action_cached(layout, cell, action, "player")
+
+
+def apply_enemy_action(layout: MazeLayout, cell: Coord, action: str) -> Coord:
+    return _apply_action_cached(layout, cell, action, "enemy")
 
 
 @lru_cache(maxsize=None)
-def _apply_action_cached(layout: MazeLayout, cell: Coord, action: str) -> Coord:
+def _apply_action_cached(layout: MazeLayout, cell: Coord, action: str, actor: str) -> Coord:
     if action == "skip":
         return cell
     if action not in ACTION_OFFSETS:
@@ -63,7 +71,7 @@ def _apply_action_cached(layout: MazeLayout, cell: Coord, action: str) -> Coord:
     nxt = (x + dx, y + dy)
     if not layout.contains(nxt):
         return cell
-    if layout.is_blocked(cell, nxt):
+    if _is_blocked_for_actor(layout, cell, nxt, actor):
         return cell
     return nxt
 
@@ -119,3 +127,9 @@ def resolve_enemy_turn_end_transition(layout: MazeLayout, final_cell: Coord) -> 
         resolved_cell=final_cell,
         used_teleport=False,
     )
+
+
+def _is_blocked_for_actor(layout: MazeLayout, a: Coord, b: Coord, actor: str) -> bool:
+    if actor == "enemy":
+        return layout.is_enemy_blocked(a, b)
+    return layout.is_player_blocked(a, b)

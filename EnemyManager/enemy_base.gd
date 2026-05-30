@@ -130,7 +130,7 @@ func _restore_custom_state_snapshot(_state: Dictionary) -> void:
 
 
 func _can_enter(cell: Vector2i, occupied_lookup: Dictionary) -> bool:
-	if not board_state.can_step(current_cell, cell):
+	if not board_state.can_enemy_step(current_cell, cell):
 		return false
 	return not occupied_lookup.has(cell)
 
@@ -144,7 +144,7 @@ func _find_path(start: Vector2i, goal: Vector2i, occupied_lookup: Dictionary) ->
 		if current == goal:
 			break
 
-		for neighbor in board_state.get_cardinal_neighbors(current):
+		for neighbor in board_state.get_enemy_cardinal_neighbors(current):
 			if occupied_lookup.has(neighbor) and neighbor != goal:
 				continue
 			if came_from.has(neighbor):

@@ -70,6 +70,6 @@ static func _can_enter(
 	occupied_lookup: Dictionary,
 	board_state
 ) -> bool:
-	if not board_state.can_step(current_cell, target_cell):
+	if not board_state.can_enemy_step(current_cell, target_cell):
 		return false
 	return not occupied_lookup.has(target_cell)
