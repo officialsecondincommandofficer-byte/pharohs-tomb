@@ -134,6 +134,37 @@ Recommended order of complexity growth:
 
 This order keeps topology changes ahead of fully dynamic board-state changes.
 
+## Implemented So Far
+
+The following mechanics and architecture slices are already in place and should be treated as active baseline, not just roadmap ideas.
+
+Static topology and traversal:
+- shared walls
+- actor-specific walls
+- one-way walls
+
+Teleport and exit behavior:
+- player teleports
+- enemy-only teleports
+- shared turn-end teleports
+- `2x2` escape zone support on larger boards
+- linked special chaser support for the larger escape-zone mechanic
+
+Enemy behavior already present in the current solver/runtime stack:
+- greedy chasers
+- killer trait interactions
+- samurai behavior
+- A* chaser behavior for the escape-zone mechanic
+
+Regression/content support already present:
+- curated `SolverTestMazes` world
+- mechanic probes
+- playable wall-mechanics regression mazes
+
+Roadmap implication:
+- future planning should treat the `2x2` escape zone and its linked A* chaser as implemented baseline
+- they should not remain listed only as future candidate mechanics
+
 ## Wall Mechanics Foundation
 
 Wall mechanics should stay split by responsibility rather than getting folded into one broad "movement rules" bucket.
@@ -229,6 +260,158 @@ Why:
 - one-way walls are still static but require directed-graph care
 - locked passages are where generation correctness risk becomes much sharper, especially around enclosed exits
 - breakable walls materially increase dynamic solver state and should come only after the transition/state model is ready
+
+## Enemy And Tile Mechanic Triage
+
+The next wave of mechanics should be sorted by how much new transition logic, runtime state, and board mutation they require.
+
+Recommended principle:
+- prefer mechanics that extend enemy behavior, targeting, or exit definition before mechanics that mutate terrain every turn
+- prefer deterministic and replayable rules before mechanics that inject a large amount of random forced movement
+- postpone mechanics that require many temporary overlays, counters, or board mutations until the state model is expanded intentionally
+
+### Safe Next Patch Candidates
+
+These are the best fit for the current architecture and should be treated as the preferred near-term pool.
+
+- `2x2` escape zone on larger boards
+- patroller enemy
+- wanderer enemy with deterministic seeded pathing
+- stationary blocker enemy
+- berserk / enraged / enhanced enemy tag
+- A* chaser variant, as long as it stays an enemy behavior rather than a terrain system
+
+Why these are safe:
+- they mostly change enemy decision logic, target selection, or goal validation
+- they can usually be modeled inside enemy runtime state and transition rules without mutating the board
+- they keep solver search centered on positions, enemy runtime state, and deterministic behavior
+
+### Medium-Complexity Mechanics
+
+These are reasonable after the safe-next-patch pool, but they want one additional state or transition system first.
+
+- quicksand that immobilizes the player for one turn
+- telegraphed attacker that marks a square and attacks its row and column next turn
+- psionic enemy that knocks actors around
+- switches that open gates or toggle actor-specific barriers
+
+Why these are medium:
+- quicksand adds temporary status state
+- telegraphed attacks add queued enemy intent state
+- knockback adds forced-movement resolution rules
+- switches and gates add dynamic topology or dynamic barrier layers
+
+### Stateful Terrain And Hazard Systems
+
+These should wait until temporary tile overlays and board-mutation rules are formalized.
+
+- acid tiles lasting several turns
+- trap tiles that fire projectiles from walls
+- traps that turn other tiles into pits
+- explosive enemies that break walls after a delay
+- void-lizard style temporary pit creation
+- ghost walls
+- ice tiles with sliding
+- ice enemies that freeze tiles for several turns
+- river tiles that push the player
+- croc-style river predators with river-only mobility bonuses
+
+These mechanics tend to require:
+- tile overlays with turn counters
+- board-state mutation over time
+- forced movement chaining
+- projectile resolution timing
+- terrain-specific movement and targeting rules
+
+### High-Risk Multi-System Mechanics
+
+These are the mechanics to postpone until the state model is more formal and the transition layer has stronger support for interacting timed systems.
+
+- river plus croc ecosystems
+- ice plus sliding plus freezing enemies
+- mutant lizard with knockback plus acid
+- void lizard with temporary pits
+- switch systems that dynamically reconfigure actor-specific walls during play
+
+Why these are high risk:
+- they mix temporary terrain, enemy AI, movement overrides, and timed effects
+- they increase the chance that solver state, runtime behavior, and export semantics drift apart
+- they are likely to want explicit state structs for temporary tiles, pending effects, turn counters, and forced-movement outcomes
+
+### Enemy Family Notes
+
+Patroller / wanderer:
+- good near-term candidate
+- should use deterministic seeded route generation so replay and regression remain stable
+
+Stationary blocker:
+- good near-term candidate
+- useful for path pressure without adding terrain mutation
+
+Berserk / enhanced tag:
+- good near-term candidate
+- should modify existing enemy aggression, threat range, or targeting rather than invent a whole new board mechanic
+
+A* chaser:
+- good near-term candidate if treated as a behavior variant
+- keep the first pass simple and deterministic
+
+Telegraphed row/column attacker:
+- medium-complexity
+- best added after queued enemy intent state exists explicitly
+
+Psionic knockback enemy:
+- medium-complexity to high-risk depending on randomness and chain reactions
+- should wait until forced-movement resolution is modeled explicitly
+
+Mutant lizard with knockback and acid:
+- high-risk multi-system mechanic
+- combines forced movement, temporary hazards, and wandering behavior
+
+Void lizard:
+- high-risk multi-system mechanic
+- combines wandering behavior with timed terrain destruction
+
+Explosive enemy:
+- stateful terrain mechanic
+- should wait until delayed board mutation is explicit in state and transition code
+
+Ice enemy:
+- stateful terrain mechanic
+- best introduced only after temporary freezing overlays and sliding rules are both formalized
+
+Croc:
+- high-risk multi-system mechanic
+- should come only after river behavior and swimmer-tag movement rules are already stable
+
+### Recommended Next Build Order
+
+If the goal is the safest path with strong gameplay payoff, the recommended order is:
+
+1. `2x2` escape zone
+2. patroller / wanderer enemy
+3. stationary blocker enemy
+4. berserk / enhanced enemy tag
+5. A* chaser variant
+6. quicksand
+7. telegraphed attacker
+8. switches and gates
+9. temporary hazard tiles such as acid, freeze, and pits
+10. river / ice / lizard families
+
+### Recommended Next Patch Bundle
+
+Best next patch:
+- `2x2` escape zone
+- patroller / wanderer enemy
+- stationary blocker enemy
+- berserk / enhanced enemy tag
+
+Why:
+- it adds visible gameplay variety
+- it stays mostly within enemy behavior and exit semantics
+- it avoids dynamic terrain mutation for one more step
+- it prepares the codebase for richer enemy runtime state before timed tile systems arrive
 
 ## Native Core Flags
 
