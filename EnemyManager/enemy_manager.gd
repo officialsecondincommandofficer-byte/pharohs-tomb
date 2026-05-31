@@ -2,6 +2,7 @@ extends Node2D
 
 signal enemy_phase_finished(enemy_results)
 
+const ZoneSpawnControllerScript := preload("res://EnemyManager/zone_spawn_controller.gd")
 const CHASER_SCENE := preload("res://EnemyManager/Chaser/Chaser.tscn")
 const MINOTAUR_SCENE := preload("res://EnemyManager/Minotaur/Minotaur.tscn")
 const PATROLLER_SCENE := preload("res://EnemyManager/Patroller/Patroller.tscn")
@@ -11,11 +12,10 @@ const TRAIT_KILLER := "killer"
 const CONTACT_BLOCKED := "blocked"
 const CONTACT_TARGET_DIES := "target_dies"
 const CONTACT_MOVER_DIES := "mover_dies"
-const INVALID_SPAWN_CELL := Vector2i(-9999, -9999)
 
 var board_state: MazeData
-var _spawner_states: Array[Dictionary] = []
 var _dynamic_spawn_order: int = 0
+var _zone_spawn_controller = ZoneSpawnControllerScript.new()
 
 
 func setup_floor(next_board_state: MazeData) -> void:
@@ -26,13 +26,7 @@ func setup_floor(next_board_state: MazeData) -> void:
 	for spawn_index in range(board_state.enemy_spawns.size()):
 		_spawn_enemy_from_data(board_state.enemy_spawns[spawn_index], spawn_index)
 
-	_spawner_states.clear()
-	for spawner_data in board_state.zone_spawners:
-		var interval: int = int(spawner_data.get("spawn_interval_turns", 2))
-		_spawner_states.append({
-			"id": String(spawner_data.get("id", "")),
-			"turns_until_spawn": int(spawner_data.get("initial_delay_turns", interval)),
-		})
+	_zone_spawn_controller.setup(board_state)
 	_dynamic_spawn_order = board_state.enemy_spawns.size()
 
 
@@ -96,7 +90,7 @@ func get_enemy_states() -> Dictionary:
 		enemy_states.append(child.build_state_snapshot())
 	return {
 		"enemies": enemy_states,
-		"spawner_states": _spawner_states.duplicate(true),
+		"spawner_states": _zone_spawn_controller.build_state_snapshot(),
 		"dynamic_spawn_order": _dynamic_spawn_order,
 	}
 
@@ -107,11 +101,11 @@ func restore_enemy_states(enemy_states) -> void:
 	if enemy_states is Dictionary:
 		state_payload = enemy_states
 		serialized_enemies = state_payload.get("enemies", [])
-		_spawner_states = state_payload.get("spawner_states", []).duplicate(true)
+		_zone_spawn_controller.restore_state_snapshot(state_payload.get("spawner_states", []))
 		_dynamic_spawn_order = int(state_payload.get("dynamic_spawn_order", board_state.enemy_spawns.size()))
 	else:
 		serialized_enemies = enemy_states
-		_spawner_states.clear()
+		_zone_spawn_controller.setup(board_state)
 		_dynamic_spawn_order = board_state.enemy_spawns.size()
 
 	for child in get_children():
@@ -137,20 +131,7 @@ func update_visibility(_visible_cells: Array[Vector2i]) -> void:
 
 
 func get_spawn_warning_cells(player_cell: Vector2i) -> Array[Vector2i]:
-	var warning_cells: Array[Vector2i] = []
-	if board_state == null:
-		return warning_cells
-
-	for spawner_index in range(_spawner_states.size()):
-		var spawner_state: Dictionary = _spawner_states[spawner_index]
-		if int(spawner_state.get("turns_until_spawn", 0)) != 1:
-			continue
-		var spawner_data: Dictionary = board_state.zone_spawners[spawner_index]
-		var spawn_cell := _choose_spawner_cell(spawner_data, player_cell)
-		if spawn_cell == INVALID_SPAWN_CELL:
-			continue
-		warning_cells.append(spawn_cell)
-	return warning_cells
+	return _zone_spawn_controller.warning_cells(player_cell, get_current_cells())
 
 
 func _take_enemy_turn(enemy_index: int, player_cell: Vector2i) -> Dictionary:
@@ -300,7 +281,7 @@ func _tint_for_spawn(spawn_data: Dictionary) -> Color:
 func _scene_for_spawn(spawn_data: Dictionary) -> PackedScene:
 	var role := String(spawn_data.get("role", ""))
 	match String(spawn_data.get("type", "greedy_chaser")):
-		"chaser", "greedy_chaser", "linked_escape_hunter":
+		"chaser", "greedy_chaser", "linked_escape_hunter", "astar_chaser", "x_chaser", "y_chaser":
 			return CHASER_SCENE
 		"patroller":
 			return PATROLLER_SCENE
@@ -334,56 +315,7 @@ func _spawn_enemy_from_data(spawn_data: Dictionary, spawn_order: int) -> void:
 
 
 func _advance_zone_spawners(player_cell: Vector2i) -> void:
-	for spawner_index in range(_spawner_states.size()):
-		var spawner_state: Dictionary = _spawner_states[spawner_index]
-		var turns_until_spawn: int = int(spawner_state.get("turns_until_spawn", 0)) - 1
-		if turns_until_spawn > 0:
-			spawner_state["turns_until_spawn"] = turns_until_spawn
-			_spawner_states[spawner_index] = spawner_state
-			continue
-
-		var spawner_data: Dictionary = board_state.zone_spawners[spawner_index]
-		var spawn_cell := _choose_spawner_cell(spawner_data, player_cell)
-		if spawn_cell == INVALID_SPAWN_CELL:
-			spawner_state["turns_until_spawn"] = 1
-			_spawner_states[spawner_index] = spawner_state
-			continue
-
-		var spawn_data := {
-			"type": String(spawner_data.get("enemy_type", "linked_escape_hunter")),
-			"role": String(spawner_data.get("role", "linked_escape_hunter")),
-			"movement_type": String(spawner_data.get("movement_type", "astar")),
-			"cell": spawn_cell,
-			"move_priority": String(spawner_data.get("move_priority", "horizontal")),
-			"step_count": int(spawner_data.get("step_count", 2)),
-			"facing_index": int(spawner_data.get("facing_index", 2)),
-			"traits": spawner_data.get("traits", ["escape_linked"]),
-			"wake_goal_distance": -1,
-			"lifetime_turns": int(spawner_data.get("lifetime_turns", 3)),
-		}
+	var occupied_cells := get_current_cells()
+	for spawn_data in _zone_spawn_controller.advance(player_cell, occupied_cells):
 		_spawn_enemy_from_data(spawn_data, _dynamic_spawn_order)
 		_dynamic_spawn_order += 1
-		spawner_state["turns_until_spawn"] = int(spawner_data.get("spawn_interval_turns", 2))
-		_spawner_states[spawner_index] = spawner_state
-
-
-func _choose_spawner_cell(spawner_data: Dictionary, player_cell: Vector2i) -> Vector2i:
-	var candidate_cells: Array = spawner_data.get("spawn_candidates", [])
-	var available: Array[Vector2i] = []
-	for raw_candidate in candidate_cells:
-		var candidate: Vector2i = raw_candidate
-		if any_enemy_at_cell(candidate):
-			continue
-		available.append(candidate)
-	if available.is_empty():
-		return INVALID_SPAWN_CELL
-	available.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-		var a_distance := absi(a.x - player_cell.x) + absi(a.y - player_cell.y)
-		var b_distance := absi(b.x - player_cell.x) + absi(b.y - player_cell.y)
-		if a_distance == b_distance:
-			if a.y == b.y:
-				return a.x < b.x
-			return a.y < b.y
-		return a_distance > b_distance
-	)
-	return available[0]

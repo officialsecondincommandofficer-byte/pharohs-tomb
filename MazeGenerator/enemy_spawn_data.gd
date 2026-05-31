@@ -8,10 +8,11 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 		if not entry is Dictionary:
 			continue
 		var spawn: Dictionary = entry.duplicate(true)
-		spawn["type"] = String(spawn.get("type", "greedy_chaser"))
+		var raw_type := String(spawn.get("type", "greedy_chaser"))
+		spawn["type"] = _resolved_enemy_type(raw_type)
 		spawn["cell"] = coerce_vector2i(spawn.get("cell", fallback_cell))
-		spawn["role"] = String(spawn.get("role", ""))
-		spawn["movement_type"] = String(spawn.get("movement_type", ""))
+		spawn["role"] = String(spawn.get("role", _resolved_enemy_role(raw_type)))
+		spawn["movement_type"] = String(spawn.get("movement_type", _resolved_movement_type(raw_type, String(spawn.get("role", "")))))
 		spawn["move_priority"] = String(spawn.get("move_priority", "horizontal"))
 		spawn["step_count"] = int(spawn.get("step_count", 2))
 		spawn["facing_index"] = int(spawn.get("facing_index", 2))
@@ -65,3 +66,40 @@ static func coerce_string_array(raw_value) -> Array[String]:
 	for entry in raw_value:
 		coerced.append(String(entry))
 	return coerced
+
+
+static func _resolved_enemy_type(raw_type: String) -> String:
+	match raw_type:
+		"x_chaser", "y_chaser":
+			return "greedy_chaser"
+		"astar_chaser":
+			return "linked_escape_hunter"
+		"dasher":
+			return "samurai"
+		_:
+			return raw_type
+
+
+static func _resolved_enemy_role(raw_type: String) -> String:
+	match raw_type:
+		"x_chaser", "y_chaser", "linked_escape_hunter", "dasher":
+			return raw_type
+		"astar_chaser":
+			return "linked_escape_hunter"
+		"samurai":
+			return "dasher"
+		_:
+			return ""
+
+
+static func _resolved_movement_type(raw_type: String, role: String) -> String:
+	var resolved_role := role if not role.is_empty() else _resolved_enemy_role(raw_type)
+	match resolved_role:
+		"linked_escape_hunter":
+			return "astar"
+		"x_chaser", "y_chaser":
+			return "greedy"
+		"dasher":
+			return "dash"
+		_:
+			return ""

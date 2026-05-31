@@ -76,7 +76,7 @@ func _draw_exit() -> void:
 			TILE_SOURCE_ID,
 			EXIT_LOCKED_TILE
 		)
-	for exit_cell in _board_state.exit_cells:
+	for exit_cell in _board_state.get_main_exit_cells():
 		goal_layer.set_cell(
 			exit_cell,
 			TILE_SOURCE_ID,

@@ -92,6 +92,10 @@ class ManifestWriter:
                     ],
                     "minotaur_start": list(exported.record.minotaur_start),
                     "goal": list(exported.record.goal),
+                    "main_exit_cell": list(exported.record.main_exit_cell),
+                    "main_exit_cells": [list(cell) for cell in exported.record.main_exit_cells],
+                    "win_zone_cells": [list(cell) for cell in exported.record.win_zone_cells],
+                    "escape_zone_cells": [list(cell) for cell in exported.record.escape_zone_cells],
                 }
                 for exported in generated_records
             ],

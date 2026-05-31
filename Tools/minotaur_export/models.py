@@ -125,6 +125,24 @@ class MazeRecord:
         return (self.goal,)
 
     @property
+    def main_exit_cell(self) -> Coord:
+        return self.goal
+
+    @property
+    def main_exit_cells(self) -> tuple[Coord, ...]:
+        if self.goal_cells:
+            return tuple(cell for cell in self.goal_cells if cell not in self.escape_zone_cells) or (self.goal,)
+        return (self.goal,)
+
+    @property
+    def win_zone_cells(self) -> tuple[Coord, ...]:
+        return self.resolved_goal_cells
+
+    @property
+    def escape_zone_spawners(self) -> tuple["ZoneSpawnerSpec", ...]:
+        return self.zone_spawners
+
+    @property
     def minotaur_start(self) -> Coord:
         if not self.enemy_spawns:
             return (0, 0)

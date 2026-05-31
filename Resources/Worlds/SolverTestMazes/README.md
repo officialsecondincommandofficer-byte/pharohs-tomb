@@ -39,9 +39,14 @@ When the mazes are generated:
 - exported `.tres` files should live in this world folder or an imported manifest path associated with this folder
 - add a `world_manifest.json` that points at the curated resources
 - keep the level ids stable so replay and regression references do not drift
+- keep escape-zone and dual-exit probes under this world tree instead of mixing active manifest references back through `Resources/Test`
 
 Wall mechanics note:
 - actor-specific wall probes should prefer small curated layouts first because they exercise runtime legality without inflating solver state
 - one-way passage probes should stay small too, with at least one case that forces reverse-search helpers to respect directed movement
 - use `player-only` to mean only the player can pass through the edge, and `enemy-only` to mean only enemies can pass through it
 - locked-passage probes should not be added to procedural generation flows until gated-reachability validation exists explicitly
+
+Escape-zone note:
+- dual-exit probes should explicitly call out whether the stored solution reaches the dedicated main exit or the 2x2 escape zone
+- keep at least one authored regression board that still wins through the 2x2 zone until the main-exit preference question is intentionally resolved

@@ -22,6 +22,8 @@ from minotaur_export.models import (
     MazeRecord,
     SamuraiBehaviorState,
     TeleportPair,
+    ZoneSpawnerSpec,
+    ZoneSpawnerState,
 )
 from minotaur_export.rules import GreedyChaserRules
 from minotaur_export.solver_backup import BackupMazeSolver
@@ -30,6 +32,38 @@ from minotaur_export.solver_strategies import STRATEGY_GOAL_ORDERED
 
 
 class MazeSolverTests(unittest.TestCase):
+    def test_solver_accepts_main_exit_win_on_dual_exit_board(self) -> None:
+        layout = MazeLayout(width=4, height=4)
+        win_zone_cells = ((3, 0), (2, 2), (3, 2), (2, 3), (3, 3))
+
+        result = MazeSolver().solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=(),
+            goal=(3, 0),
+            goal_cells=win_zone_cells,
+            enemy_specs=(),
+        )
+
+        self.assertTrue(result.solvable)
+        self.assertEqual(result.actions, ("right", "right", "right"))
+
+    def test_solver_accepts_escape_zone_win_on_dual_exit_board(self) -> None:
+        layout = MazeLayout(width=4, height=4)
+        win_zone_cells = ((3, 0), (0, 1), (1, 1), (0, 2), (1, 2))
+
+        result = MazeSolver().solve(
+            layout,
+            player_start=(0, 0),
+            enemy_starts=(),
+            goal=(3, 0),
+            goal_cells=win_zone_cells,
+            enemy_specs=(),
+        )
+
+        self.assertTrue(result.solvable)
+        self.assertEqual(result.actions, ("down",))
+
     def test_solver_returns_empty_solution_when_player_starts_on_goal(self) -> None:
         layout = MazeLayout(width=2, height=2)
         result = MazeSolver().solve(layout, player_start=(0, 0), enemy_starts=((1, 1),), goal=(0, 0))
@@ -456,6 +490,148 @@ class MazeSolverTests(unittest.TestCase):
 
 
 class GreedyChaserRulesTests(unittest.TestCase):
+    def test_blocked_escape_zone_spawn_retries_next_turn(self) -> None:
+        layout = MazeLayout(width=3, height=1, walls=frozenset({normalize_edge((1, 0), (2, 0))}))
+        rules = GreedyChaserRules()
+        linked_spec = EnemySpec(
+            enemy_type="linked_escape_hunter",
+            role="linked_escape_hunter",
+            movement_type="astar",
+            move_priority="horizontal",
+            step_count=1,
+            lifetime_turns=3,
+            traits=("escape_linked",),
+        )
+        blocked_spawner = ZoneSpawnerSpec(
+            spawner_id="escape_zone_linked_hunter",
+            enemy_spec=linked_spec,
+            spawn_interval_turns=2,
+            spawn_candidates=((1, 0),),
+            source_zone_cells=((2, 0),),
+            initial_delay_turns=1,
+        )
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(
+                player_position=(2, 0),
+                enemy_positions=((1, 0),),
+                enemy_states=(EnemyRuntimeState(),),
+                spawner_states=(ZoneSpawnerState(turns_until_spawn=1),),
+            ),
+            action="skip",
+            enemy_specs=(EnemySpec(move_priority="horizontal", step_count=1),),
+            goal_cells=((0, 0),),
+            zone_spawners=(blocked_spawner,),
+        )
+
+        self.assertIsNotNone(next_state)
+        self.assertEqual(next_state.spawned_enemies, ())
+        self.assertEqual(next_state.spawner_states, (ZoneSpawnerState(turns_until_spawn=1),))
+
+    def test_multiple_escape_zone_spawners_can_overlap_in_runtime_state(self) -> None:
+        layout = MazeLayout(width=5, height=2)
+        rules = GreedyChaserRules()
+        linked_spec = EnemySpec(
+            enemy_type="linked_escape_hunter",
+            role="linked_escape_hunter",
+            movement_type="astar",
+            move_priority="horizontal",
+            step_count=1,
+            lifetime_turns=3,
+            traits=("escape_linked",),
+        )
+        spawners = (
+            ZoneSpawnerSpec(
+                spawner_id="escape_zone_linked_hunter_a",
+                enemy_spec=linked_spec,
+                spawn_interval_turns=2,
+                spawn_candidates=((0, 1),),
+                source_zone_cells=((0, 0),),
+                initial_delay_turns=1,
+            ),
+            ZoneSpawnerSpec(
+                spawner_id="escape_zone_linked_hunter_b",
+                enemy_spec=linked_spec,
+                spawn_interval_turns=2,
+                spawn_candidates=((4, 1),),
+                source_zone_cells=((4, 0),),
+                initial_delay_turns=1,
+            ),
+        )
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(
+                player_position=(2, 0),
+                enemy_positions=(),
+                enemy_states=(),
+                spawner_states=(
+                    ZoneSpawnerState(turns_until_spawn=1),
+                    ZoneSpawnerState(turns_until_spawn=1),
+                ),
+            ),
+            action="skip",
+            enemy_specs=(),
+            goal_cells=((0, 0), (4, 0)),
+            zone_spawners=spawners,
+        )
+
+        self.assertIsNotNone(next_state)
+        self.assertEqual(
+            sorted(enemy.position for enemy in next_state.spawned_enemies if enemy.position is not None),
+            [(0, 0), (3, 1)],
+        )
+        self.assertEqual(
+            tuple(enemy.source_spawner_id for enemy in next_state.spawned_enemies),
+            ("escape_zone_linked_hunter_a", "escape_zone_linked_hunter_b"),
+        )
+        self.assertEqual(
+            next_state.spawner_states,
+            (
+                ZoneSpawnerState(turns_until_spawn=2),
+                ZoneSpawnerState(turns_until_spawn=2),
+            ),
+        )
+
+    def test_newly_spawned_escape_hunter_acts_immediately_same_turn(self) -> None:
+        layout = MazeLayout(width=3, height=2)
+        rules = GreedyChaserRules()
+        linked_spec = EnemySpec(
+            enemy_type="linked_escape_hunter",
+            role="linked_escape_hunter",
+            movement_type="astar",
+            move_priority="horizontal",
+            step_count=2,
+            lifetime_turns=3,
+            traits=("escape_linked",),
+        )
+        spawner = ZoneSpawnerSpec(
+            spawner_id="escape_zone_linked_hunter",
+            enemy_spec=linked_spec,
+            spawn_interval_turns=2,
+            spawn_candidates=((2, 0),),
+            source_zone_cells=((2, 0),),
+            initial_delay_turns=1,
+        )
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(
+                player_position=(0, 0),
+                enemy_positions=(),
+                enemy_states=(),
+                spawned_enemies=(),
+                spawner_states=(ZoneSpawnerState(turns_until_spawn=1),),
+            ),
+            action="skip",
+            enemy_specs=(),
+            goal_cells=((2, 0),),
+            zone_spawners=(spawner,),
+        )
+
+        self.assertIsNone(next_state)
+
     def test_horizontal_priority_moves_on_x_axis_first(self) -> None:
         layout = MazeLayout(width=3, height=3)
         rules = GreedyChaserRules(minotaur_steps=1, move_priority="horizontal")
@@ -859,8 +1035,12 @@ class GodotMazeExporterTests(unittest.TestCase):
         self.assertIn("trap_cells = Array[Vector2i]([Vector2i(2, 2)])", serialized)
         self.assertIn("enemy_spawns = Array[Dictionary]", serialized)
         self.assertIn('minotaur_spawn = Vector2i(3, 3)', serialized)
+        self.assertIn("main_exit_cell = Vector2i(1, 1)", serialized)
         self.assertIn("exit_cells = Array[Vector2i]([Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(2, 2), Vector2i(3, 2)])", serialized)
+        self.assertIn("main_exit_cells = Array[Vector2i]([Vector2i(1, 1)])", serialized)
+        self.assertIn("win_zone_cells = Array[Vector2i]([Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(2, 2), Vector2i(3, 2)])", serialized)
         self.assertIn("escape_zone_cells = Array[Vector2i]([Vector2i(2, 1), Vector2i(3, 1), Vector2i(2, 2), Vector2i(3, 2)])", serialized)
+        self.assertIn("escape_zone_spawners = Array[Dictionary]([])", serialized)
         self.assertIn('generation_profile_id = "profile"', serialized)
 
     def test_serialize_writes_enemy_traits_when_present(self) -> None:
