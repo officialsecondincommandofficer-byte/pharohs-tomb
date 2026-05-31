@@ -1,9 +1,16 @@
 extends "res://EnemyManager/enemy_base.gd"
 
+const AStarChaserLogicScript = preload("res://EnemyManager/AStarChaser/astar_chaser_logic.gd")
 const ChaserLogicScript = preload("res://EnemyManager/chaser_logic.gd")
 
+var role: String = ""
+var movement_type: String = "greedy"
 var move_priority: String = "horizontal"
 var step_count: int = 2
+var wake_goal_distance: int = -1
+var lifetime_turns: int = -1
+var turns_remaining: int = -1
+var activated := true
 
 
 func _ready() -> void:
@@ -12,8 +19,14 @@ func _ready() -> void:
 
 
 func configure(spawn_data: Dictionary, next_board_state) -> void:
+	role = String(spawn_data.get("role", role))
+	movement_type = String(spawn_data.get("movement_type", movement_type))
 	move_priority = String(spawn_data.get("move_priority", "horizontal"))
 	step_count = int(spawn_data.get("step_count", 2))
+	wake_goal_distance = int(spawn_data.get("wake_goal_distance", -1))
+	lifetime_turns = int(spawn_data.get("lifetime_turns", -1))
+	turns_remaining = lifetime_turns
+	activated = wake_goal_distance < 0
 	super.configure(spawn_data, next_board_state)
 
 
@@ -22,7 +35,32 @@ func get_step_count() -> int:
 
 
 func choose_target_cell(player_cell: Vector2i, occupied_lookup: Dictionary) -> Vector2i:
+	if movement_type == "astar":
+		return AStarChaserLogicScript.choose_astar_step(
+			current_cell,
+			player_cell,
+			occupied_lookup,
+			board_state
+		)
 	return _choose_greedy_step(player_cell, occupied_lookup)
+
+
+func begin_turn(player_cell: Vector2i) -> bool:
+	if is_dead:
+		return false
+	if not activated and wake_goal_distance >= 0:
+		var distance_to_exit: int = int(board_state.goal_distance_from_player_cell(player_cell))
+		if distance_to_exit >= 0 and distance_to_exit <= wake_goal_distance:
+			activated = true
+	return activated
+
+
+func end_turn() -> void:
+	if not activated or lifetime_turns < 0 or is_dead:
+		return
+	turns_remaining -= 1
+	if turns_remaining <= 0:
+		mark_dead()
 
 
 func take_turn(player_cell: Vector2i, occupied_cells: Array[Vector2i]) -> Dictionary:
@@ -67,3 +105,26 @@ func _choose_greedy_step(player_cell: Vector2i, occupied_lookup: Dictionary) -> 
 		board_state,
 		move_priority
 	)
+
+
+func build_spawn_snapshot() -> Dictionary:
+	var snapshot := super.build_spawn_snapshot()
+	snapshot["role"] = role
+	snapshot["movement_type"] = movement_type
+	snapshot["move_priority"] = move_priority
+	snapshot["step_count"] = step_count
+	snapshot["wake_goal_distance"] = wake_goal_distance
+	snapshot["lifetime_turns"] = lifetime_turns
+	return snapshot
+
+
+func _build_shared_state_snapshot() -> Dictionary:
+	return {
+		"activated": activated,
+		"turns_remaining": turns_remaining,
+	}
+
+
+func _restore_shared_state_snapshot(state: Dictionary) -> void:
+	activated = bool(state.get("activated", activated))
+	turns_remaining = int(state.get("turns_remaining", turns_remaining))

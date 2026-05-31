@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "Codex Linked Escape Hunter Repeat 6x6 A"
+saved_at_unix = 1780185600
+width = 6
+height = 6
+cell_size = 16
+size_category = "small"
+difficulty_category = "codex"
+horizontal_walls = Array[Vector2i]([])
+vertical_walls = Array[Vector2i]([])
+player_horizontal_walls = Array[Vector2i]([])
+player_vertical_walls = Array[Vector2i]([])
+enemy_horizontal_walls = Array[Vector2i]([])
+enemy_vertical_walls = Array[Vector2i]([])
+one_way_passages = Array[Dictionary]([])
+teleport_pairs = Array[Dictionary]([])
+enemy_teleport_pairs = Array[Dictionary]([])
+shared_teleport_pairs = Array[Dictionary]([])
+trap_cells = Array[Vector2i]([])
+player_spawn = Vector2i(0, 5)
+enemy_spawns = Array[Dictionary]([])
+minotaur_spawn = Vector2i(0, 0)
+exit_cell = Vector2i(5, 5)
+exit_cells = Array[Vector2i]([Vector2i(5, 5), Vector2i(4, 0), Vector2i(5, 0), Vector2i(4, 1), Vector2i(5, 1)])
+escape_zone_cells = Array[Vector2i]([Vector2i(4, 0), Vector2i(5, 0), Vector2i(4, 1), Vector2i(5, 1)])
+zone_spawners = Array[Dictionary]([{"id": "escape_zone_linked_hunter", "spawn_interval_turns": 2, "spawn_candidates": Array[Vector2i]([Vector2i(3, 0), Vector2i(3, 1), Vector2i(4, 2), Vector2i(5, 2)]), "source_zone_cells": Array[Vector2i]([Vector2i(4, 0), Vector2i(5, 0), Vector2i(4, 1), Vector2i(5, 1)]), "enemy_type": "linked_escape_hunter", "role": "linked_escape_hunter", "movement_type": "astar", "move_priority": "horizontal", "step_count": 2, "lifetime_turns": 3, "traits": Array[String](["escape_linked"])}])
+solution_actions = Array[String](["right", "right", "right", "right", "down", "down", "down", "down", "right"])
+solution_total_steps = 9
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "codex_linked_escape_hunter_repeat_showcase"

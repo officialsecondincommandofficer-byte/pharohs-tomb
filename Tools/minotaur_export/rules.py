@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from .greedy_chaser_rules import GreedyChaserRules
+from .enemy_turn_rules import EnemyTurnRules
 
-MinotaurRules = GreedyChaserRules
+GreedyChaserRules = EnemyTurnRules
+MinotaurRules = EnemyTurnRules
 
-__all__ = ["GreedyChaserRules", "MinotaurRules"]
+__all__ = ["EnemyTurnRules", "GreedyChaserRules", "MinotaurRules"]

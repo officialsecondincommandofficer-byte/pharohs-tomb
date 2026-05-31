@@ -84,6 +84,10 @@ Teleport rule for the current exported-board model:
 - waiting on a teleport tile also re-triggers that same teleport after the enemy phase
 - exit and trap validation happen against the resolved destination after the warp
 
+Optional TODO for dual-exit boards:
+- decide whether the solver/generator should prefer the dedicated main exit when both the main exit and a 2x2 escape zone are valid win cells
+- keep at least one curated board where the currently solver-preferred path wins via the 2x2 zone, because it is a useful behavior probe
+
 Recommended naming:
 - `stepped_cell`: the location reached by ordinary movement before teleport resolution
 - `resolved_cell`: the final player location after teleport resolution

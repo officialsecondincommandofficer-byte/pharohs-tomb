@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterable
 
 from .grid import partition_walls
-from .models import Coord, DirectedEdge, EnemySpawn, ExportedMaze, MazeRecord, TeleportPair
+from .models import Coord, DirectedEdge, EnemySpawn, ExportedMaze, MazeRecord, TeleportPair, ZoneSpawnerSpec
 
 
 def vector2i(value: Coord) -> str:
@@ -32,8 +32,20 @@ def enemy_spawn_dictionary(enemy: EnemySpawn) -> str:
         f'"step_count": {enemy.step_count}',
         f'"facing_index": {enemy.facing_index}',
     ]
+    if enemy.role:
+        values.append(f'"role": {json.dumps(enemy.role)}')
+    if enemy.movement_type:
+        values.append(f'"movement_type": {json.dumps(enemy.movement_type)}')
     if enemy.traits:
         values.append(f'"traits": {string_array(enemy.traits)}')
+    if enemy.wake_goal_distance >= 0:
+        values.append(f'"wake_goal_distance": {enemy.wake_goal_distance}')
+    if enemy.lifetime_turns >= 0:
+        values.append(f'"lifetime_turns": {enemy.lifetime_turns}')
+    if enemy.spawn_delay_turns > 0:
+        values.append(f'"spawn_delay_turns": {enemy.spawn_delay_turns}')
+    if enemy.respawn_delay_turns > 0:
+        values.append(f'"respawn_delay_turns": {enemy.respawn_delay_turns}')
     return "{%s}" % ", ".join(values)
 
 
@@ -67,6 +79,31 @@ def directed_edge_dictionary(edge: DirectedEdge) -> str:
 
 def directed_edge_array(values: Iterable[DirectedEdge]) -> str:
     serialized = ", ".join(directed_edge_dictionary(value) for value in values)
+    return f"Array[Dictionary]([{serialized}])"
+
+
+def zone_spawner_dictionary(spawner: ZoneSpawnerSpec) -> str:
+    values = [
+        f'"id": {json.dumps(spawner.spawner_id)}',
+        f'"spawn_interval_turns": {spawner.spawn_interval_turns}',
+        f'"spawn_candidates": {vector2i_array(spawner.spawn_candidates)}',
+        f'"source_zone_cells": {vector2i_array(spawner.source_zone_cells)}',
+        f'"enemy_type": {json.dumps(spawner.enemy_spec.enemy_type)}',
+        f'"role": {json.dumps(spawner.enemy_spec.role)}',
+        f'"movement_type": {json.dumps(spawner.enemy_spec.movement_type)}',
+        f'"move_priority": {json.dumps(spawner.enemy_spec.move_priority)}',
+        f'"step_count": {spawner.enemy_spec.step_count}',
+        f'"lifetime_turns": {spawner.enemy_spec.lifetime_turns}',
+    ]
+    if spawner.enemy_spec.traits:
+        values.append(f'"traits": {string_array(spawner.enemy_spec.traits)}')
+    if spawner.initial_delay_turns >= 0:
+        values.append(f'"initial_delay_turns": {spawner.initial_delay_turns}')
+    return "{%s}" % ", ".join(values)
+
+
+def zone_spawner_array(values: Iterable[ZoneSpawnerSpec]) -> str:
+    serialized = ", ".join(zone_spawner_dictionary(value) for value in values)
     return f"Array[Dictionary]([{serialized}])"
 
 
@@ -124,6 +161,9 @@ class GodotMazeExporter:
             f"enemy_spawns = {enemy_spawn_array(record.enemy_spawns)}",
             f"minotaur_spawn = {vector2i(record.minotaur_start)}",
             f"exit_cell = {vector2i(record.goal)}",
+            f"exit_cells = {vector2i_array(record.resolved_goal_cells)}",
+            f"escape_zone_cells = {vector2i_array(record.escape_zone_cells)}",
+            f"zone_spawners = {zone_spawner_array(record.zone_spawners)}",
             f"solution_actions = {string_array(record.solution)}",
             f"solution_total_steps = {record.solution_total_steps}",
             'generation_mode = "IMPORTED_MINOTAUR_PROJECT"',

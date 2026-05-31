@@ -1,7 +1,7 @@
 {
   "id": "solver_test_mazes",
   "display_name": "Solver Test Mazes",
-  "description": "Manual-playtest world for solver probes and curated regression mazes. Probe entries may be unverified and are meant for investigation, not release difficulty tuning.",
+  "description": "Manual-playtest world for curated solver regression mazes and larger architecture validation boards.",
   "levels": [
     {
       "id": "solver_trap_heavy_9x9_a",
@@ -58,87 +58,6 @@
       "solution_total_steps": 44
     },
     {
-      "id": "probe_samurai_timing_8x8_a",
-      "display_name": "Probe Samurai Timing 8x8 (Unverified)",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260528_152038_8x8_len000_probe_001.tres",
-      "width": 8,
-      "height": 8,
-      "difficulty": "probe",
-      "solution_total_steps": 0
-    },
-    {
-      "id": "probe_teleport_barrier_5x4_a",
-      "display_name": "Probe Required Teleport Barrier 5x4",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_barrier_5x4_len005_probe_001.tres",
-      "width": 5,
-      "height": 4,
-      "difficulty": "probe",
-      "solution_total_steps": 5
-    },
-    {
-      "id": "probe_teleport_source_targeting_4x2_a",
-      "display_name": "Probe Teleport Source Targeting 4x2",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_source_targeting_4x2_len001_probe_001.tres",
-      "width": 4,
-      "height": 2,
-      "difficulty": "probe",
-      "solution_total_steps": 1
-    },
-    {
-      "id": "probe_teleport_source_not_safe_3x1_a",
-      "display_name": "Probe Teleport Source Not Safe 3x1",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_source_not_safe_3x1_len000_probe_001.tres",
-      "width": 3,
-      "height": 1,
-      "difficulty": "probe",
-      "solution_total_steps": 0
-    },
-    {
-      "id": "probe_enemy_teleport_4x1_a",
-      "display_name": "Probe Enemy Teleport 4x1",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_enemy_only_4x1_len001_probe_001.tres",
-      "width": 4,
-      "height": 1,
-      "difficulty": "probe",
-      "solution_total_steps": 1
-    },
-    {
-      "id": "probe_shared_turn_end_teleport_4x1_a",
-      "display_name": "Probe Shared Turn-End Teleport 4x1",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/teleport_probe_shared_turn_end_4x1_len001_probe_001.tres",
-      "width": 4,
-      "height": 1,
-      "difficulty": "probe",
-      "solution_total_steps": 1
-    },
-    {
-      "id": "probe_actor_wall_enemy_only_3x2_a",
-      "display_name": "Probe Actor Wall Enemy-Only 3x2",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/actor_wall_enemy_only_3x2_len004_probe_001.tres",
-      "width": 3,
-      "height": 2,
-      "difficulty": "probe",
-      "solution_total_steps": 4
-    },
-    {
-      "id": "probe_actor_wall_player_only_4x1_a",
-      "display_name": "Probe Actor Wall Player-Only 4x1",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/actor_wall_player_only_4x1_len002_probe_001.tres",
-      "width": 4,
-      "height": 1,
-      "difficulty": "probe",
-      "solution_total_steps": 2
-    },
-    {
-      "id": "probe_one_way_passage_3x2_a",
-      "display_name": "Probe One-Way Passage 3x2",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/one_way_passage_3x2_len004_probe_001.tres",
-      "width": 3,
-      "height": 2,
-      "difficulty": "probe",
-      "solution_total_steps": 4
-    },
-    {
       "id": "solver_wall_mechanics_8x8_a",
       "display_name": "Wall Mechanics 8x8",
       "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260530_060814_8x8_len039_max_001.tres",
@@ -157,58 +76,22 @@
       "solution_total_steps": 57
     },
     {
-      "id": "solver_mixed_teleport_8x8_a",
-      "display_name": "Mixed Teleport 8x8",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_061000_8x8_len020_probe_001.tres",
-      "width": 8,
-      "height": 8,
-      "difficulty": "teleport",
-      "solution_total_steps": 20
+      "id": "solver_dual_exit_escape_zone_12x12_a",
+      "display_name": "Dual Exit Escape Zone 12x12",
+      "resource": "res://Resources/Test/minotaur_20260531_033310_12x12_len030_probe_001.tres",
+      "width": 12,
+      "height": 12,
+      "difficulty": "probe",
+      "solution_total_steps": 30
     },
     {
-      "id": "solver_enemy_turn_end_teleport_8x8_a",
-      "display_name": "Enemy Turn-End Teleport 8x8",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_071000_8x8_len022_probe_001.tres",
-      "width": 8,
-      "height": 8,
-      "difficulty": "teleport",
-      "solution_total_steps": 22
-    },
-    {
-      "id": "solver_teleport_greedy_8x8_a",
-      "display_name": "Teleport Regression Greedy 8x8 A",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_042110_8x8_len032_probe_001.tres",
-      "width": 8,
-      "height": 8,
-      "difficulty": "teleport",
-      "solution_total_steps": 32
-    },
-    {
-      "id": "solver_teleport_greedy_8x8_b",
-      "display_name": "Teleport Regression Greedy 8x8 B",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_042114_8x8_len032_probe_002.tres",
-      "width": 8,
-      "height": 8,
-      "difficulty": "teleport",
-      "solution_total_steps": 32
-    },
-    {
-      "id": "solver_teleport_greedy_8x8_c",
-      "display_name": "Teleport Regression Greedy 8x8 C",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_042115_8x8_len034_probe_003.tres",
-      "width": 8,
-      "height": 8,
-      "difficulty": "teleport",
-      "solution_total_steps": 34
-    },
-    {
-      "id": "solver_teleport_saturation_8x8_a",
-      "display_name": "Teleport Saturation 8x8",
-      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_044144_8x8_len008_probe_001.tres",
-      "width": 8,
-      "height": 8,
-      "difficulty": "teleport",
-      "solution_total_steps": 8
+      "id": "solver_dual_exit_escape_zone_12x12_b",
+      "display_name": "Dual Exit Escape Zone 12x12 B",
+      "resource": "res://Resources/Test/minotaur_20260531_042549_12x12_len037_probe_001.tres",
+      "width": 12,
+      "height": 12,
+      "difficulty": "probe",
+      "solution_total_steps": 37
     }
   ]
 }

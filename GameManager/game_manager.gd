@@ -186,7 +186,7 @@ func _run_solution_replay() -> void:
 	replaying_solution = false
 	input_locked = false
 	player.set_input_enabled(not game_over)
-	if game_over and player.get_current_cell() == board_state.exit_cell:
+	if game_over and board_state.is_exit_cell(player.get_current_cell()):
 		hud.set_message("SOLUTION GIVEN")
 
 
@@ -226,9 +226,14 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 			player.set_input_enabled(false)
 		return
 
-	await enemy_manager.begin_enemy_phase(stepped_player)
+	var enemy_results: Array = await enemy_manager.begin_enemy_phase(stepped_player)
 	move_count += 1
-	if enemy_manager.any_enemy_at_cell(stepped_player):
+	var enemy_contacted_player := false
+	for enemy_result in enemy_results:
+		if bool(enemy_result.get("contact_player", false)):
+			enemy_contacted_player = true
+			break
+	if enemy_contacted_player or enemy_manager.any_enemy_at_cell(stepped_player):
 		game_over = true
 	else:
 		var turn_end_transition: Dictionary = board_state.resolve_player_turn_end_transition(next_player)
@@ -243,16 +248,16 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 	var status_text := "In progress"
 	if game_over:
 		status_text = "You lose"
-	elif next_player == board_state.exit_cell:
+	elif board_state.is_exit_cell(next_player):
 		game_over = true
 		status_text = "You win"
 
 	_update_hud(status_text)
 
 	if game_over:
-		if from_replay and next_player == board_state.exit_cell:
+		if from_replay and board_state.is_exit_cell(next_player):
 			hud.set_message("SOLUTION GIVEN")
-		elif next_player == board_state.exit_cell:
+		elif board_state.is_exit_cell(next_player):
 			hud.set_message("YOU WIN!")
 		else:
 			hud.set_message("YOU LOSE!")
@@ -292,6 +297,7 @@ func _refresh_visibility() -> void:
 		true
 	)
 	enemy_manager.update_visibility(visible_cells)
+	tile_map.set_spawn_warning_cells(enemy_manager.get_spawn_warning_cells(player.get_current_cell()))
 
 
 func _refresh_camera() -> void:

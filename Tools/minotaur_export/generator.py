@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from .grid import MazeLayout, directed_edge_sort_key, edge_sort_key
-from .models import Coord, Edge, EnemySpec, EnemySpawn, MazeRecord
+from .models import Coord, Edge, EnemySpec, EnemySpawn, MazeRecord, ZoneSpawnerSpec
 from .solver import MazeSolver
 
 
@@ -18,6 +18,7 @@ class MazeGenerator:
     player_only_wall_count: int = 0
     enemy_only_wall_count: int = 0
     one_way_passage_count: int = 0
+    escape_zone_size: int = 1
 
     def uses_generation_prefilter(self, layout: MazeLayout) -> bool:
         return self.solver.dispatch_policy.uses_generation_prefilter(layout)
@@ -167,19 +168,50 @@ class MazeGenerator:
 
         return walls_remaining
 
-    def _sample_positions(self, layout: MazeLayout) -> tuple[Coord, tuple[EnemySpawn, ...], Coord, tuple[Coord, ...]]:
+    def _sample_positions(
+        self,
+        layout: MazeLayout,
+    ) -> tuple[Coord, tuple[EnemySpawn, ...], Coord, tuple[Coord, ...], tuple[Coord, ...], tuple[Coord, ...], tuple[ZoneSpawnerSpec, ...]]:
         while True:
             player_start = layout.random_cell(self.rng)
-            goal = layout.random_cell(self.rng)
-            if player_start == goal:
+            goal = self._sample_distinct_cell(layout, {player_start})
+            escape_zone_cells = self._sample_escape_zone_cells(layout, {player_start, goal})
+            goal_cells = (goal, *escape_zone_cells)
+            if player_start in goal_cells:
                 continue
 
-            occupied = {player_start, goal}
+            occupied = {player_start, *goal_cells, *escape_zone_cells}
             enemy_spawns: list[EnemySpawn] = []
             for spec in self.enemy_specs:
                 enemy_cell = self._sample_distinct_cell(layout, occupied)
                 occupied.add(enemy_cell)
                 enemy_spawns.append(EnemySpawn.from_spec(spec, enemy_cell))
+
+            zone_spawners: list[ZoneSpawnerSpec] = []
+            if len(escape_zone_cells) > 1:
+                spawn_candidates = tuple(
+                    cell
+                    for cell in self._adjacent_zone_candidates(layout, escape_zone_cells)
+                    if cell not in occupied
+                )
+                zone_spawners.append(
+                    ZoneSpawnerSpec(
+                        spawner_id="escape_zone_linked_hunter",
+                        enemy_spec=EnemySpec(
+                            enemy_type="linked_escape_hunter",
+                            role="linked_escape_hunter",
+                            movement_type="astar",
+                            move_priority="horizontal",
+                            step_count=2,
+                            traits=("escape_linked",),
+                            wake_goal_distance=-1,
+                            lifetime_turns=3,
+                        ),
+                        spawn_interval_turns=2,
+                        spawn_candidates=spawn_candidates,
+                        source_zone_cells=escape_zone_cells,
+                    )
+                )
 
             trap_cells: list[Coord] = []
             for _ in range(self.trap_count):
@@ -187,7 +219,44 @@ class MazeGenerator:
                 occupied.add(trap_cell)
                 trap_cells.append(trap_cell)
 
-            return player_start, tuple(enemy_spawns), goal, tuple(sorted(trap_cells))
+            return (
+                player_start,
+                tuple(enemy_spawns),
+                goal,
+                tuple(sorted(trap_cells)),
+                goal_cells,
+                escape_zone_cells,
+                tuple(zone_spawners),
+            )
+
+    def _sample_escape_zone_cells(self, layout: MazeLayout, occupied: set[Coord]) -> tuple[Coord, ...]:
+        if self.escape_zone_size <= 1:
+            return ()
+        if min(layout.width, layout.height) < self.escape_zone_size:
+            return ()
+        top_left_candidates = [
+            (x, y)
+            for y in range(layout.height - self.escape_zone_size + 1)
+            for x in range(layout.width - self.escape_zone_size + 1)
+            if all((x + dx, y + dy) not in occupied for dy in range(self.escape_zone_size) for dx in range(self.escape_zone_size))
+        ]
+        if not top_left_candidates:
+            return ()
+        top_left = top_left_candidates[self.rng.randrange(len(top_left_candidates))]
+        return tuple(
+            (top_left[0] + dx, top_left[1] + dy)
+            for dy in range(self.escape_zone_size)
+            for dx in range(self.escape_zone_size)
+        )
+
+    def _adjacent_zone_candidates(self, layout: MazeLayout, zone_cells: tuple[Coord, ...]) -> tuple[Coord, ...]:
+        goal_lookup = set(zone_cells)
+        candidates: set[Coord] = set()
+        for goal_cell in zone_cells:
+            for neighbor in layout.neighbors(goal_cell):
+                if neighbor not in goal_lookup:
+                    candidates.add(neighbor)
+        return tuple(sorted(candidates, key=lambda cell: (cell[1], cell[0])))
 
     def _sample_distinct_cell(self, layout: MazeLayout, occupied: set[Coord]) -> Coord:
         while True:
@@ -207,12 +276,22 @@ class MazeGenerator:
         if augmented_layout is None:
             return None
 
-        player_start, enemy_spawns, goal, trap_cells = self._sample_positions(augmented_layout)
+        player_start, enemy_spawns, goal, trap_cells, goal_cells, escape_zone_cells, zone_spawners = self._sample_positions(augmented_layout)
         enemy_starts = tuple(enemy.cell for enemy in enemy_spawns)
         if self.uses_generation_prefilter(augmented_layout):
-            shortest_length = self.solver.shortest_path_length_without_enemies(augmented_layout, player_start, goal)
+            shortest_length = self.solver.shortest_path_length_without_enemies(
+                augmented_layout,
+                player_start,
+                goal,
+                goal_cells=goal_cells,
+            )
             if shortest_length is not None and shortest_length < min_moves:
-                shortest_path = self.solver.shortest_path_without_enemies(augmented_layout, player_start, goal)
+                shortest_path = self.solver.shortest_path_without_enemies(
+                    augmented_layout,
+                    player_start,
+                    goal,
+                    goal_cells=goal_cells,
+                )
                 if shortest_path is not None and self.solver.sequence_is_safe(
                     augmented_layout,
                     player_start,
@@ -220,6 +299,8 @@ class MazeGenerator:
                     shortest_path,
                     goal,
                     enemy_specs=self.enemy_specs,
+                    goal_cells=goal_cells,
+                    zone_spawners=zone_spawners,
                     trap_cells=trap_cells,
                 ):
                     return None
@@ -229,7 +310,9 @@ class MazeGenerator:
             player_start,
             enemy_starts,
             goal,
+            goal_cells=goal_cells,
             enemy_specs=self.enemy_specs,
+            zone_spawners=zone_spawners,
             trap_cells=trap_cells,
         )
         if not result.solvable or result.total_steps < min_moves:
@@ -246,6 +329,9 @@ class MazeGenerator:
             player_start=player_start,
             enemy_spawns=enemy_spawns,
             goal=goal,
+            goal_cells=goal_cells,
+            escape_zone_cells=escape_zone_cells,
+            zone_spawners=zone_spawners,
             solution=result.actions,
             iteration=iteration,
             seed_hint=board_seed,
