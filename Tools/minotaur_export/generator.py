@@ -21,6 +21,11 @@ class MazeGenerator:
     one_way_passage_count: int = 0
     escape_zone_size: int = 1
 
+    MAX_PATROL_ROUTE_LENGTH: int = 16
+    MIN_LONG_PATROL_ROUTE_LENGTH: int = 8
+    MAX_PATROL_LOOP_LENGTH: int = 16
+    MIN_LONG_PATROL_LOOP_LENGTH: int = 8
+
     def uses_generation_prefilter(self, layout: MazeLayout) -> bool:
         return self.solver.dispatch_policy.uses_generation_prefilter(layout)
 
@@ -238,8 +243,13 @@ class MazeGenerator:
         enemy_index: int,
     ) -> EnemySpawn:
         patrol_route = spec.patrol_route
+        patrol_mode = spec.patrol_mode
         if (spec.role == "patroller" or spec.enemy_type == "patroller") and not patrol_route:
-            patrol_route = self._sample_patrol_route(layout, enemy_cell)
+            if patrol_mode == "loop":
+                patrol_route = self._sample_patrol_loop_route(layout, enemy_cell)
+            if not patrol_route:
+                patrol_route = self._sample_patrol_route(layout, enemy_cell)
+                patrol_mode = "ping_pong"
         behavior_seed = spec.behavior_seed
         if spec.role == "wanderer" or spec.enemy_type == "wanderer":
             behavior_seed = self.rng.randrange(1, 1 << 30)
@@ -247,37 +257,188 @@ class MazeGenerator:
             replace(
                 spec,
                 patrol_route=patrol_route,
-                patrol_mode=spec.patrol_mode,
+                patrol_mode=patrol_mode,
                 behavior_seed=behavior_seed + enemy_index if behavior_seed != 0 else behavior_seed,
             ),
             enemy_cell,
         )
 
     def _sample_patrol_route(self, layout: MazeLayout, start: Coord) -> tuple[Coord, ...]:
-        neighbors = [neighbor for neighbor in layout.neighbors(start) if not layout.is_enemy_blocked(start, neighbor)]
-        neighbors.sort(key=lambda cell: (cell[1], cell[0]))
-        if not neighbors:
-            return (start,)
+        max_length = min(self.MAX_PATROL_ROUTE_LENGTH, layout.width * layout.height)
+        preferred_min = min(self.MIN_LONG_PATROL_ROUTE_LENGTH, max_length)
+        route = self._find_patrol_path(layout, start, max_length, preferred_min)
+        if route:
+            return route
+        return (start,)
 
-        anchor = neighbors[self.rng.randrange(len(neighbors))]
-        route: list[Coord] = [start, anchor]
-        previous = start
-        current = anchor
-        while len(route) < 4:
-            candidates = [
-                neighbor
-                for neighbor in layout.neighbors(current)
-                if neighbor != previous and not layout.is_enemy_blocked(current, neighbor)
-            ]
-            candidates = [candidate for candidate in candidates if candidate not in route]
-            candidates.sort(key=lambda cell: (cell[1], cell[0]))
-            if not candidates:
-                break
-            next_cell = candidates[self.rng.randrange(len(candidates))]
-            route.append(next_cell)
-            previous = current
-            current = next_cell
-        return tuple(route)
+    def _sample_patrol_loop_route(self, layout: MazeLayout, start: Coord) -> tuple[Coord, ...]:
+        max_cycle_length = min(self.MAX_PATROL_LOOP_LENGTH, layout.width * layout.height)
+        preferred_min = min(self.MIN_LONG_PATROL_LOOP_LENGTH, max_cycle_length)
+
+        for cycle_length in range(max_cycle_length, max(3, preferred_min - 1), -1):
+            route = self._sample_rectangular_patrol_loop(layout, start, cycle_length)
+            if route:
+                return route
+
+        for cycle_length in range(preferred_min - 1, 3, -1):
+            route = self._sample_rectangular_patrol_loop(layout, start, cycle_length)
+            if route:
+                return route
+
+        def legal_neighbors(cell: Coord) -> list[Coord]:
+            return self._shuffled_legal_patrol_neighbors(layout, cell)
+
+        for cycle_length in range(max_cycle_length, 3, -1):
+            route = self._find_patrol_cycle(layout, start, legal_neighbors, cycle_length)
+            if route:
+                return route
+        return ()
+
+    def _find_patrol_path(
+        self,
+        layout: MazeLayout,
+        start: Coord,
+        max_length: int,
+        preferred_min: int,
+    ) -> tuple[Coord, ...]:
+        for target_length in range(max_length, max(1, preferred_min - 1), -1):
+            route = self._search_simple_patrol_path(layout, start, target_length)
+            if route:
+                return route
+        for target_length in range(preferred_min - 1, 1, -1):
+            route = self._search_simple_patrol_path(layout, start, target_length)
+            if route:
+                return route
+        return ()
+
+    def _search_simple_patrol_path(
+        self,
+        layout: MazeLayout,
+        start: Coord,
+        target_length: int,
+    ) -> tuple[Coord, ...]:
+        path: list[Coord] = [start]
+        visited = {start}
+
+        def search(current: Coord) -> tuple[Coord, ...]:
+            if len(path) == target_length:
+                return tuple(path)
+
+            for neighbor in self._shuffled_legal_patrol_neighbors(layout, current):
+                if neighbor in visited:
+                    continue
+                path.append(neighbor)
+                visited.add(neighbor)
+                found = search(neighbor)
+                if found:
+                    return found
+                visited.remove(neighbor)
+                path.pop()
+            return ()
+
+        return search(start)
+
+    def _find_patrol_cycle(
+        self,
+        layout: MazeLayout,
+        start: Coord,
+        legal_neighbors,
+        cycle_length: int,
+    ) -> tuple[Coord, ...]:
+        path: list[Coord] = [start]
+        visited = {start}
+
+        def search(current: Coord) -> tuple[Coord, ...]:
+            if len(path) == cycle_length:
+                if start in legal_neighbors(current):
+                    return tuple(path)
+                return ()
+
+            for neighbor in legal_neighbors(current):
+                if neighbor in visited:
+                    continue
+                path.append(neighbor)
+                visited.add(neighbor)
+                found = search(neighbor)
+                if found:
+                    return found
+                visited.remove(neighbor)
+                path.pop()
+            return ()
+
+        return search(start)
+
+    def _sample_rectangular_patrol_loop(
+        self,
+        layout: MazeLayout,
+        start: Coord,
+        target_length: int,
+    ) -> tuple[Coord, ...]:
+        rectangles: list[tuple[int, int, int, int]] = []
+        for width in range(2, layout.width + 1):
+            for height in range(2, layout.height + 1):
+                perimeter = 2 * (width + height) - 4
+                if perimeter != target_length:
+                    continue
+                for x0 in range(start[0] - width + 1, start[0] + 1):
+                    for y0 in range(start[1] - height + 1, start[1] + 1):
+                        x1 = x0 + width - 1
+                        y1 = y0 + height - 1
+                        if x0 < 0 or y0 < 0 or x1 >= layout.width or y1 >= layout.height:
+                            continue
+                        if start[0] not in (x0, x1) and start[1] not in (y0, y1):
+                            continue
+                        rectangles.append((x0, y0, x1, y1))
+
+        rectangles.sort()
+        self.rng.shuffle(rectangles)
+        for x0, y0, x1, y1 in rectangles:
+            route = self._build_rectangular_patrol_loop(start, x0, y0, x1, y1)
+            if route and self._route_is_enemy_legal(layout, route, closed=True):
+                return route
+        return ()
+
+    def _build_rectangular_patrol_loop(
+        self,
+        start: Coord,
+        x0: int,
+        y0: int,
+        x1: int,
+        y1: int,
+    ) -> tuple[Coord, ...]:
+        perimeter: list[Coord] = []
+        for x in range(x0, x1 + 1):
+            perimeter.append((x, y0))
+        for y in range(y0 + 1, y1 + 1):
+            perimeter.append((x1, y))
+        for x in range(x1 - 1, x0 - 1, -1):
+            perimeter.append((x, y1))
+        for y in range(y1 - 1, y0, -1):
+            perimeter.append((x0, y))
+
+        if start not in perimeter:
+            return ()
+        start_index = perimeter.index(start)
+        return tuple(perimeter[start_index:] + perimeter[:start_index])
+
+    def _route_is_enemy_legal(self, layout: MazeLayout, route: tuple[Coord, ...], closed: bool) -> bool:
+        if len(route) <= 1:
+            return bool(route)
+        last_index = len(route) if closed else len(route) - 1
+        for index in range(last_index):
+            a = route[index]
+            b = route[(index + 1) % len(route)]
+            if abs(a[0] - b[0]) + abs(a[1] - b[1]) != 1:
+                return False
+            if layout.is_enemy_blocked(a, b):
+                return False
+        return True
+
+    def _shuffled_legal_patrol_neighbors(self, layout: MazeLayout, cell: Coord) -> list[Coord]:
+        neighbors = [neighbor for neighbor in layout.neighbors(cell) if not layout.is_enemy_blocked(cell, neighbor)]
+        neighbors.sort(key=lambda item: (item[1], item[0]))
+        self.rng.shuffle(neighbors)
+        return neighbors
 
     def _sample_escape_zone_cells(self, layout: MazeLayout, occupied: set[Coord]) -> tuple[Coord, ...]:
         if self.escape_zone_size <= 1:

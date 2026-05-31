@@ -929,6 +929,28 @@ class GreedyChaserRulesTests(unittest.TestCase):
 
         self.assertEqual(positions, [(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
 
+    def test_patroller_loop_ignores_duplicated_terminal_start_cell(self) -> None:
+        layout = MazeLayout(width=2, height=2)
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="patroller",
+            role="patroller",
+            movement_type="patrol",
+            step_count=1,
+            patrol_route=((0, 0), (1, 0), (1, 1), (0, 1), (0, 0)),
+            patrol_mode="loop",
+        )
+
+        state = GameState(player_position=(2, 2), enemy_positions=((0, 0),))
+        positions: list[tuple[int, int] | None] = [state.enemy_positions[0]]
+        for _ in range(4):
+            next_state = rules.step_state(layout, state=state, action="skip", enemy_specs=(spec,))
+            self.assertIsNotNone(next_state)
+            state = next_state
+            positions.append(state.enemy_positions[0])
+
+        self.assertEqual(positions, [(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
+
     def test_stationary_blocker_keeps_player_goal_unsafely_occupied(self) -> None:
         layout = MazeLayout(width=3, height=1)
         rules = GreedyChaserRules()
@@ -1299,6 +1321,79 @@ class MazeGeneratorTests(unittest.TestCase):
         self.assertFalse(generator.uses_generation_prefilter(MazeLayout(width=12, height=12)))
         self.assertFalse(generator.uses_generation_prefilter(MazeLayout(width=12, height=9)))
         self.assertTrue(generator.uses_generation_prefilter(MazeLayout(width=13, height=12)))
+
+    def test_loop_patroller_generation_samples_adjacent_cycle(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            enemy_specs=(),
+        )
+        layout = MazeLayout(width=4, height=4)
+
+        route = generator._sample_patrol_loop_route(layout, (1, 1))
+
+        self.assertGreaterEqual(len(route), 4)
+        self.assertEqual(route[0], (1, 1))
+        self.assertEqual(len(route), len(set(route)))
+        for index in range(len(route)):
+            a = route[index]
+            b = route[(index + 1) % len(route)]
+            self.assertEqual(abs(a[0] - b[0]) + abs(a[1] - b[1]), 1)
+
+    def test_patroller_generation_prefers_longer_routes(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            enemy_specs=(),
+        )
+        layout = MazeLayout(width=6, height=6)
+
+        route = generator._sample_patrol_route(layout, (2, 2))
+
+        self.assertGreaterEqual(len(route), 8)
+        self.assertEqual(route[0], (2, 2))
+        self.assertEqual(len(route), len(set(route)))
+        for index in range(len(route) - 1):
+            a = route[index]
+            b = route[index + 1]
+            self.assertEqual(abs(a[0] - b[0]) + abs(a[1] - b[1]), 1)
+
+    def test_loop_patroller_generation_prefers_longer_cycles(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            enemy_specs=(),
+        )
+        layout = MazeLayout(width=6, height=6)
+
+        route = generator._sample_patrol_loop_route(layout, (2, 2))
+
+        self.assertGreaterEqual(len(route), 8)
+        self.assertEqual(route[0], (2, 2))
+
+    def test_loop_patroller_generation_downgrades_to_ping_pong_when_no_cycle_exists(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            enemy_specs=(),
+        )
+        layout = MazeLayout(width=4, height=1)
+        spec = EnemySpec(
+            enemy_type="patroller",
+            role="patroller",
+            movement_type="patrol",
+            step_count=1,
+            patrol_mode="loop",
+        )
+
+        spawn = generator._spawn_from_spec(layout, spec, (1, 0), 0)
+
+        self.assertEqual(spawn.patrol_mode, "ping_pong")
+        self.assertGreaterEqual(len(spawn.patrol_route), 2)
+        for index in range(len(spawn.patrol_route) - 1):
+            a = spawn.patrol_route[index]
+            b = spawn.patrol_route[index + 1]
+            self.assertEqual(abs(a[0] - b[0]) + abs(a[1] - b[1]), 1)
 
 
 class GodotMazeExporterTests(unittest.TestCase):

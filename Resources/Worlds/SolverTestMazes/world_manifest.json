@@ -137,6 +137,24 @@
       "height": 8,
       "difficulty": "max",
       "solution_total_steps": 11
+    },
+    {
+      "id": "solver_patroller_modes_9x8_a",
+      "display_name": "Patroller Modes 9x8",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260531_183500_9x8_len015_probe_001.tres",
+      "width": 9,
+      "height": 8,
+      "difficulty": "probe",
+      "solution_total_steps": 15
+    },
+    {
+      "id": "solver_patroller_modes_9x8_b",
+      "display_name": "Patroller Modes 9x8 B",
+      "resource": "res://Resources/Worlds/SolverTestMazes/minotaur_20260531_172532_9x8_len010_max_001.tres",
+      "width": 9,
+      "height": 8,
+      "difficulty": "max",
+      "solution_total_steps": 10
     }
   ]
 }

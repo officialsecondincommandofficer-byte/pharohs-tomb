@@ -12,6 +12,9 @@ SMALL_SIZES = {(4, 4), (5, 5), (3, 5), (4, 3), (5, 3), (5, 4)}
 MEDIUM_SIZES = {(6, 6), (7, 7), (7, 5)}
 LARGE_SIZES = {(8, 8), (9, 9), (11, 11), (15, 11), (26, 14)}
 
+PATROL_MODE_PING_PONG = "ping_pong"
+PATROL_MODE_LOOP = "loop"
+
 
 def categorize_size(width: int, height: int) -> str:
     size = (width, height)
@@ -24,6 +27,12 @@ def categorize_size(width: int, height: int) -> str:
     if max(width, height) >= 6:
         return "medium"
     return "small"
+
+
+def normalize_patrol_route(route: tuple[Coord, ...], patrol_mode: str) -> tuple[Coord, ...]:
+    if patrol_mode == PATROL_MODE_LOOP and len(route) > 1 and route[0] == route[-1]:
+        return route[:-1]
+    return route
 
 
 @dataclass(frozen=True, slots=True)
@@ -230,6 +239,7 @@ class EnemySpawn:
 
     @classmethod
     def from_spec(cls, spec: EnemySpec, cell: Coord) -> "EnemySpawn":
+        patrol_route = normalize_patrol_route(spec.patrol_route, spec.patrol_mode)
         return cls(
             enemy_type=spec.enemy_type,
             cell=cell,
@@ -243,7 +253,7 @@ class EnemySpawn:
             lifetime_turns=spec.lifetime_turns,
             spawn_delay_turns=spec.spawn_delay_turns,
             respawn_delay_turns=spec.respawn_delay_turns,
-            patrol_route=spec.patrol_route,
+            patrol_route=patrol_route,
             patrol_mode=spec.patrol_mode,
             behavior_seed=spec.behavior_seed,
         )

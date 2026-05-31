@@ -36,6 +36,8 @@ func configure(spawn_data: Dictionary, next_board_state) -> void:
 	var raw_patrol_route: Array = spawn_data.get("patrol_route", [current_cell])
 	for patrol_cell in raw_patrol_route:
 		patrol_route.append(_coerce_vector2i(patrol_cell))
+	if String(spawn_data.get("patrol_mode", "ping_pong")) == "loop" and patrol_route.size() > 1 and patrol_route[0] == patrol_route[patrol_route.size() - 1]:
+		patrol_route.remove_at(patrol_route.size() - 1)
 	if patrol_route.is_empty():
 		patrol_route.append(current_cell)
 	patrol_index = 0

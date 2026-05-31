@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from .enemy_behavior import EnemyBehavior, EnemyStepResult
-from .models import Coord, EnemyRuntimeState, EnemySpec, PatrollerBehaviorState
+from .models import Coord, EnemyRuntimeState, EnemySpec, PatrollerBehaviorState, normalize_patrol_route
 
 
 PATROL_MODE_LOOP = "loop"
@@ -51,7 +51,7 @@ class PatrollerBehavior(EnemyBehavior):
         if current_location is None:
             return EnemyStepResult(caught_player=False, next_state=enemy_states[enemy_index])
 
-        route = spec.patrol_route or (current_location,)
+        route = normalize_patrol_route(spec.patrol_route, spec.patrol_mode) or (current_location,)
         behavior_state = enemy_states[enemy_index].behavior_state
         if not isinstance(behavior_state, PatrollerBehaviorState):
             behavior_state = PatrollerBehaviorState()

@@ -21,8 +21,11 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 		spawn["lifetime_turns"] = int(spawn.get("lifetime_turns", -1))
 		spawn["spawn_delay_turns"] = int(spawn.get("spawn_delay_turns", 0))
 		spawn["respawn_delay_turns"] = int(spawn.get("respawn_delay_turns", 0))
-		spawn["patrol_route"] = coerce_vector2i_array(spawn.get("patrol_route", []))
 		spawn["patrol_mode"] = String(spawn.get("patrol_mode", "ping_pong"))
+		spawn["patrol_route"] = normalize_patrol_route(
+			coerce_vector2i_array(spawn.get("patrol_route", [])),
+			spawn["patrol_mode"]
+		)
 		spawn["behavior_seed"] = int(spawn.get("behavior_seed", 0))
 		coerced.append(spawn)
 
@@ -76,6 +79,13 @@ static func coerce_vector2i_array(raw_value) -> Array[Vector2i]:
 	for entry in raw_value:
 		coerced.append(coerce_vector2i(entry))
 	return coerced
+
+
+static func normalize_patrol_route(route: Array[Vector2i], patrol_mode: String) -> Array[Vector2i]:
+	var normalized := route.duplicate()
+	if patrol_mode == "loop" and normalized.size() > 1 and normalized[0] == normalized[normalized.size() - 1]:
+		normalized.remove_at(normalized.size() - 1)
+	return normalized
 
 
 static func _resolved_enemy_type(raw_type: String) -> String:
