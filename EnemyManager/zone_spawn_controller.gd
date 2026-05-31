@@ -91,6 +91,8 @@ func _build_spawn_configuration(spawner_data: Dictionary, spawn_cell: Vector2i) 
 		"traits": spawner_data.get("traits", ["escape_linked"]),
 		"wake_goal_distance": -1,
 		"lifetime_turns": int(spawner_data.get("lifetime_turns", 3)),
+		"patrol_route": spawner_data.get("patrol_route", []),
+		"behavior_seed": int(spawner_data.get("behavior_seed", 0)),
 	}
 
 

@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "2026-05-30 12:20:00 UTC Stationary Blocker Lane 6x3 #001"
+saved_at_unix = 1780143600
+width = 6
+height = 3
+cell_size = 16
+size_category = "small"
+difficulty_category = "max"
+horizontal_walls = Array[Vector2i]([Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(4, 1), Vector2i(5, 1)])
+vertical_walls = Array[Vector2i]([])
+player_horizontal_walls = Array[Vector2i]([])
+player_vertical_walls = Array[Vector2i]([])
+enemy_horizontal_walls = Array[Vector2i]([])
+enemy_vertical_walls = Array[Vector2i]([])
+one_way_passages = Array[Dictionary]([])
+teleport_pairs = Array[Dictionary]([])
+enemy_teleport_pairs = Array[Dictionary]([])
+shared_teleport_pairs = Array[Dictionary]([])
+trap_cells = Array[Vector2i]([])
+player_spawn = Vector2i(0, 2)
+enemy_spawns = Array[Dictionary]([{"type": "stationary_blocker", "cell": Vector2i(3, 0), "move_priority": "horizontal", "step_count": 1, "role": "stationary_blocker", "movement_type": "stationary"}])
+minotaur_spawn = Vector2i(3, 0)
+exit_cell = Vector2i(5, 2)
+main_exit_cell = Vector2i(5, 2)
+exit_cells = Array[Vector2i]([Vector2i(5, 2)])
+main_exit_cells = Array[Vector2i]([Vector2i(5, 2)])
+win_zone_cells = Array[Vector2i]([Vector2i(5, 2)])
+escape_zone_cells = Array[Vector2i]([])
+zone_spawners = Array[Dictionary]([])
+escape_zone_spawners = Array[Dictionary]([])
+solution_actions = Array[String](["right", "right", "right", "right", "right"])
+solution_total_steps = 5
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "stationary_blocker_lane_curated"
+

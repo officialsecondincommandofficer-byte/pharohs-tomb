@@ -21,6 +21,9 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 		spawn["lifetime_turns"] = int(spawn.get("lifetime_turns", -1))
 		spawn["spawn_delay_turns"] = int(spawn.get("spawn_delay_turns", 0))
 		spawn["respawn_delay_turns"] = int(spawn.get("respawn_delay_turns", 0))
+		spawn["patrol_route"] = coerce_vector2i_array(spawn.get("patrol_route", []))
+		spawn["patrol_mode"] = String(spawn.get("patrol_mode", "ping_pong"))
+		spawn["behavior_seed"] = int(spawn.get("behavior_seed", 0))
 		coerced.append(spawn)
 
 	if coerced.is_empty() and not allow_empty:
@@ -68,6 +71,13 @@ static func coerce_string_array(raw_value) -> Array[String]:
 	return coerced
 
 
+static func coerce_vector2i_array(raw_value) -> Array[Vector2i]:
+	var coerced: Array[Vector2i] = []
+	for entry in raw_value:
+		coerced.append(coerce_vector2i(entry))
+	return coerced
+
+
 static func _resolved_enemy_type(raw_type: String) -> String:
 	match raw_type:
 		"x_chaser", "y_chaser":
@@ -82,7 +92,7 @@ static func _resolved_enemy_type(raw_type: String) -> String:
 
 static func _resolved_enemy_role(raw_type: String) -> String:
 	match raw_type:
-		"x_chaser", "y_chaser", "linked_escape_hunter", "dasher":
+		"x_chaser", "y_chaser", "linked_escape_hunter", "dasher", "patroller", "stationary_blocker", "wanderer":
 			return raw_type
 		"astar_chaser":
 			return "linked_escape_hunter"
@@ -101,5 +111,19 @@ static func _resolved_movement_type(raw_type: String, role: String) -> String:
 			return "greedy"
 		"dasher":
 			return "dash"
+		"patroller":
+			return "patrol"
+		"stationary_blocker":
+			return "stationary"
+		"wanderer":
+			return "wander"
 		_:
-			return ""
+			match raw_type:
+				"patroller":
+					return "patrol"
+				"stationary_blocker":
+					return "stationary"
+				"wanderer":
+					return "wander"
+				_:
+					return ""

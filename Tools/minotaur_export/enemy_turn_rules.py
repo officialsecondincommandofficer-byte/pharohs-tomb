@@ -15,6 +15,7 @@ from .enemy_contact_rules import (
 )
 from .enemy_spawn_rules import advance_spawn_state
 from .greedy_chaser_rules import GreedyChaserBehavior, choose_greedy_step
+from .patrol_rules import PatrollerBehavior
 from .grid import MazeLayout
 from .models import (
     Coord,
@@ -37,6 +38,8 @@ from .movement import (
     resolve_player_turn_end_transition,
 )
 from .samurai_rules import SamuraiBehavior
+from .stationary_rules import StationaryBehavior
+from .wanderer_rules import WandererBehavior
 from .zone_spawner_rules import advance_zone_spawner
 
 
@@ -46,6 +49,9 @@ def build_default_enemy_behaviors() -> dict[str, EnemyBehavior]:
         "greedy": greedy,
         "astar": AStarChaserBehavior(),
         "dash": SamuraiBehavior(),
+        "patrol": PatrollerBehavior(),
+        "stationary": StationaryBehavior(),
+        "wander": WandererBehavior(),
     }
 
 
@@ -132,6 +138,9 @@ class EnemyTurnRules:
                 spawn_delay_turns=enemy.spawn_delay_turns,
                 respawn_delay_turns=enemy.respawn_delay_turns,
                 spawn_cell=enemy.cell,
+                patrol_route=enemy.patrol_route,
+                patrol_mode=enemy.patrol_mode,
+                behavior_seed=enemy.behavior_seed,
             )
             for enemy in enemy_spawns
         )

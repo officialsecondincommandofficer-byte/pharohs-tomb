@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+from dataclasses import replace
 from dataclasses import dataclass
 from typing import Callable
 
@@ -182,10 +183,10 @@ class MazeGenerator:
 
             occupied = {player_start, *goal_cells, *escape_zone_cells}
             enemy_spawns: list[EnemySpawn] = []
-            for spec in self.enemy_specs:
+            for enemy_index, spec in enumerate(self.enemy_specs):
                 enemy_cell = self._sample_distinct_cell(layout, occupied)
                 occupied.add(enemy_cell)
-                enemy_spawns.append(EnemySpawn.from_spec(spec, enemy_cell))
+                enemy_spawns.append(self._spawn_from_spec(layout, spec, enemy_cell, enemy_index))
 
             zone_spawners: list[ZoneSpawnerSpec] = []
             if len(escape_zone_cells) > 1:
@@ -228,6 +229,55 @@ class MazeGenerator:
                 escape_zone_cells,
                 tuple(zone_spawners),
             )
+
+    def _spawn_from_spec(
+        self,
+        layout: MazeLayout,
+        spec: EnemySpec,
+        enemy_cell: Coord,
+        enemy_index: int,
+    ) -> EnemySpawn:
+        patrol_route = spec.patrol_route
+        if (spec.role == "patroller" or spec.enemy_type == "patroller") and not patrol_route:
+            patrol_route = self._sample_patrol_route(layout, enemy_cell)
+        behavior_seed = spec.behavior_seed
+        if spec.role == "wanderer" or spec.enemy_type == "wanderer":
+            behavior_seed = self.rng.randrange(1, 1 << 30)
+        return EnemySpawn.from_spec(
+            replace(
+                spec,
+                patrol_route=patrol_route,
+                patrol_mode=spec.patrol_mode,
+                behavior_seed=behavior_seed + enemy_index if behavior_seed != 0 else behavior_seed,
+            ),
+            enemy_cell,
+        )
+
+    def _sample_patrol_route(self, layout: MazeLayout, start: Coord) -> tuple[Coord, ...]:
+        neighbors = [neighbor for neighbor in layout.neighbors(start) if not layout.is_enemy_blocked(start, neighbor)]
+        neighbors.sort(key=lambda cell: (cell[1], cell[0]))
+        if not neighbors:
+            return (start,)
+
+        anchor = neighbors[self.rng.randrange(len(neighbors))]
+        route: list[Coord] = [start, anchor]
+        previous = start
+        current = anchor
+        while len(route) < 4:
+            candidates = [
+                neighbor
+                for neighbor in layout.neighbors(current)
+                if neighbor != previous and not layout.is_enemy_blocked(current, neighbor)
+            ]
+            candidates = [candidate for candidate in candidates if candidate not in route]
+            candidates.sort(key=lambda cell: (cell[1], cell[0]))
+            if not candidates:
+                break
+            next_cell = candidates[self.rng.randrange(len(candidates))]
+            route.append(next_cell)
+            previous = current
+            current = next_cell
+        return tuple(route)
 
     def _sample_escape_zone_cells(self, layout: MazeLayout, occupied: set[Coord]) -> tuple[Coord, ...]:
         if self.escape_zone_size <= 1:

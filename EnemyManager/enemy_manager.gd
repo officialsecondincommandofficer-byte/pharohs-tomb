@@ -7,6 +7,7 @@ const CHASER_SCENE := preload("res://EnemyManager/Chaser/Chaser.tscn")
 const MINOTAUR_SCENE := preload("res://EnemyManager/Minotaur/Minotaur.tscn")
 const PATROLLER_SCENE := preload("res://EnemyManager/Patroller/Patroller.tscn")
 const SAMURAI_SCENE := preload("res://EnemyManager/Samurai/Samurai.tscn")
+const STATIONARY_BLOCKER_SCENE := preload("res://EnemyManager/StationaryBlocker/StationaryBlocker.tscn")
 const WANDERER_SCENE := preload("res://EnemyManager/Wanderer/Wanderer.tscn")
 const TRAIT_KILLER := "killer"
 const CONTACT_BLOCKED := "blocked"
@@ -28,6 +29,7 @@ func setup_floor(next_board_state: MazeData) -> void:
 
 	_zone_spawn_controller.setup(board_state)
 	_dynamic_spawn_order = board_state.enemy_spawns.size()
+	_refresh_enemy_intents()
 
 
 func begin_enemy_phase(player_cell: Vector2i) -> Array:
@@ -45,6 +47,7 @@ func begin_enemy_phase(player_cell: Vector2i) -> Array:
 		var result: Dictionary = await _take_enemy_turn(enemy_index, player_cell)
 		results.append(result)
 
+	_refresh_enemy_intents()
 	enemy_phase_finished.emit(results)
 	return results
 
@@ -70,6 +73,7 @@ func set_cell_immediate(cell: Vector2i) -> void:
 	var enemy = get_child(0)
 	enemy.configure(_build_spawn_configuration(0), board_state)
 	enemy.restore_to_cell(cell, true)
+	_refresh_enemy_intents()
 
 
 func set_cells_immediate(cells: Array) -> void:
@@ -82,6 +86,7 @@ func set_cells_immediate(cells: Array) -> void:
 			enemy.configure(_build_spawn_configuration(index), board_state)
 		var cell: Vector2i = cells[index]
 		enemy.restore_to_cell(cell, true)
+	_refresh_enemy_intents()
 
 
 func get_enemy_states() -> Dictionary:
@@ -116,6 +121,7 @@ func restore_enemy_states(enemy_states) -> void:
 		var config: Dictionary = enemy_state.get("config", {})
 		_spawn_enemy_from_data(config, int(config.get("spawn_order", 0)))
 		get_child(get_child_count() - 1).restore_from_state(enemy_state)
+	_refresh_enemy_intents()
 
 
 func any_enemy_at_cell(cell: Vector2i) -> bool:
@@ -128,6 +134,7 @@ func any_enemy_at_cell(cell: Vector2i) -> bool:
 func update_visibility(_visible_cells: Array[Vector2i]) -> void:
 	for child in get_children():
 		child.visible = _enemy_occupies_cell(child)
+	_refresh_enemy_intents()
 
 
 func get_spawn_warning_cells(player_cell: Vector2i) -> Array[Vector2i]:
@@ -271,6 +278,12 @@ func _tint_for_spawn(spawn_data: Dictionary) -> Color:
 		return Color(0.88, 0.78, 0.32, 1.0)
 	if String(spawn_data.get("role", "")) == "dasher":
 		return Color(0.7, 0.7, 0.78, 1.0)
+	if String(spawn_data.get("role", "")) == "stationary_blocker":
+		return Color(0.95, 0.95, 0.55, 1.0)
+	if String(spawn_data.get("role", "")) == "patroller":
+		return Color(0.65, 0.85, 1.0, 1.0)
+	if String(spawn_data.get("role", "")) == "wanderer":
+		return Color(1.0, 0.8, 0.55, 1.0)
 	if String(spawn_data.get("type", "greedy_chaser")) == "samurai":
 		return Color(0.7, 0.7, 0.78, 1.0)
 	if String(spawn_data.get("move_priority", "horizontal")) == "vertical":
@@ -285,6 +298,8 @@ func _scene_for_spawn(spawn_data: Dictionary) -> PackedScene:
 			return CHASER_SCENE
 		"patroller":
 			return PATROLLER_SCENE
+		"stationary_blocker":
+			return STATIONARY_BLOCKER_SCENE
 		"wanderer":
 			return WANDERER_SCENE
 		"minotaur":
@@ -312,6 +327,15 @@ func _spawn_enemy_from_data(spawn_data: Dictionary, spawn_order: int) -> void:
 	configured_spawn["spawn_order"] = spawn_order
 	configured_spawn["tint"] = _tint_for_spawn(configured_spawn)
 	enemy.configure(configured_spawn, board_state)
+
+
+func _refresh_enemy_intents() -> void:
+	for enemy_index in range(get_child_count()):
+		var enemy = get_child(enemy_index)
+		if not _enemy_occupies_cell(enemy):
+			continue
+		if enemy.has_method("refresh_intent_preview"):
+			enemy.refresh_intent_preview(_build_blocked_lookup_for_mover(enemy_index))
 
 
 func _advance_zone_spawners(player_cell: Vector2i) -> void:

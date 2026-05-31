@@ -94,6 +94,33 @@
       "solution_total_steps": 4
     },
     {
+      "id": "probe_patroller_lane_5x3_a",
+      "display_name": "Probe Patroller Lane 5x3",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/patroller_probe_lane_5x3_len004_probe_001.tres",
+      "width": 5,
+      "height": 3,
+      "difficulty": "probe",
+      "solution_total_steps": 4
+    },
+    {
+      "id": "probe_stationary_blocker_lane_5x3_a",
+      "display_name": "Probe Stationary Blocker Lane 5x3",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/stationary_blocker_probe_lane_5x3_len004_probe_001.tres",
+      "width": 5,
+      "height": 3,
+      "difficulty": "probe",
+      "solution_total_steps": 4
+    },
+    {
+      "id": "probe_wanderer_lane_5x3_a",
+      "display_name": "Probe Wanderer Lane 5x3",
+      "resource": "res://Resources/Worlds/SolverTestMazes/Probes/wanderer_probe_lane_5x3_len004_probe_001.tres",
+      "width": 5,
+      "height": 3,
+      "difficulty": "probe",
+      "solution_total_steps": 4
+    },
+    {
       "id": "solver_mixed_teleport_8x8_a",
       "display_name": "Mixed Teleport 8x8",
       "resource": "res://Resources/Worlds/SolverTestMazes/Probes/minotaur_20260529_061000_8x8_len020_probe_001.tres",

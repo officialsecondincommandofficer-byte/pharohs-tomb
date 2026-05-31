@@ -47,7 +47,21 @@ class AStarBehaviorState:
     path_version: int = 0
 
 
-BehaviorState = SamuraiBehaviorState | AStarBehaviorState | None
+@dataclass(frozen=True, slots=True)
+class PatrollerBehaviorState:
+    patrol_index: int = 0
+    patrol_direction: int = 1
+
+
+@dataclass(frozen=True, slots=True)
+class WandererBehaviorState:
+    facing_index: int = 2
+    decision_count: int = 0
+    visit_tick: int = 0
+    visited_ticks: tuple[tuple[Coord, int], ...] = ()
+
+
+BehaviorState = SamuraiBehaviorState | AStarBehaviorState | PatrollerBehaviorState | WandererBehaviorState | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -191,6 +205,9 @@ class EnemySpec:
     spawn_delay_turns: int = 0
     respawn_delay_turns: int = 0
     spawn_cell: Coord | None = None
+    patrol_route: tuple[Coord, ...] = ()
+    patrol_mode: str = "ping_pong"
+    behavior_seed: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -207,6 +224,9 @@ class EnemySpawn:
     lifetime_turns: int = -1
     spawn_delay_turns: int = 0
     respawn_delay_turns: int = 0
+    patrol_route: tuple[Coord, ...] = ()
+    patrol_mode: str = "ping_pong"
+    behavior_seed: int = 0
 
     @classmethod
     def from_spec(cls, spec: EnemySpec, cell: Coord) -> "EnemySpawn":
@@ -223,6 +243,9 @@ class EnemySpawn:
             lifetime_turns=spec.lifetime_turns,
             spawn_delay_turns=spec.spawn_delay_turns,
             respawn_delay_turns=spec.respawn_delay_turns,
+            patrol_route=spec.patrol_route,
+            patrol_mode=spec.patrol_mode,
+            behavior_seed=spec.behavior_seed,
         )
 
 
@@ -273,6 +296,8 @@ def resolved_movement_type(
         return "dash"
     if resolved_role == "patroller":
         return "patrol"
+    if resolved_role == "stationary_blocker":
+        return "stationary"
     if resolved_role == "wanderer":
         return "wander"
     return "greedy"

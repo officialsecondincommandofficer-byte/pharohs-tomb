@@ -20,8 +20,10 @@ from minotaur_export.models import (
     GameState,
     GenerationConfig,
     MazeRecord,
+    PatrollerBehaviorState,
     SamuraiBehaviorState,
     TeleportPair,
+    WandererBehaviorState,
     ZoneSpawnerSpec,
     ZoneSpawnerState,
 )
@@ -65,7 +67,7 @@ class MazeSolverTests(unittest.TestCase):
         self.assertEqual(result.actions, ("down",))
 
     def test_solver_returns_empty_solution_when_player_starts_on_goal(self) -> None:
-        layout = MazeLayout(width=2, height=2)
+        layout = MazeLayout(width=3, height=3)
         result = MazeSolver().solve(layout, player_start=(0, 0), enemy_starts=((1, 1),), goal=(0, 0))
         self.assertTrue(result.solvable)
         self.assertEqual(result.actions, ())
@@ -816,6 +818,304 @@ class GreedyChaserRulesTests(unittest.TestCase):
         )
         self.assertIsNone(next_state)
 
+    def test_patroller_advances_and_reverses_using_runtime_state(self) -> None:
+        layout = MazeLayout(width=4, height=1)
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="patroller",
+            role="patroller",
+            movement_type="patrol",
+            step_count=1,
+            patrol_route=((0, 0), (1, 0), (2, 0)),
+        )
+
+        first_state = rules.step_state(
+            layout,
+            state=GameState(player_position=(3, 0), enemy_positions=((0, 0),)),
+            action="skip",
+            enemy_specs=(spec,),
+        )
+        self.assertIsNotNone(first_state)
+        self.assertEqual(first_state.enemy_positions, ((1, 0),))
+        self.assertEqual(
+            first_state.enemy_states[0],
+            EnemyRuntimeState(behavior_state=PatrollerBehaviorState(patrol_index=1, patrol_direction=1)),
+        )
+
+        second_state = rules.step_state(
+            layout,
+            state=first_state,
+            action="skip",
+            enemy_specs=(spec,),
+        )
+        self.assertIsNotNone(second_state)
+        self.assertEqual(second_state.enemy_positions, ((2, 0),))
+        self.assertEqual(
+            second_state.enemy_states[0],
+            EnemyRuntimeState(behavior_state=PatrollerBehaviorState(patrol_index=2, patrol_direction=1)),
+        )
+
+        third_state = rules.step_state(
+            layout,
+            state=second_state,
+            action="skip",
+            enemy_specs=(spec,),
+        )
+        self.assertIsNotNone(third_state)
+        self.assertEqual(third_state.enemy_positions, ((1, 0),))
+        self.assertEqual(
+            third_state.enemy_states[0],
+            EnemyRuntimeState(behavior_state=PatrollerBehaviorState(patrol_index=1, patrol_direction=-1)),
+        )
+
+    def test_patroller_reverses_when_forward_cell_is_blocked(self) -> None:
+        layout = MazeLayout(width=3, height=2)
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="patroller",
+            role="patroller",
+            movement_type="patrol",
+            step_count=1,
+            patrol_route=((0, 0), (1, 0), (2, 0)),
+        )
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(
+                player_position=(0, 1),
+                enemy_positions=((1, 0), (2, 0)),
+                enemy_states=(
+                    EnemyRuntimeState(behavior_state=PatrollerBehaviorState(patrol_index=1, patrol_direction=1)),
+                    EnemyRuntimeState(),
+                ),
+            ),
+            action="skip",
+            enemy_specs=(
+                spec,
+                EnemySpec(
+                    enemy_type="stationary_blocker",
+                    role="stationary_blocker",
+                    movement_type="stationary",
+                    step_count=1,
+                ),
+            ),
+        )
+        self.assertIsNotNone(next_state)
+        self.assertEqual(next_state.enemy_positions, ((0, 0), (2, 0)))
+        self.assertEqual(
+            next_state.enemy_states[0],
+            EnemyRuntimeState(behavior_state=PatrollerBehaviorState(patrol_index=0, patrol_direction=-1)),
+        )
+
+    def test_patroller_can_loop_across_full_route(self) -> None:
+        layout = MazeLayout(width=2, height=2)
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="patroller",
+            role="patroller",
+            movement_type="patrol",
+            step_count=1,
+            patrol_route=((0, 0), (1, 0), (1, 1), (0, 1)),
+            patrol_mode="loop",
+        )
+
+        state = GameState(player_position=(2, 2), enemy_positions=((0, 0),))
+        positions: list[tuple[int, int] | None] = [state.enemy_positions[0]]
+        for _ in range(4):
+            next_state = rules.step_state(layout, state=state, action="skip", enemy_specs=(spec,))
+            self.assertIsNotNone(next_state)
+            state = next_state
+            positions.append(state.enemy_positions[0])
+
+        self.assertEqual(positions, [(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
+
+    def test_stationary_blocker_keeps_player_goal_unsafely_occupied(self) -> None:
+        layout = MazeLayout(width=3, height=1)
+        rules = GreedyChaserRules()
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(player_position=(0, 0), enemy_positions=((1, 0),)),
+            action="right",
+            enemy_specs=(
+                EnemySpec(
+                    enemy_type="stationary_blocker",
+                    role="stationary_blocker",
+                    movement_type="stationary",
+                    step_count=1,
+                ),
+            ),
+        )
+        self.assertIsNone(next_state)
+
+    def test_wanderer_uses_seeded_forward_left_right_preference(self) -> None:
+        layout = MazeLayout(width=4, height=3)
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="wanderer",
+            role="wanderer",
+            movement_type="wander",
+            step_count=1,
+            facing_index=1,
+            behavior_seed=8,
+        )
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(player_position=(3, 2), enemy_positions=((1, 1),)),
+            action="skip",
+            enemy_specs=(spec,),
+        )
+        self.assertIsNotNone(next_state)
+        self.assertEqual(next_state.enemy_positions, ((2, 1),))
+        self.assertEqual(
+            next_state.enemy_states[0],
+            EnemyRuntimeState(behavior_state=WandererBehaviorState(facing_index=1, decision_count=1, visit_tick=1, visited_ticks=(((2, 1), 1),))),
+        )
+
+        repeated_state = rules.step_state(
+            layout,
+            state=GameState(player_position=(3, 2), enemy_positions=((1, 1),)),
+            action="skip",
+            enemy_specs=(spec,),
+        )
+        self.assertEqual(next_state, repeated_state)
+
+    def test_wanderer_only_moves_back_when_forward_left_and_right_are_blocked(self) -> None:
+        layout = MazeLayout(
+            width=3,
+            height=3,
+            walls=frozenset(
+                {
+                    normalize_edge((1, 1), (2, 1)),
+                    normalize_edge((1, 1), (1, 0)),
+                    normalize_edge((1, 1), (1, 2)),
+                }
+            ),
+        )
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="wanderer",
+            role="wanderer",
+            movement_type="wander",
+            step_count=1,
+            facing_index=1,
+            behavior_seed=99,
+        )
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(player_position=(0, 2), enemy_positions=((1, 1),)),
+            action="skip",
+            enemy_specs=(spec,),
+        )
+        self.assertIsNotNone(next_state)
+        self.assertEqual(next_state.enemy_positions, ((0, 1),))
+        self.assertEqual(
+            next_state.enemy_states[0],
+            EnemyRuntimeState(behavior_state=WandererBehaviorState(facing_index=3, decision_count=1, visit_tick=1, visited_ticks=(((0, 1), 1),))),
+        )
+
+    def test_wanderer_prefers_oldest_unvisited_forward_left_right_moves(self) -> None:
+        layout = MazeLayout(width=3, height=3)
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="wanderer",
+            role="wanderer",
+            movement_type="wander",
+            step_count=1,
+            facing_index=1,
+            behavior_seed=8,
+        )
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(
+                player_position=(2, 2),
+                enemy_positions=((1, 1),),
+                enemy_states=(
+                    EnemyRuntimeState(
+                        behavior_state=WandererBehaviorState(
+                            facing_index=1,
+                            decision_count=4,
+                            visit_tick=4,
+                            visited_ticks=(((2, 1), 3), ((1, 2), 4)),
+                        )
+                    ),
+                ),
+            ),
+            action="skip",
+            enemy_specs=(spec,),
+        )
+        self.assertIsNotNone(next_state)
+        self.assertEqual(next_state.enemy_positions, ((1, 0),))
+        self.assertEqual(
+            next_state.enemy_states[0],
+            EnemyRuntimeState(
+                behavior_state=WandererBehaviorState(
+                    facing_index=0,
+                    decision_count=5,
+                    visit_tick=5,
+                    visited_ticks=(((1, 0), 5), ((1, 2), 4), ((2, 1), 3)),
+                )
+            ),
+        )
+
+    def test_wanderer_still_catches_player_after_long_recent_trail(self) -> None:
+        layout = MazeLayout(width=3, height=3)
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="wanderer",
+            role="wanderer",
+            movement_type="wander",
+            step_count=1,
+            facing_index=1,
+            behavior_seed=8,
+        )
+
+        next_state = rules.step_state(
+            layout,
+            state=GameState(
+                player_position=(2, 1),
+                enemy_positions=((1, 1),),
+                enemy_states=(
+                    EnemyRuntimeState(
+                        behavior_state=WandererBehaviorState(
+                            facing_index=1,
+                            decision_count=20,
+                            visit_tick=20,
+                            visited_ticks=(((0, 1), 18), ((1, 0), 19), ((1, 2), 20), ((2, 1), 17)),
+                        )
+                    ),
+                ),
+            ),
+            action="skip",
+            enemy_specs=(spec,),
+        )
+        self.assertIsNone(next_state)
+
+    def test_wanderer_explores_beyond_four_tile_loop_pattern(self) -> None:
+        layout = MazeLayout(width=4, height=4)
+        rules = GreedyChaserRules()
+        spec = EnemySpec(
+            enemy_type="wanderer",
+            role="wanderer",
+            movement_type="wander",
+            step_count=1,
+            facing_index=1,
+            behavior_seed=8,
+        )
+
+        state = GameState(player_position=(3, 3), enemy_positions=((1, 1),))
+        visited_positions = [state.enemy_positions[0]]
+        for _ in range(8):
+            next_state = rules.step_state(layout, state=state, action="skip", enemy_specs=(spec,))
+            self.assertIsNotNone(next_state)
+            state = next_state
+            visited_positions.append(state.enemy_positions[0])
+
+        self.assertGreaterEqual(len(set(visited_positions)), 6)
+
 
 class MazeGeneratorTests(unittest.TestCase):
     def test_sample_positions_keeps_player_goal_and_enemies_distinct(self) -> None:
@@ -1098,6 +1398,57 @@ class GodotMazeExporterTests(unittest.TestCase):
         )
 
         self.assertIn('"facing_index": 1', serialized)
+
+    def test_serialize_writes_patrol_route_and_behavior_seed(self) -> None:
+        exporter = GodotMazeExporter()
+        record = MazeRecord(
+            width=4,
+            height=1,
+            walls=(),
+            teleport_pairs=(),
+            enemy_teleport_pairs=(),
+            shared_teleport_pairs=(),
+            trap_cells=(),
+            player_start=(0, 0),
+            enemy_spawns=(
+                EnemySpawn(
+                    "wanderer",
+                    (2, 0),
+                    "horizontal",
+                    role="wanderer",
+                    movement_type="wander",
+                    step_count=1,
+                    facing_index=1,
+                    behavior_seed=17,
+                ),
+                EnemySpawn(
+                    "patroller",
+                    (1, 0),
+                    "horizontal",
+                    role="patroller",
+                    movement_type="patrol",
+                    step_count=1,
+                    patrol_route=((1, 0), (2, 0), (3, 0)),
+                    patrol_mode="loop",
+                ),
+            ),
+            goal=(3, 0),
+            solution=("right", "right", "right"),
+            iteration=1,
+        )
+
+        serialized = exporter.serialize(
+            record=record,
+            saved_at_unix=123,
+            difficulty_label="probe",
+            index=1,
+            generation_profile_id="enemy_behavior_probe",
+            cell_size=16,
+        )
+
+        self.assertIn('"behavior_seed": 17', serialized)
+        self.assertIn('"patrol_route": Array[Vector2i]([Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)])', serialized)
+        self.assertIn('"patrol_mode": "loop"', serialized)
 
     def test_serialize_writes_teleport_pairs(self) -> None:
         exporter = GodotMazeExporter()
