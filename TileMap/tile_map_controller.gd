@@ -12,15 +12,18 @@ const EXIT_UNLOCKED_TILE := Vector2i(3, 0)
 @onready var floor_checker_overlay: Node2D = $FloorCheckerOverlay
 @onready var trap_overlay: Node2D = $TrapOverlay
 @onready var teleport_overlay: Node2D = $TeleportOverlay
+@onready var spawn_warning_overlay: Node2D = $SpawnWarningOverlay
 @onready var thin_wall_overlay: Node2D = $ThinWallOverlay
 
 var _board_state
 var _exit_unlocked := false
+var _spawn_warning_cells: Array[Vector2i] = []
 
 
 func render_board(board_state, exit_unlocked: bool) -> void:
 	_board_state = board_state
 	_exit_unlocked = exit_unlocked
+	_spawn_warning_cells.clear()
 
 	floor_layer.clear()
 	wall_layer.clear()
@@ -33,6 +36,7 @@ func render_board(board_state, exit_unlocked: bool) -> void:
 	floor_checker_overlay.call("render_checker", board_state)
 	trap_overlay.call("render_traps", board_state)
 	teleport_overlay.call("render_teleports", board_state)
+	spawn_warning_overlay.call("render_warnings", board_state, _spawn_warning_cells)
 	_draw_perimeter_border()
 	_draw_exit()
 
@@ -40,6 +44,13 @@ func render_board(board_state, exit_unlocked: bool) -> void:
 func set_exit_unlocked(value: bool) -> void:
 	_exit_unlocked = value
 	_draw_exit()
+
+
+func set_spawn_warning_cells(warning_cells: Array[Vector2i]) -> void:
+	_spawn_warning_cells = warning_cells.duplicate()
+	if _board_state == null:
+		return
+	spawn_warning_overlay.call("render_warnings", _board_state, _spawn_warning_cells)
 
 
 func world_to_grid(pos: Vector2) -> Vector2i:
@@ -59,11 +70,18 @@ func _draw_exit() -> void:
 		return
 
 	goal_layer.clear()
-	goal_layer.set_cell(
-		_board_state.exit_cell,
-		TILE_SOURCE_ID,
-		EXIT_UNLOCKED_TILE if _exit_unlocked else EXIT_LOCKED_TILE
-	)
+	for escape_zone_cell in _board_state.escape_zone_cells:
+		goal_layer.set_cell(
+			escape_zone_cell,
+			TILE_SOURCE_ID,
+			EXIT_LOCKED_TILE
+		)
+	for exit_cell in _board_state.exit_cells:
+		goal_layer.set_cell(
+			exit_cell,
+			TILE_SOURCE_ID,
+			EXIT_UNLOCKED_TILE if _exit_unlocked else EXIT_LOCKED_TILE
+		)
 
 
 func _draw_perimeter_border() -> void:

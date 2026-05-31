@@ -10,10 +10,16 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 		var spawn: Dictionary = entry.duplicate(true)
 		spawn["type"] = String(spawn.get("type", "greedy_chaser"))
 		spawn["cell"] = coerce_vector2i(spawn.get("cell", fallback_cell))
+		spawn["role"] = String(spawn.get("role", ""))
+		spawn["movement_type"] = String(spawn.get("movement_type", ""))
 		spawn["move_priority"] = String(spawn.get("move_priority", "horizontal"))
 		spawn["step_count"] = int(spawn.get("step_count", 2))
 		spawn["facing_index"] = int(spawn.get("facing_index", 2))
 		spawn["traits"] = coerce_string_array(spawn.get("traits", []))
+		spawn["wake_goal_distance"] = int(spawn.get("wake_goal_distance", -1))
+		spawn["lifetime_turns"] = int(spawn.get("lifetime_turns", -1))
+		spawn["spawn_delay_turns"] = int(spawn.get("spawn_delay_turns", 0))
+		spawn["respawn_delay_turns"] = int(spawn.get("respawn_delay_turns", 0))
 		coerced.append(spawn)
 
 	if coerced.is_empty() and not allow_empty:
@@ -25,10 +31,16 @@ static func default_greedy_chaser(cell: Vector2i) -> Dictionary:
 	return {
 		"type": "greedy_chaser",
 		"cell": cell,
+		"role": "x_chaser",
+		"movement_type": "greedy",
 		"move_priority": "horizontal",
 		"step_count": 2,
 		"facing_index": 2,
 		"traits": [],
+		"wake_goal_distance": -1,
+		"lifetime_turns": -1,
+		"spawn_delay_turns": 0,
+		"respawn_delay_turns": 0,
 	}
 
 

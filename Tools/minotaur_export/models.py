@@ -31,13 +31,44 @@ class GameState:
     player_position: Coord
     enemy_positions: tuple[Coord | None, ...]
     enemy_states: tuple["EnemyRuntimeState", ...] = field(default_factory=tuple)
+    spawned_enemies: tuple["SpawnedEnemyState", ...] = field(default_factory=tuple)
+    spawner_states: tuple["ZoneSpawnerState", ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True, slots=True)
+class SamuraiBehaviorState:
+    facing_index: int = 2
+    attack_phase: int = -1
+    turns_until_dash: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class AStarBehaviorState:
+    path_version: int = 0
+
+
+BehaviorState = SamuraiBehaviorState | AStarBehaviorState | None
 
 
 @dataclass(frozen=True, slots=True)
 class EnemyRuntimeState:
-    facing_index: int = 2
-    attack_phase: int = -1
-    turns_until_dash: int = 0
+    activated: bool = True
+    turns_remaining: int = -1
+    turns_until_spawn: int = 0
+    behavior_state: BehaviorState = None
+
+
+@dataclass(frozen=True, slots=True)
+class SpawnedEnemyState:
+    spec: "EnemySpec"
+    position: Coord | None
+    runtime_state: EnemyRuntimeState
+    source_spawner_id: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class ZoneSpawnerState:
+    turns_until_spawn: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,6 +103,9 @@ class MazeRecord:
     goal: Coord
     solution: tuple[str, ...]
     iteration: int
+    goal_cells: tuple[Coord, ...] = ()
+    escape_zone_cells: tuple[Coord, ...] = ()
+    zone_spawners: tuple["ZoneSpawnerSpec", ...] = ()
     player_only_walls: tuple[Edge, ...] = ()
     enemy_only_walls: tuple[Edge, ...] = ()
     one_way_passages: tuple[DirectedEdge, ...] = ()
@@ -83,6 +117,12 @@ class MazeRecord:
     @property
     def solution_total_steps(self) -> int:
         return len(self.solution)
+
+    @property
+    def resolved_goal_cells(self) -> tuple[Coord, ...]:
+        if self.goal_cells:
+            return self.goal_cells
+        return (self.goal,)
 
     @property
     def minotaur_start(self) -> Coord:
@@ -112,6 +152,9 @@ class MazeRecord:
             self.player_start,
             self.enemy_spawns,
             self.goal,
+            self.goal_cells,
+            self.escape_zone_cells,
+            self.zone_spawners,
             self.solution,
         )
 
@@ -119,10 +162,17 @@ class MazeRecord:
 @dataclass(frozen=True, slots=True)
 class EnemySpec:
     enemy_type: str = "greedy_chaser"
+    role: str = ""
+    movement_type: str = ""
     move_priority: str = "horizontal"
     step_count: int = 2
     facing_index: int = 2
     traits: tuple[str, ...] = ()
+    wake_goal_distance: int = -1
+    lifetime_turns: int = -1
+    spawn_delay_turns: int = 0
+    respawn_delay_turns: int = 0
+    spawn_cell: Coord | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,9 +180,15 @@ class EnemySpawn:
     enemy_type: str
     cell: Coord
     move_priority: str
+    role: str = ""
+    movement_type: str = ""
     step_count: int = 2
     facing_index: int = 2
     traits: tuple[str, ...] = ()
+    wake_goal_distance: int = -1
+    lifetime_turns: int = -1
+    spawn_delay_turns: int = 0
+    respawn_delay_turns: int = 0
 
     @classmethod
     def from_spec(cls, spec: EnemySpec, cell: Coord) -> "EnemySpawn":
@@ -140,10 +196,68 @@ class EnemySpawn:
             enemy_type=spec.enemy_type,
             cell=cell,
             move_priority=spec.move_priority,
+            role=spec.role,
+            movement_type=spec.movement_type,
             step_count=spec.step_count,
             facing_index=spec.facing_index,
             traits=spec.traits,
+            wake_goal_distance=spec.wake_goal_distance,
+            lifetime_turns=spec.lifetime_turns,
+            spawn_delay_turns=spec.spawn_delay_turns,
+            respawn_delay_turns=spec.respawn_delay_turns,
         )
+
+
+@dataclass(frozen=True, slots=True)
+class ZoneSpawnerSpec:
+    spawner_id: str
+    enemy_spec: EnemySpec
+    spawn_interval_turns: int
+    spawn_candidates: tuple[Coord, ...]
+    source_zone_cells: tuple[Coord, ...] = ()
+    initial_delay_turns: int = -1
+
+
+def resolved_enemy_role(
+    enemy_type: str,
+    move_priority: str = "horizontal",
+    traits: tuple[str, ...] = (),
+    explicit_role: str = "",
+) -> str:
+    if explicit_role:
+        return explicit_role
+    if enemy_type in ("dasher", "samurai"):
+        return "dasher"
+    if enemy_type == "linked_escape_hunter":
+        return "linked_escape_hunter"
+    if enemy_type == "astar_chaser" or "escape_linked" in traits:
+        return "linked_escape_hunter"
+    if enemy_type in ("x_chaser", "y_chaser"):
+        return enemy_type
+    if enemy_type in ("chaser", "greedy_chaser", "minotaur"):
+        return "y_chaser" if move_priority == "vertical" else "x_chaser"
+    return enemy_type
+
+
+def resolved_movement_type(
+    enemy_type: str,
+    role: str = "",
+    explicit_movement_type: str = "",
+) -> str:
+    if explicit_movement_type:
+        return explicit_movement_type
+    resolved_role = role or enemy_type
+    if resolved_role == "linked_escape_hunter" or enemy_type == "astar_chaser":
+        return "astar"
+    if resolved_role in ("x_chaser", "y_chaser", "chaser", "minotaur"):
+        return "greedy"
+    if resolved_role in ("dasher", "samurai"):
+        return "dash"
+    if resolved_role == "patroller":
+        return "patrol"
+    if resolved_role == "wanderer":
+        return "wander"
+    return "greedy"
 
 
 @dataclass(frozen=True, slots=True)
@@ -183,12 +297,14 @@ class GenerationConfig:
     @property
     def enemy_specs(self) -> tuple[EnemySpec, ...]:
         specs: list[EnemySpec] = []
-        specs.extend(EnemySpec(move_priority="horizontal") for _ in range(self.greedy_horizontal_count))
-        specs.extend(EnemySpec(move_priority="vertical") for _ in range(self.greedy_vertical_count))
-        specs.extend(EnemySpec(enemy_type="samurai", step_count=1, facing_index=2) for _ in range(self.samurai_count))
+        specs.extend(EnemySpec(role="x_chaser", movement_type="greedy", move_priority="horizontal") for _ in range(self.greedy_horizontal_count))
+        specs.extend(EnemySpec(role="y_chaser", movement_type="greedy", move_priority="vertical") for _ in range(self.greedy_vertical_count))
+        specs.extend(EnemySpec(enemy_type="samurai", role="dasher", movement_type="dash", step_count=1, facing_index=2) for _ in range(self.samurai_count))
         specs = [
             EnemySpec(
                 enemy_type=spec.enemy_type,
+                role=spec.role,
+                movement_type=spec.movement_type,
                 move_priority=spec.move_priority,
                 step_count=spec.step_count,
                 facing_index=spec.facing_index,

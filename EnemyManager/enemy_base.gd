@@ -104,9 +104,11 @@ func has_trait(trait_name: String) -> bool:
 
 func build_state_snapshot() -> Dictionary:
 	return {
+		"config": build_spawn_snapshot(),
 		"cell": current_cell,
 		"alive": not is_dead,
-		"state": _build_custom_state_snapshot(),
+		"shared_state": _build_shared_state_snapshot(),
+		"behavior_state": _build_behavior_state_snapshot(),
 	}
 
 
@@ -114,18 +116,41 @@ func restore_from_state(enemy_state: Dictionary) -> void:
 	var cell: Vector2i = enemy_state.get("cell", current_cell)
 	var alive := bool(enemy_state.get("alive", true))
 	restore_to_cell(cell, alive)
-	_restore_custom_state_snapshot(enemy_state.get("state", {}))
+	var legacy_state: Dictionary = enemy_state.get("state", {})
+	_restore_shared_state_snapshot(enemy_state.get("shared_state", legacy_state))
+	_restore_behavior_state_snapshot(enemy_state.get("behavior_state", legacy_state))
 
 
 func choose_target_cell(_player_cell: Vector2i, _occupied_lookup: Dictionary) -> Vector2i:
 	return current_cell
 
 
-func _build_custom_state_snapshot() -> Dictionary:
+func build_spawn_snapshot() -> Dictionary:
+	return {
+		"type": enemy_type,
+		"cell": current_cell,
+		"spawn_order": spawn_order,
+		"traits": traits.duplicate(),
+	}
+
+
+func occupies_cell() -> bool:
+	return not is_dead
+
+
+func _build_shared_state_snapshot() -> Dictionary:
 	return {}
 
 
-func _restore_custom_state_snapshot(_state: Dictionary) -> void:
+func _restore_shared_state_snapshot(_state: Dictionary) -> void:
+	return
+
+
+func _build_behavior_state_snapshot() -> Dictionary:
+	return {}
+
+
+func _restore_behavior_state_snapshot(_state: Dictionary) -> void:
 	return
 
 

@@ -35,6 +35,9 @@ var player_spawn: Vector2i = Vector2i.ZERO
 var enemy_spawns: Array[Dictionary] = []
 var minotaur_spawn: Vector2i = Vector2i.ZERO
 var exit_cell: Vector2i = Vector2i.ZERO
+var exit_cells: Array[Vector2i] = []
+var escape_zone_cells: Array[Vector2i] = []
+var zone_spawners: Array[Dictionary] = []
 var solution_actions: Array[String] = []
 var solution_total_steps: int = 0
 var maze_key: Dictionary = {}
@@ -55,6 +58,8 @@ var _teleport_lookup: Dictionary = {}
 var _enemy_teleport_lookup: Dictionary = {}
 var _shared_teleport_lookup: Dictionary = {}
 var _trap_lookup: Dictionary = {}
+var _exit_lookup: Dictionary = {}
+var _escape_zone_lookup: Dictionary = {}
 
 
 func configure_from_maze_key(
@@ -83,6 +88,9 @@ func configure_from_maze_key(
 	shared_teleport_pairs.clear()
 	trap_cells.clear()
 	enemy_spawns.clear()
+	exit_cells.clear()
+	escape_zone_cells.clear()
+	zone_spawners.clear()
 	solution_actions.clear()
 	_floor_lookup.clear()
 	_horizontal_wall_lookup.clear()
@@ -96,6 +104,8 @@ func configure_from_maze_key(
 	_enemy_teleport_lookup.clear()
 	_shared_teleport_lookup.clear()
 	_trap_lookup.clear()
+	_exit_lookup.clear()
+	_escape_zone_lookup.clear()
 
 	for y in range(height):
 		for x in range(width):
@@ -121,6 +131,14 @@ func configure_from_maze_key(
 	enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(next_maze_key.get("enemy_spawns", []), minotaur_spawn)
 	minotaur_spawn = EnemySpawnDataScript.first_enemy_cell(enemy_spawns, minotaur_spawn)
 	exit_cell = _coerce_vector2i(next_maze_key.get("goal", Vector2i.ZERO))
+	var raw_goal_cells = next_maze_key.get("goal_cells", [exit_cell])
+	if raw_goal_cells.is_empty():
+		raw_goal_cells = [exit_cell]
+	for raw_exit_cell in raw_goal_cells:
+		add_exit_cell(_coerce_vector2i(raw_exit_cell))
+	for raw_escape_zone_cell in next_maze_key.get("escape_zone_cells", []):
+		add_escape_zone_cell(_coerce_vector2i(raw_escape_zone_cell))
+	zone_spawners = _coerce_dictionary_array(next_maze_key.get("zone_spawners", []))
 	for trap_cell in next_maze_key.get("trap_cells", []):
 		add_trap_cell(_coerce_vector2i(trap_cell))
 
@@ -181,6 +199,24 @@ func add_trap_cell(cell: Vector2i) -> void:
 		return
 	trap_cells.append(cell)
 	_trap_lookup[cell] = true
+
+
+func add_exit_cell(cell: Vector2i) -> void:
+	if not is_in_bounds(cell):
+		return
+	if _exit_lookup.has(cell):
+		return
+	exit_cells.append(cell)
+	_exit_lookup[cell] = true
+
+
+func add_escape_zone_cell(cell: Vector2i) -> void:
+	if not is_in_bounds(cell):
+		return
+	if _escape_zone_lookup.has(cell):
+		return
+	escape_zone_cells.append(cell)
+	_escape_zone_lookup[cell] = true
 
 
 func add_player_horizontal_wall(edge: Vector2i) -> void:
@@ -332,6 +368,33 @@ func has_one_way_passage(a: Vector2i, b: Vector2i) -> bool:
 
 func is_trap_cell(cell: Vector2i) -> bool:
 	return _trap_lookup.has(cell)
+
+
+func is_exit_cell(cell: Vector2i) -> bool:
+	return _exit_lookup.has(cell) or _escape_zone_lookup.has(cell)
+
+
+func is_escape_zone_cell(cell: Vector2i) -> bool:
+	return _escape_zone_lookup.has(cell)
+
+
+func goal_distance_from_player_cell(start_cell: Vector2i) -> int:
+	if is_exit_cell(start_cell):
+		return 0
+	var queue: Array[Vector2i] = [start_cell]
+	var distances: Dictionary = {start_cell: 0}
+	while not queue.is_empty():
+		var current: Vector2i = queue.pop_front()
+		var next_distance: int = int(distances[current]) + 1
+		for action in ["right", "left", "up", "down"]:
+			var next_cell: Vector2i = apply_action(current, action)
+			if next_cell == current or distances.has(next_cell):
+				continue
+			if is_exit_cell(next_cell):
+				return next_distance
+			distances[next_cell] = next_distance
+			queue.append(next_cell)
+	return -1
 
 
 func get_teleport_destination(cell: Vector2i) -> Vector2i:
@@ -521,6 +584,9 @@ func to_saved_payload(display_name: String = "", saved_at_unix: int = 0) -> Dict
 		"enemy_spawns": enemy_spawns.duplicate(true),
 		"minotaur_spawn": minotaur_spawn,
 		"exit_cell": exit_cell,
+		"exit_cells": exit_cells.duplicate(),
+		"escape_zone_cells": escape_zone_cells.duplicate(),
+		"zone_spawners": zone_spawners.duplicate(true),
 		"solution_actions": solution_actions.duplicate(),
 		"solution_total_steps": solution_total_steps,
 		"generation_mode": generation_mode,
@@ -542,6 +608,14 @@ static func from_saved_payload(payload: Dictionary) -> MazeData:
 	board.enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), board.minotaur_spawn, true)
 	board.minotaur_spawn = EnemySpawnDataScript.first_enemy_cell(board.enemy_spawns, board.minotaur_spawn)
 	board.exit_cell = board._coerce_vector2i(payload.get("exit_cell", Vector2i.ZERO))
+	var raw_exit_cells = payload.get("exit_cells", [board.exit_cell])
+	if raw_exit_cells.is_empty():
+		raw_exit_cells = [board.exit_cell]
+	for raw_exit_cell in raw_exit_cells:
+		board.add_exit_cell(board._coerce_vector2i(raw_exit_cell))
+	for raw_escape_zone_cell in payload.get("escape_zone_cells", []):
+		board.add_escape_zone_cell(board._coerce_vector2i(raw_escape_zone_cell))
+	board.zone_spawners = board._coerce_dictionary_array(payload.get("zone_spawners", []))
 	board.generation_mode = String(payload.get("generation_mode", "RUNTIME_GENERATED"))
 	board.generation_profile_id = String(payload.get("generation_profile_id", ""))
 	board.solution_total_steps = int(payload.get("solution_total_steps", 0))
@@ -686,6 +760,9 @@ func _build_maze_key_from_state() -> Dictionary:
 		"enemy_spawns": enemy_spawns.duplicate(true),
 		"mino_start": [minotaur_spawn.x, minotaur_spawn.y],
 		"goal": [exit_cell.x, exit_cell.y],
+		"goal_cells": exit_cells.duplicate(),
+		"escape_zone_cells": escape_zone_cells.duplicate(),
+		"zone_spawners": zone_spawners.duplicate(true),
 		"solution": solution_actions.duplicate(),
 		"sol_length": solution_total_steps,
 	}
@@ -707,3 +784,11 @@ func _coerce_vector2i(raw_value) -> Vector2i:
 	if raw_value is Array and raw_value.size() >= 2:
 		return Vector2i(int(raw_value[0]), int(raw_value[1]))
 	return Vector2i.ZERO
+
+
+func _coerce_dictionary_array(raw_value) -> Array[Dictionary]:
+	var coerced: Array[Dictionary] = []
+	for entry in raw_value:
+		if entry is Dictionary:
+			coerced.append(entry.duplicate(true))
+	return coerced

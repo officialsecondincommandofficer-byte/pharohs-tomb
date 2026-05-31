@@ -13,7 +13,16 @@ if str(TOOLS_DIR) not in sys.path:
 from minotaur_export.exporter import GodotMazeExporter
 from minotaur_export.generator import MazeGenerator
 from minotaur_export.grid import MazeLayout, normalize_edge
-from minotaur_export.models import EnemyRuntimeState, EnemySpec, EnemySpawn, GameState, GenerationConfig, MazeRecord, TeleportPair
+from minotaur_export.models import (
+    EnemyRuntimeState,
+    EnemySpec,
+    EnemySpawn,
+    GameState,
+    GenerationConfig,
+    MazeRecord,
+    SamuraiBehaviorState,
+    TeleportPair,
+)
 from minotaur_export.rules import GreedyChaserRules
 from minotaur_export.solver_backup import BackupMazeSolver
 from minotaur_export.solver import MazeSolver
@@ -603,14 +612,17 @@ class GreedyChaserRulesTests(unittest.TestCase):
             state=GameState(
                 player_position=(2, 0),
                 enemy_positions=((0, 0),),
-                enemy_states=(EnemyRuntimeState(facing_index=0),),
+                enemy_states=(EnemyRuntimeState(behavior_state=SamuraiBehaviorState(facing_index=0)),),
             ),
             action="skip",
             enemy_specs=(EnemySpec(enemy_type="samurai"),),
         )
         self.assertIsNotNone(next_state)
         self.assertEqual(next_state.enemy_positions, ((0, 0),))
-        self.assertEqual(next_state.enemy_states[0], EnemyRuntimeState(facing_index=1, attack_phase=0, turns_until_dash=3))
+        self.assertEqual(
+            next_state.enemy_states[0],
+            EnemyRuntimeState(behavior_state=SamuraiBehaviorState(facing_index=1, attack_phase=0, turns_until_dash=3)),
+        )
 
     def test_samurai_dashes_after_countdown_and_ignores_walls(self) -> None:
         layout = MazeLayout(width=6, height=6, walls=frozenset({normalize_edge((0, 0), (0, 1))}))
@@ -618,7 +630,7 @@ class GreedyChaserRulesTests(unittest.TestCase):
         state = GameState(
             player_position=(2, 5),
             enemy_positions=((2, 0),),
-            enemy_states=(EnemyRuntimeState(facing_index=2, attack_phase=0, turns_until_dash=1),),
+            enemy_states=(EnemyRuntimeState(behavior_state=SamuraiBehaviorState(facing_index=2, attack_phase=0, turns_until_dash=1)),),
         )
         next_state = rules.step_state(
             layout,
@@ -636,13 +648,16 @@ class MazeGeneratorTests(unittest.TestCase):
             rng=random.Random(4),
             enemy_specs=(EnemySpec(move_priority="horizontal"), EnemySpec(move_priority="vertical")),
         )
-        player_start, enemy_spawns, goal, trap_cells = generator._sample_positions(MazeLayout(width=4, height=4))
+        player_start, enemy_spawns, goal, trap_cells, goal_cells, escape_zone_cells, zone_spawners = generator._sample_positions(MazeLayout(width=4, height=4))
         occupied = {player_start, goal}
         occupied.update(enemy.cell for enemy in enemy_spawns)
         occupied.update(trap_cells)
 
         self.assertEqual(len(enemy_spawns), 2)
         self.assertEqual(len(occupied), 4)
+        self.assertEqual(goal_cells, (goal,))
+        self.assertEqual(escape_zone_cells, ())
+        self.assertEqual(zone_spawners, ())
         self.assertEqual(enemy_spawns[0].move_priority, "horizontal")
         self.assertEqual(enemy_spawns[1].move_priority, "vertical")
 
@@ -652,13 +667,38 @@ class MazeGeneratorTests(unittest.TestCase):
             rng=random.Random(4),
             trap_count=2,
         )
-        player_start, enemy_spawns, goal, trap_cells = generator._sample_positions(MazeLayout(width=4, height=4))
+        player_start, enemy_spawns, goal, trap_cells, goal_cells, escape_zone_cells, zone_spawners = generator._sample_positions(MazeLayout(width=4, height=4))
 
         self.assertEqual(len(trap_cells), 2)
         self.assertEqual(len(set(trap_cells)), 2)
         self.assertNotIn(player_start, trap_cells)
         self.assertNotIn(goal, trap_cells)
+        self.assertEqual(goal_cells, (goal,))
+        self.assertEqual(escape_zone_cells, ())
+        self.assertEqual(zone_spawners, ())
         self.assertTrue(all(enemy.cell not in trap_cells for enemy in enemy_spawns))
+
+    def test_sample_positions_adds_escape_zone_spawner_beside_main_exit(self) -> None:
+        generator = MazeGenerator(
+            solver=MazeSolver(),
+            rng=random.Random(4),
+            enemy_specs=(),
+            escape_zone_size=2,
+        )
+
+        player_start, enemy_spawns, goal, _trap_cells, goal_cells, escape_zone_cells, zone_spawners = generator._sample_positions(MazeLayout(width=6, height=6))
+
+        self.assertEqual(enemy_spawns, ())
+        self.assertEqual(goal_cells, (goal, *escape_zone_cells))
+        self.assertEqual(len(escape_zone_cells), 4)
+        self.assertNotIn(goal, escape_zone_cells)
+        self.assertNotIn(player_start, escape_zone_cells)
+        self.assertEqual(len(zone_spawners), 1)
+        self.assertEqual(zone_spawners[0].source_zone_cells, escape_zone_cells)
+        self.assertEqual(zone_spawners[0].enemy_spec.role, "linked_escape_hunter")
+        self.assertEqual(zone_spawners[0].enemy_spec.movement_type, "astar")
+        self.assertEqual(zone_spawners[0].enemy_spec.lifetime_turns, 3)
+        self.assertEqual(zone_spawners[0].spawn_interval_turns, 2)
 
     def test_generation_config_marks_first_specs_as_killers(self) -> None:
         config = GenerationConfig(
@@ -677,8 +717,11 @@ class MazeGeneratorTests(unittest.TestCase):
 
         self.assertEqual(len(specs), 3)
         self.assertEqual(specs[0].traits, ("killer",))
+        self.assertEqual(specs[0].role, "x_chaser")
+        self.assertEqual(specs[1].role, "y_chaser")
         self.assertEqual(specs[1].traits, ())
         self.assertEqual(specs[2].enemy_type, "samurai")
+        self.assertEqual(specs[2].role, "dasher")
         self.assertEqual(
             config.generation_profile_id,
             "greedy_enemies_1x_1y_1samurai_1killer_2traps_2playerwalls_1enemywalls_0oneways_9x9_batch",
@@ -735,11 +778,17 @@ class MazeGeneratorTests(unittest.TestCase):
 
     def test_try_record_rejects_safe_short_solution_before_full_solve(self) -> None:
         class FixedPositionGenerator(MazeGenerator):
-            def _sample_positions(self, layout: MazeLayout) -> tuple[tuple[int, int], tuple[EnemySpawn, ...], tuple[int, int], tuple[tuple[int, int], ...]]:
+            def _sample_positions(
+                self,
+                layout: MazeLayout,
+            ) -> tuple[tuple[int, int], tuple[EnemySpawn, ...], tuple[int, int], tuple[tuple[int, int], ...], tuple[tuple[int, int], ...], tuple[tuple[int, int], ...], tuple]:
                 return (
                     (0, 0),
                     (EnemySpawn.from_spec(EnemySpec(move_priority="horizontal"), (1, 1)),),
                     (0, 1),
+                    (),
+                    ((0, 1),),
+                    (),
                     (),
                 )
 
@@ -790,6 +839,8 @@ class GodotMazeExporterTests(unittest.TestCase):
             player_start=(0, 0),
             enemy_spawns=(EnemySpawn("greedy_chaser", (3, 3), "horizontal"),),
             goal=(1, 1),
+            goal_cells=((1, 1), (2, 1), (3, 1), (2, 2), (3, 2)),
+            escape_zone_cells=((2, 1), (3, 1), (2, 2), (3, 2)),
             solution=("right", "down"),
             iteration=1,
         )
@@ -808,6 +859,8 @@ class GodotMazeExporterTests(unittest.TestCase):
         self.assertIn("trap_cells = Array[Vector2i]([Vector2i(2, 2)])", serialized)
         self.assertIn("enemy_spawns = Array[Dictionary]", serialized)
         self.assertIn('minotaur_spawn = Vector2i(3, 3)', serialized)
+        self.assertIn("exit_cells = Array[Vector2i]([Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(2, 2), Vector2i(3, 2)])", serialized)
+        self.assertIn("escape_zone_cells = Array[Vector2i]([Vector2i(2, 1), Vector2i(3, 1), Vector2i(2, 2), Vector2i(3, 2)])", serialized)
         self.assertIn('generation_profile_id = "profile"', serialized)
 
     def test_serialize_writes_enemy_traits_when_present(self) -> None:

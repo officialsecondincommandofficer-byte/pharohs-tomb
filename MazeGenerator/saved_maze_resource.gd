@@ -26,6 +26,9 @@ const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
 @export var enemy_spawns: Array[Dictionary] = []
 @export var minotaur_spawn: Vector2i = Vector2i.ZERO
 @export var exit_cell: Vector2i = Vector2i.ZERO
+@export var exit_cells: Array[Vector2i] = []
+@export var escape_zone_cells: Array[Vector2i] = []
+@export var zone_spawners: Array[Dictionary] = []
 @export var solution_actions: Array[String] = []
 @export var solution_total_steps: int = 0
 @export var generation_mode: String = "RUNTIME_GENERATED"
@@ -56,6 +59,11 @@ func apply_payload(payload: Dictionary) -> void:
 	minotaur_spawn = _coerce_vector2i(payload.get("minotaur_spawn", minotaur_spawn))
 	enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), minotaur_spawn, true)
 	exit_cell = _coerce_vector2i(payload.get("exit_cell", exit_cell))
+	exit_cells = _coerce_vector2i_array(payload.get("exit_cells", [exit_cell]))
+	if exit_cells.is_empty():
+		exit_cells = [exit_cell]
+	escape_zone_cells = _coerce_vector2i_array(payload.get("escape_zone_cells", []))
+	zone_spawners = _coerce_dictionary_array(payload.get("zone_spawners", []))
 	solution_actions = _coerce_string_array(payload.get("solution_actions", []))
 	solution_total_steps = int(payload.get("solution_total_steps", solution_total_steps))
 	generation_mode = String(payload.get("generation_mode", generation_mode))
@@ -87,6 +95,9 @@ func to_payload() -> Dictionary:
 		"enemy_spawns": enemy_spawns.duplicate(true),
 		"minotaur_spawn": minotaur_spawn,
 		"exit_cell": exit_cell,
+		"exit_cells": exit_cells.duplicate() if not exit_cells.is_empty() else [exit_cell],
+		"escape_zone_cells": escape_zone_cells.duplicate(),
+		"zone_spawners": zone_spawners.duplicate(true),
 		"solution_actions": solution_actions.duplicate(),
 		"solution_total_steps": solution_total_steps,
 		"generation_mode": generation_mode,
@@ -139,4 +150,12 @@ func _coerce_string_array(raw_value) -> Array[String]:
 	var coerced: Array[String] = []
 	for entry in raw_value:
 		coerced.append(String(entry))
+	return coerced
+
+
+func _coerce_dictionary_array(raw_value) -> Array[Dictionary]:
+	var coerced: Array[Dictionary] = []
+	for entry in raw_value:
+		if entry is Dictionary:
+			coerced.append(entry.duplicate(true))
 	return coerced
