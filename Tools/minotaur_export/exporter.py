@@ -46,6 +46,12 @@ def enemy_spawn_dictionary(enemy: EnemySpawn) -> str:
         values.append(f'"spawn_delay_turns": {enemy.spawn_delay_turns}')
     if enemy.respawn_delay_turns > 0:
         values.append(f'"respawn_delay_turns": {enemy.respawn_delay_turns}')
+    if enemy.patrol_route:
+        values.append(f'"patrol_route": {vector2i_array(enemy.patrol_route)}')
+    if enemy.patrol_mode != "ping_pong":
+        values.append(f'"patrol_mode": {json.dumps(enemy.patrol_mode)}')
+    if enemy.behavior_seed != 0:
+        values.append(f'"behavior_seed": {enemy.behavior_seed}')
     return "{%s}" % ", ".join(values)
 
 
@@ -93,10 +99,17 @@ def zone_spawner_dictionary(spawner: ZoneSpawnerSpec) -> str:
         f'"movement_type": {json.dumps(spawner.enemy_spec.movement_type)}',
         f'"move_priority": {json.dumps(spawner.enemy_spec.move_priority)}',
         f'"step_count": {spawner.enemy_spec.step_count}',
+        f'"facing_index": {spawner.enemy_spec.facing_index}',
         f'"lifetime_turns": {spawner.enemy_spec.lifetime_turns}',
     ]
     if spawner.enemy_spec.traits:
         values.append(f'"traits": {string_array(spawner.enemy_spec.traits)}')
+    if spawner.enemy_spec.patrol_route:
+        values.append(f'"patrol_route": {vector2i_array(spawner.enemy_spec.patrol_route)}')
+    if spawner.enemy_spec.patrol_mode != "ping_pong":
+        values.append(f'"patrol_mode": {json.dumps(spawner.enemy_spec.patrol_mode)}')
+    if spawner.enemy_spec.behavior_seed != 0:
+        values.append(f'"behavior_seed": {spawner.enemy_spec.behavior_seed}')
     if spawner.initial_delay_turns >= 0:
         values.append(f'"initial_delay_turns": {spawner.initial_delay_turns}')
     return "{%s}" % ", ".join(values)

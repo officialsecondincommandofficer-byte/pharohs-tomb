@@ -87,6 +87,11 @@ class ManifestWriter:
                             "step_count": enemy.step_count,
                             "facing_index": enemy.facing_index,
                             "traits": list(enemy.traits),
+                            "role": enemy.role,
+                            "movement_type": enemy.movement_type,
+                            "patrol_route": [list(cell) for cell in enemy.patrol_route],
+                            "patrol_mode": enemy.patrol_mode,
+                            "behavior_seed": enemy.behavior_seed,
                         }
                         for enemy in exported.record.enemy_spawns
                     ],

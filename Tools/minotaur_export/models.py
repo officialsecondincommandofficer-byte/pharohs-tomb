@@ -12,6 +12,9 @@ SMALL_SIZES = {(4, 4), (5, 5), (3, 5), (4, 3), (5, 3), (5, 4)}
 MEDIUM_SIZES = {(6, 6), (7, 7), (7, 5)}
 LARGE_SIZES = {(8, 8), (9, 9), (11, 11), (15, 11), (26, 14)}
 
+PATROL_MODE_PING_PONG = "ping_pong"
+PATROL_MODE_LOOP = "loop"
+
 
 def categorize_size(width: int, height: int) -> str:
     size = (width, height)
@@ -24,6 +27,12 @@ def categorize_size(width: int, height: int) -> str:
     if max(width, height) >= 6:
         return "medium"
     return "small"
+
+
+def normalize_patrol_route(route: tuple[Coord, ...], patrol_mode: str) -> tuple[Coord, ...]:
+    if patrol_mode == PATROL_MODE_LOOP and len(route) > 1 and route[0] == route[-1]:
+        return route[:-1]
+    return route
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,7 +56,21 @@ class AStarBehaviorState:
     path_version: int = 0
 
 
-BehaviorState = SamuraiBehaviorState | AStarBehaviorState | None
+@dataclass(frozen=True, slots=True)
+class PatrollerBehaviorState:
+    patrol_index: int = 0
+    patrol_direction: int = 1
+
+
+@dataclass(frozen=True, slots=True)
+class WandererBehaviorState:
+    facing_index: int = 2
+    decision_count: int = 0
+    visit_tick: int = 0
+    visited_ticks: tuple[tuple[Coord, int], ...] = ()
+
+
+BehaviorState = SamuraiBehaviorState | AStarBehaviorState | PatrollerBehaviorState | WandererBehaviorState | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -191,6 +214,9 @@ class EnemySpec:
     spawn_delay_turns: int = 0
     respawn_delay_turns: int = 0
     spawn_cell: Coord | None = None
+    patrol_route: tuple[Coord, ...] = ()
+    patrol_mode: str = "ping_pong"
+    behavior_seed: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -207,9 +233,13 @@ class EnemySpawn:
     lifetime_turns: int = -1
     spawn_delay_turns: int = 0
     respawn_delay_turns: int = 0
+    patrol_route: tuple[Coord, ...] = ()
+    patrol_mode: str = "ping_pong"
+    behavior_seed: int = 0
 
     @classmethod
     def from_spec(cls, spec: EnemySpec, cell: Coord) -> "EnemySpawn":
+        patrol_route = normalize_patrol_route(spec.patrol_route, spec.patrol_mode)
         return cls(
             enemy_type=spec.enemy_type,
             cell=cell,
@@ -223,6 +253,9 @@ class EnemySpawn:
             lifetime_turns=spec.lifetime_turns,
             spawn_delay_turns=spec.spawn_delay_turns,
             respawn_delay_turns=spec.respawn_delay_turns,
+            patrol_route=patrol_route,
+            patrol_mode=spec.patrol_mode,
+            behavior_seed=spec.behavior_seed,
         )
 
 
@@ -273,6 +306,8 @@ def resolved_movement_type(
         return "dash"
     if resolved_role == "patroller":
         return "patrol"
+    if resolved_role == "stationary_blocker":
+        return "stationary"
     if resolved_role == "wanderer":
         return "wander"
     return "greedy"

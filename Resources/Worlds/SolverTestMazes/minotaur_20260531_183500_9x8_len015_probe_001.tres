@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "2026-05-31 18:35:00 UTC 9x8 Probe #001"
+saved_at_unix = 1780252500
+width = 9
+height = 8
+cell_size = 16
+size_category = "large"
+difficulty_category = "probe"
+horizontal_walls = Array[Vector2i]([Vector2i(4, 1), Vector2i(4, 2), Vector2i(4, 3), Vector2i(4, 6), Vector2i(4, 7)])
+vertical_walls = Array[Vector2i]([Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2), Vector2i(6, 2), Vector2i(7, 2), Vector2i(8, 2), Vector2i(2, 4), Vector2i(3, 4), Vector2i(4, 4), Vector2i(7, 4), Vector2i(8, 4)])
+player_horizontal_walls = Array[Vector2i]([])
+player_vertical_walls = Array[Vector2i]([])
+enemy_horizontal_walls = Array[Vector2i]([])
+enemy_vertical_walls = Array[Vector2i]([])
+one_way_passages = Array[Dictionary]([])
+teleport_pairs = Array[Dictionary]([])
+enemy_teleport_pairs = Array[Dictionary]([])
+shared_teleport_pairs = Array[Dictionary]([])
+trap_cells = Array[Vector2i]([])
+player_spawn = Vector2i(0, 7)
+enemy_spawns = Array[Dictionary]([{"type": "patroller", "cell": Vector2i(1, 1), "move_priority": "horizontal", "step_count": 1, "facing_index": 2, "role": "patroller", "movement_type": "patrol", "patrol_route": Array[Vector2i]([Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(4, 1), Vector2i(5, 1), Vector2i(6, 1), Vector2i(7, 1)])}, {"type": "patroller", "cell": Vector2i(5, 5), "move_priority": "horizontal", "step_count": 1, "facing_index": 2, "role": "patroller", "movement_type": "patrol", "patrol_route": Array[Vector2i]([Vector2i(5, 5), Vector2i(6, 5), Vector2i(7, 5), Vector2i(7, 6), Vector2i(6, 6), Vector2i(5, 6)]), "patrol_mode": "loop"}])
+minotaur_spawn = Vector2i(1, 1)
+exit_cell = Vector2i(8, 0)
+main_exit_cell = Vector2i(8, 0)
+exit_cells = Array[Vector2i]([Vector2i(8, 0)])
+main_exit_cells = Array[Vector2i]([Vector2i(8, 0)])
+win_zone_cells = Array[Vector2i]([Vector2i(8, 0)])
+escape_zone_cells = Array[Vector2i]([])
+zone_spawners = Array[Dictionary]([])
+escape_zone_spawners = Array[Dictionary]([])
+solution_actions = Array[String](["right", "right", "right", "right", "right", "right", "right", "right", "up", "up", "up", "up", "up", "up", "up"])
+solution_total_steps = 15
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "patroller_modes_test"

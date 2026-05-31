@@ -14,11 +14,10 @@ var is_dead := false
 var patrol_route: Array[Vector2i] = []
 var patrol_index := 0
 var patrol_direction := 1
-var _rng := RandomNumberGenerator.new()
+var behavior_seed: int = 0
 
 
 func _ready() -> void:
-	_rng.randomize()
 	anim.modulate = tint
 
 
@@ -32,10 +31,13 @@ func configure(spawn_data: Dictionary, next_board_state) -> void:
 	current_cell = spawn_data.get("cell", Vector2i.ZERO)
 	is_dead = false
 	visible = true
+	behavior_seed = int(spawn_data.get("behavior_seed", 0))
 	patrol_route.clear()
 	var raw_patrol_route: Array = spawn_data.get("patrol_route", [current_cell])
 	for patrol_cell in raw_patrol_route:
-		patrol_route.append(patrol_cell)
+		patrol_route.append(_coerce_vector2i(patrol_cell))
+	if String(spawn_data.get("patrol_mode", "ping_pong")) == "loop" and patrol_route.size() > 1 and patrol_route[0] == patrol_route[patrol_route.size() - 1]:
+		patrol_route.remove_at(patrol_route.size() - 1)
 	if patrol_route.is_empty():
 		patrol_route.append(current_cell)
 	patrol_index = 0
@@ -131,6 +133,9 @@ func build_spawn_snapshot() -> Dictionary:
 		"cell": current_cell,
 		"spawn_order": spawn_order,
 		"traits": traits.duplicate(),
+		"patrol_route": patrol_route.duplicate(),
+		"patrol_mode": "ping_pong",
+		"behavior_seed": behavior_seed,
 	}
 
 
@@ -210,3 +215,13 @@ func _coerce_string_array(raw_value) -> Array[String]:
 	for entry in raw_value:
 		coerced.append(String(entry))
 	return coerced
+
+
+func _coerce_vector2i(raw_value) -> Vector2i:
+	if raw_value is Vector2i:
+		return raw_value
+	if raw_value is Vector2:
+		return Vector2i(int(raw_value.x), int(raw_value.y))
+	if raw_value is Array and raw_value.size() >= 2:
+		return Vector2i(int(raw_value[0]), int(raw_value[1]))
+	return Vector2i.ZERO
