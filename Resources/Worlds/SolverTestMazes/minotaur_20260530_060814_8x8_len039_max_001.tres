@@ -27,6 +27,9 @@ player_spawn = Vector2i(4, 7)
 enemy_spawns = Array[Dictionary]([{"type": "greedy_chaser", "cell": Vector2i(0, 7), "move_priority": "horizontal", "step_count": 2, "facing_index": 2}, {"type": "greedy_chaser", "cell": Vector2i(6, 2), "move_priority": "vertical", "step_count": 2, "facing_index": 2}])
 minotaur_spawn = Vector2i(0, 7)
 exit_cell = Vector2i(2, 5)
+main_exit_cell = Vector2i(2, 5)
+main_exit_cells = Array[Vector2i]([Vector2i(2, 5)])
+win_zone_cells = Array[Vector2i]([Vector2i(2, 5)])
 solution_actions = Array[String](["left", "left", "skip", "right", "right", "up", "right", "up", "up", "left", "left", "up", "up", "right", "right", "up", "left", "up", "left", "left", "left", "left", "right", "down", "right", "right", "up", "right", "down", "right", "right", "down", "left", "left", "left", "down", "down", "left", "down"])
 solution_total_steps = 39
 generation_mode = "IMPORTED_MINOTAUR_PROJECT"

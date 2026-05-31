@@ -164,6 +164,23 @@ class EnemyTurnRules:
         enemy_states = state.enemy_states
         if len(enemy_states) != len(enemy_specs):
             enemy_states = tuple(self.initial_enemy_state(spec) for spec in enemy_specs)
+
+        next_spawner_states, next_spawned_enemies = self._advance_spawner_states(
+            zone_spawners=zone_spawners,
+            spawner_states=state.spawner_states,
+            player_location=transition.stepped_cell,
+            occupied_cells={
+                position
+                for position in state.enemy_positions
+                if position is not None
+            } | {
+                enemy.position
+                for enemy in state.spawned_enemies
+                if enemy.position is not None
+            },
+            spawned_enemies=list(state.spawned_enemies),
+        )
+
         next_enemy_locations, next_enemy_states, next_spawned_enemies = self._step_enemy_positions(
             layout=layout,
             player_location=transition.stepped_cell,
@@ -172,34 +189,18 @@ class EnemyTurnRules:
             enemy_specs=enemy_specs,
             goal_cells=goal_cells,
             zone_spawners=zone_spawners,
-            spawner_states=state.spawner_states,
-            spawned_enemies=state.spawned_enemies,
+            spawner_states=next_spawner_states,
+            spawned_enemies=next_spawned_enemies,
         )
         if next_enemy_locations is None:
             return None
-
-        next_spawner_states = self._advance_spawner_states(
-            zone_spawners=zone_spawners,
-            spawner_states=state.spawner_states,
-            player_location=transition.stepped_cell,
-            occupied_cells={
-                position
-                for position in next_enemy_locations
-                if position is not None
-            } | {
-                enemy.position
-                for enemy in next_spawned_enemies
-                if enemy.position is not None
-            },
-            spawned_enemies=list(next_spawned_enemies),
-        )
 
         turn_end_transition = resolve_player_turn_end_transition(layout, transition.resolved_cell)
         return GameState(
             player_position=turn_end_transition.resolved_cell,
             enemy_positions=next_enemy_locations,
             enemy_states=next_enemy_states,
-            spawned_enemies=tuple(next_spawned_enemies),
+            spawned_enemies=next_spawned_enemies,
             spawner_states=next_spawner_states,
         )
 
@@ -384,9 +385,9 @@ class EnemyTurnRules:
         player_location: Coord,
         occupied_cells: set[Coord],
         spawned_enemies: list[SpawnedEnemyState],
-    ):
+    ) -> tuple[tuple, tuple[SpawnedEnemyState, ...]]:
         if not zone_spawners:
-            return spawner_states
+            return spawner_states, tuple(spawned_enemies)
         next_states = list(spawner_states)
         for index, spawner in enumerate(zone_spawners):
             behavior = self.behavior_for_spec(spawner.enemy_spec)
@@ -402,4 +403,4 @@ class EnemyTurnRules:
                 spawned_enemies.append(spawned_enemy)
                 if spawned_enemy.position is not None:
                     occupied_cells.add(spawned_enemy.position)
-        return tuple(next_states)
+        return tuple(next_states), tuple(spawned_enemies)

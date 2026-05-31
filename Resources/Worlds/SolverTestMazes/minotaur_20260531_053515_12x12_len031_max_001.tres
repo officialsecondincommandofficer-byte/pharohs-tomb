@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "2026-05-31 05:35:15 UTC 12x12 Max #001"
+saved_at_unix = 1780205715
+width = 12
+height = 12
+cell_size = 16
+size_category = "large"
+difficulty_category = "max"
+horizontal_walls = Array[Vector2i]([Vector2i(2, 1), Vector2i(4, 1), Vector2i(6, 1), Vector2i(8, 1), Vector2i(9, 1), Vector2i(1, 2), Vector2i(6, 2), Vector2i(7, 2), Vector2i(8, 2), Vector2i(9, 2), Vector2i(10, 2), Vector2i(11, 2), Vector2i(2, 3), Vector2i(3, 3), Vector2i(6, 3), Vector2i(9, 3), Vector2i(10, 3), Vector2i(1, 4), Vector2i(3, 4), Vector2i(1, 5), Vector2i(7, 5), Vector2i(10, 5), Vector2i(11, 5), Vector2i(8, 6), Vector2i(10, 6), Vector2i(0, 7), Vector2i(3, 7), Vector2i(8, 7), Vector2i(9, 7), Vector2i(0, 8), Vector2i(7, 8), Vector2i(9, 8), Vector2i(0, 9), Vector2i(3, 10), Vector2i(7, 10), Vector2i(8, 10), Vector2i(2, 11), Vector2i(3, 11), Vector2i(4, 11), Vector2i(5, 11), Vector2i(7, 11), Vector2i(10, 11)])
+vertical_walls = Array[Vector2i]([Vector2i(7, 0), Vector2i(10, 0), Vector2i(11, 0), Vector2i(1, 1), Vector2i(5, 1), Vector2i(1, 2), Vector2i(6, 2), Vector2i(2, 3), Vector2i(4, 3), Vector2i(5, 3), Vector2i(6, 3), Vector2i(1, 4), Vector2i(3, 4), Vector2i(4, 4), Vector2i(6, 4), Vector2i(8, 4), Vector2i(1, 5), Vector2i(4, 5), Vector2i(5, 5), Vector2i(6, 5), Vector2i(7, 5), Vector2i(8, 5), Vector2i(2, 6), Vector2i(3, 6), Vector2i(5, 6), Vector2i(11, 6), Vector2i(4, 7), Vector2i(10, 7), Vector2i(4, 8), Vector2i(5, 8), Vector2i(11, 8), Vector2i(1, 9), Vector2i(5, 9), Vector2i(10, 9), Vector2i(2, 10), Vector2i(5, 10), Vector2i(7, 10), Vector2i(11, 10), Vector2i(6, 11), Vector2i(7, 11), Vector2i(9, 11), Vector2i(11, 11)])
+player_horizontal_walls = Array[Vector2i]([])
+player_vertical_walls = Array[Vector2i]([])
+enemy_horizontal_walls = Array[Vector2i]([])
+enemy_vertical_walls = Array[Vector2i]([])
+one_way_passages = Array[Dictionary]([])
+teleport_pairs = Array[Dictionary]([])
+enemy_teleport_pairs = Array[Dictionary]([])
+shared_teleport_pairs = Array[Dictionary]([])
+trap_cells = Array[Vector2i]([])
+player_spawn = Vector2i(3, 2)
+enemy_spawns = Array[Dictionary]([{"type": "greedy_chaser", "cell": Vector2i(6, 4), "move_priority": "horizontal", "step_count": 2, "facing_index": 2, "role": "x_chaser", "movement_type": "greedy"}, {"type": "greedy_chaser", "cell": Vector2i(4, 6), "move_priority": "vertical", "step_count": 2, "facing_index": 2, "role": "y_chaser", "movement_type": "greedy"}])
+minotaur_spawn = Vector2i(6, 4)
+exit_cell = Vector2i(10, 8)
+main_exit_cell = Vector2i(10, 8)
+exit_cells = Array[Vector2i]([Vector2i(10, 8), Vector2i(0, 10), Vector2i(1, 10), Vector2i(0, 11), Vector2i(1, 11)])
+main_exit_cells = Array[Vector2i]([Vector2i(10, 8)])
+win_zone_cells = Array[Vector2i]([Vector2i(10, 8), Vector2i(0, 10), Vector2i(1, 10), Vector2i(0, 11), Vector2i(1, 11)])
+escape_zone_cells = Array[Vector2i]([Vector2i(0, 10), Vector2i(1, 10), Vector2i(0, 11), Vector2i(1, 11)])
+zone_spawners = Array[Dictionary]([{"id": "escape_zone_linked_hunter", "spawn_interval_turns": 2, "spawn_candidates": Array[Vector2i]([Vector2i(0, 9), Vector2i(1, 9), Vector2i(2, 10), Vector2i(2, 11)]), "source_zone_cells": Array[Vector2i]([Vector2i(0, 10), Vector2i(1, 10), Vector2i(0, 11), Vector2i(1, 11)]), "enemy_type": "linked_escape_hunter", "role": "linked_escape_hunter", "movement_type": "astar", "move_priority": "horizontal", "step_count": 2, "lifetime_turns": 3, "traits": Array[String](["escape_linked"])}])
+escape_zone_spawners = Array[Dictionary]([{"id": "escape_zone_linked_hunter", "spawn_interval_turns": 2, "spawn_candidates": Array[Vector2i]([Vector2i(0, 9), Vector2i(1, 9), Vector2i(2, 10), Vector2i(2, 11)]), "source_zone_cells": Array[Vector2i]([Vector2i(0, 10), Vector2i(1, 10), Vector2i(0, 11), Vector2i(1, 11)]), "enemy_type": "linked_escape_hunter", "role": "linked_escape_hunter", "movement_type": "astar", "move_priority": "horizontal", "step_count": 2, "lifetime_turns": 3, "traits": Array[String](["escape_linked"])}])
+solution_actions = Array[String](["left", "left", "down", "left", "down", "down", "down", "up", "up", "down", "down", "up", "up", "up", "right", "up", "right", "right", "right", "down", "down", "right", "down", "down", "right", "right", "right", "right", "right", "down", "down"])
+solution_total_steps = 31
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "greedy_enemies_1x_1y_0samurai_0killer_0traps_0playerwalls_0enemywalls_0oneways_12x12_batch"

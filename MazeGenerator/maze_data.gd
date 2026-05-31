@@ -130,15 +130,15 @@ func configure_from_maze_key(
 	minotaur_spawn = _coerce_vector2i(next_maze_key.get("mino_start", Vector2i.ZERO))
 	enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(next_maze_key.get("enemy_spawns", []), minotaur_spawn)
 	minotaur_spawn = EnemySpawnDataScript.first_enemy_cell(enemy_spawns, minotaur_spawn)
-	exit_cell = _coerce_vector2i(next_maze_key.get("goal", Vector2i.ZERO))
-	var raw_goal_cells = next_maze_key.get("goal_cells", [exit_cell])
+	exit_cell = _resolve_main_exit_cell_from_payload(next_maze_key, "main_exit_cell", "goal")
+	var raw_goal_cells = _resolve_main_exit_cells_from_payload(next_maze_key, "main_exit_cells", "goal_cells", exit_cell)
 	if raw_goal_cells.is_empty():
 		raw_goal_cells = [exit_cell]
 	for raw_exit_cell in raw_goal_cells:
 		add_exit_cell(_coerce_vector2i(raw_exit_cell))
 	for raw_escape_zone_cell in next_maze_key.get("escape_zone_cells", []):
 		add_escape_zone_cell(_coerce_vector2i(raw_escape_zone_cell))
-	zone_spawners = _coerce_dictionary_array(next_maze_key.get("zone_spawners", []))
+	zone_spawners = _coerce_dictionary_array(next_maze_key.get("escape_zone_spawners", next_maze_key.get("zone_spawners", [])))
 	for trap_cell in next_maze_key.get("trap_cells", []):
 		add_trap_cell(_coerce_vector2i(trap_cell))
 
@@ -371,6 +371,14 @@ func is_trap_cell(cell: Vector2i) -> bool:
 
 
 func is_exit_cell(cell: Vector2i) -> bool:
+	return is_win_cell(cell)
+
+
+func is_main_exit_cell(cell: Vector2i) -> bool:
+	return _exit_lookup.has(cell)
+
+
+func is_win_cell(cell: Vector2i) -> bool:
 	return _exit_lookup.has(cell) or _escape_zone_lookup.has(cell)
 
 
@@ -378,8 +386,30 @@ func is_escape_zone_cell(cell: Vector2i) -> bool:
 	return _escape_zone_lookup.has(cell)
 
 
+func get_main_exit_cell() -> Vector2i:
+	return exit_cell
+
+
+func get_main_exit_cells() -> Array[Vector2i]:
+	if exit_cells.is_empty():
+		return [exit_cell]
+	return exit_cells.duplicate()
+
+
+func get_win_zone_cells() -> Array[Vector2i]:
+	var win_cells: Array[Vector2i] = get_main_exit_cells()
+	for escape_zone_cell in escape_zone_cells:
+		if not win_cells.has(escape_zone_cell):
+			win_cells.append(escape_zone_cell)
+	return win_cells
+
+
+func get_escape_zone_spawners() -> Array[Dictionary]:
+	return zone_spawners.duplicate(true)
+
+
 func goal_distance_from_player_cell(start_cell: Vector2i) -> int:
-	if is_exit_cell(start_cell):
+	if is_win_cell(start_cell):
 		return 0
 	var queue: Array[Vector2i] = [start_cell]
 	var distances: Dictionary = {start_cell: 0}
@@ -390,7 +420,7 @@ func goal_distance_from_player_cell(start_cell: Vector2i) -> int:
 			var next_cell: Vector2i = apply_action(current, action)
 			if next_cell == current or distances.has(next_cell):
 				continue
-			if is_exit_cell(next_cell):
+			if is_win_cell(next_cell):
 				return next_distance
 			distances[next_cell] = next_distance
 			queue.append(next_cell)
@@ -584,9 +614,13 @@ func to_saved_payload(display_name: String = "", saved_at_unix: int = 0) -> Dict
 		"enemy_spawns": enemy_spawns.duplicate(true),
 		"minotaur_spawn": minotaur_spawn,
 		"exit_cell": exit_cell,
+		"main_exit_cell": exit_cell,
 		"exit_cells": exit_cells.duplicate(),
+		"main_exit_cells": get_main_exit_cells(),
+		"win_zone_cells": get_win_zone_cells(),
 		"escape_zone_cells": escape_zone_cells.duplicate(),
 		"zone_spawners": zone_spawners.duplicate(true),
+		"escape_zone_spawners": zone_spawners.duplicate(true),
 		"solution_actions": solution_actions.duplicate(),
 		"solution_total_steps": solution_total_steps,
 		"generation_mode": generation_mode,
@@ -607,15 +641,15 @@ static func from_saved_payload(payload: Dictionary) -> MazeData:
 	board.minotaur_spawn = board._coerce_vector2i(payload.get("minotaur_spawn", Vector2i.ZERO))
 	board.enemy_spawns = EnemySpawnDataScript.coerce_enemy_spawn_array(payload.get("enemy_spawns", []), board.minotaur_spawn, true)
 	board.minotaur_spawn = EnemySpawnDataScript.first_enemy_cell(board.enemy_spawns, board.minotaur_spawn)
-	board.exit_cell = board._coerce_vector2i(payload.get("exit_cell", Vector2i.ZERO))
-	var raw_exit_cells = payload.get("exit_cells", [board.exit_cell])
+	board.exit_cell = board._resolve_main_exit_cell_from_payload(payload, "main_exit_cell", "exit_cell")
+	var raw_exit_cells = board._resolve_main_exit_cells_from_payload(payload, "main_exit_cells", "exit_cells", board.exit_cell)
 	if raw_exit_cells.is_empty():
 		raw_exit_cells = [board.exit_cell]
 	for raw_exit_cell in raw_exit_cells:
 		board.add_exit_cell(board._coerce_vector2i(raw_exit_cell))
 	for raw_escape_zone_cell in payload.get("escape_zone_cells", []):
 		board.add_escape_zone_cell(board._coerce_vector2i(raw_escape_zone_cell))
-	board.zone_spawners = board._coerce_dictionary_array(payload.get("zone_spawners", []))
+	board.zone_spawners = board._coerce_dictionary_array(payload.get("escape_zone_spawners", payload.get("zone_spawners", [])))
 	board.generation_mode = String(payload.get("generation_mode", "RUNTIME_GENERATED"))
 	board.generation_profile_id = String(payload.get("generation_profile_id", ""))
 	board.solution_total_steps = int(payload.get("solution_total_steps", 0))
@@ -760,9 +794,13 @@ func _build_maze_key_from_state() -> Dictionary:
 		"enemy_spawns": enemy_spawns.duplicate(true),
 		"mino_start": [minotaur_spawn.x, minotaur_spawn.y],
 		"goal": [exit_cell.x, exit_cell.y],
+		"main_exit_cell": [exit_cell.x, exit_cell.y],
 		"goal_cells": exit_cells.duplicate(),
+		"main_exit_cells": get_main_exit_cells(),
+		"win_zone_cells": get_win_zone_cells(),
 		"escape_zone_cells": escape_zone_cells.duplicate(),
 		"zone_spawners": zone_spawners.duplicate(true),
+		"escape_zone_spawners": zone_spawners.duplicate(true),
 		"solution": solution_actions.duplicate(),
 		"sol_length": solution_total_steps,
 	}
@@ -791,4 +829,48 @@ func _coerce_dictionary_array(raw_value) -> Array[Dictionary]:
 	for entry in raw_value:
 		if entry is Dictionary:
 			coerced.append(entry.duplicate(true))
+	return coerced
+
+
+func _resolve_main_exit_cell_from_payload(payload: Dictionary, preferred_key: String, fallback_key: String) -> Vector2i:
+	var preferred_cell := _coerce_vector2i(payload.get(preferred_key, Vector2i.ZERO))
+	if preferred_cell != Vector2i.ZERO:
+		return preferred_cell
+
+	var fallback_cell := _coerce_vector2i(payload.get(fallback_key, Vector2i.ZERO))
+	if fallback_cell != Vector2i.ZERO:
+		return fallback_cell
+
+	var preferred_cells = _coerce_vector2i_array(payload.get(preferred_key.replace("_cell", "_cells"), []))
+	if not preferred_cells.is_empty():
+		return preferred_cells[0]
+
+	var fallback_cells = _coerce_vector2i_array(payload.get(fallback_key.replace("_cell", "_cells"), []))
+	if not fallback_cells.is_empty():
+		return fallback_cells[0]
+
+	return preferred_cell
+
+
+func _resolve_main_exit_cells_from_payload(
+	payload: Dictionary,
+	preferred_key: String,
+	fallback_key: String,
+	fallback_cell: Vector2i
+) -> Array:
+	var preferred_cells = _coerce_vector2i_array(payload.get(preferred_key, []))
+	if not preferred_cells.is_empty():
+		return preferred_cells
+
+	var fallback_cells = _coerce_vector2i_array(payload.get(fallback_key, []))
+	if not fallback_cells.is_empty():
+		return fallback_cells
+
+	return [fallback_cell]
+
+
+func _coerce_vector2i_array(raw_value) -> Array[Vector2i]:
+	var coerced: Array[Vector2i] = []
+	for entry in raw_value:
+		coerced.append(_coerce_vector2i(entry))
 	return coerced
