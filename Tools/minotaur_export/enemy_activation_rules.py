@@ -11,10 +11,11 @@ def update_activation_state(
     player_location: Coord,
     goal_cells: tuple[Coord, ...],
 ) -> EnemyRuntimeState:
+    wake_goal_distance = spec.component_int("activation", "wake_goal_distance", spec.wake_goal_distance)
     if state.activated:
         return state
-    if spec.wake_goal_distance >= 0 and goal_cells:
-        if min(manhattan_distance(player_location, goal) for goal in goal_cells) > spec.wake_goal_distance:
+    if wake_goal_distance >= 0 and goal_cells:
+        if min(manhattan_distance(player_location, goal) for goal in goal_cells) > wake_goal_distance:
             return state
     return replace(state, activated=True)
 
@@ -25,16 +26,18 @@ def advance_lifetime(
     enemy_positions: list[Coord | None],
     enemy_index: int,
 ) -> EnemyRuntimeState:
-    if not state.activated or spec.lifetime_turns < 0 or enemy_positions[enemy_index] is None:
+    lifetime_turns = spec.component_int("lifecycle", "lifetime_turns", spec.lifetime_turns)
+    respawn_delay_turns = spec.component_int("activation", "respawn_delay_turns", spec.respawn_delay_turns)
+    if not state.activated or lifetime_turns < 0 or enemy_positions[enemy_index] is None:
         return state
     next_turns_remaining = state.turns_remaining - 1
     if next_turns_remaining <= 0:
         enemy_positions[enemy_index] = None
-        if spec.respawn_delay_turns > 0:
+        if respawn_delay_turns > 0:
             return EnemyRuntimeState(
                 activated=False,
-                turns_remaining=spec.lifetime_turns,
-                turns_until_spawn=spec.respawn_delay_turns,
+                turns_remaining=lifetime_turns,
+                turns_until_spawn=respawn_delay_turns,
                 behavior_state=state.behavior_state,
             )
         return EnemyRuntimeState()

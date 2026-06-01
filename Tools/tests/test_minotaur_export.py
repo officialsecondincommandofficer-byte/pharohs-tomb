@@ -27,13 +27,66 @@ from minotaur_export.models import (
     ZoneSpawnerSpec,
     ZoneSpawnerState,
 )
+from minotaur_export.enemy_contact_rules import CONTACT_TARGET_DIES, resolve_enemy_contact
+from minotaur_export.enemy_turn_rules import EnemyTurnRules
 from minotaur_export.rules import GreedyChaserRules
+from minotaur_export.shared_enemy_schema import build_enemy_bridge_payload
 from minotaur_export.solver_backup import BackupMazeSolver
 from minotaur_export.solver import MazeSolver
 from minotaur_export.solver_strategies import STRATEGY_GOAL_ORDERED
 
 
 class MazeSolverTests(unittest.TestCase):
+    def test_bridge_payload_resolves_components_for_legacy_greedy_enemy(self) -> None:
+        payload = build_enemy_bridge_payload(
+            enemy_type="greedy_chaser",
+            move_priority="vertical",
+            traits=("killer",),
+            step_count=2,
+        )
+
+        self.assertEqual(payload["canonical_enemy_type"], "greedy_chaser")
+        self.assertEqual(payload["archetype_id"], "enemy.greedy_chaser.vertical")
+        self.assertEqual(payload["legacy"]["role"], "y_chaser")
+        self.assertEqual(payload["legacy"]["movement_type"], "greedy")
+        self.assertEqual(payload["components"]["movement"]["axis"], "vertical")
+        self.assertEqual(payload["components"]["contact"]["enemy_collision"], "kill_non_killers")
+
+    def test_bridge_payload_preserves_escape_linked_trait_compatibility(self) -> None:
+        payload = build_enemy_bridge_payload(
+            enemy_type="astar_chaser",
+            traits=("escape_linked",),
+            step_count=2,
+        )
+
+        self.assertEqual(payload["canonical_enemy_type"], "linked_escape_hunter")
+        self.assertEqual(payload["legacy"]["role"], "linked_escape_hunter")
+        self.assertEqual(payload["legacy"]["movement_type"], "astar")
+        self.assertEqual(payload["components"]["spawn_context"]["kind"], "escape_zone_linked")
+
+    def test_component_movement_family_drives_behavior_selection(self) -> None:
+        rules = EnemyTurnRules()
+        greedy_spec = EnemySpec(
+            enemy_type="greedy_chaser",
+            movement_type="greedy",
+            patrol_route=((0, 0), (1, 0), (2, 0)),
+            patrol_mode="loop",
+        )
+        patrol_spec = EnemySpec(
+            enemy_type="patroller",
+            patrol_route=((0, 0), (1, 0), (2, 0)),
+            patrol_mode="loop",
+        )
+
+        self.assertEqual(type(rules.behavior_for_spec(greedy_spec)).__name__, "GreedyChaserBehavior")
+        self.assertEqual(type(rules.behavior_for_spec(patrol_spec)).__name__, "PatrollerBehavior")
+
+    def test_component_contact_rules_preserve_killer_behavior_without_trait_branching(self) -> None:
+        killer_spec = EnemySpec(enemy_type="greedy_chaser", traits=("killer",))
+        target_spec = EnemySpec(enemy_type="greedy_chaser")
+
+        self.assertEqual(resolve_enemy_contact(0, 1, (killer_spec, target_spec)), CONTACT_TARGET_DIES)
+
     def test_solver_accepts_main_exit_win_on_dual_exit_board(self) -> None:
         layout = MazeLayout(width=4, height=4)
         win_zone_cells = ((3, 0), (2, 2), (3, 2), (2, 3), (3, 3))
@@ -1465,6 +1518,8 @@ class GodotMazeExporterTests(unittest.TestCase):
         )
 
         self.assertIn('"traits": Array[String](["killer"])', serialized)
+        self.assertIn('"canonical_archetype": "enemy.greedy_chaser.horizontal"', serialized)
+        self.assertIn('"ecs_schema_version": 1', serialized)
 
     def test_serialize_writes_enemy_facing_index(self) -> None:
         exporter = GodotMazeExporter()

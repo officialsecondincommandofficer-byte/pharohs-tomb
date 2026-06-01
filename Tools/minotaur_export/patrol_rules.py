@@ -51,7 +51,11 @@ class PatrollerBehavior(EnemyBehavior):
         if current_location is None:
             return EnemyStepResult(caught_player=False, next_state=enemy_states[enemy_index])
 
-        route = normalize_patrol_route(spec.patrol_route, spec.patrol_mode) or (current_location,)
+        patrol_mode_from_components = spec.component_str("movement", "patrol_mode", spec.patrol_mode)
+        patrol_route_from_components = tuple(
+            tuple(cell) for cell in spec.component_tuple("movement", "patrol_route")
+        ) or spec.patrol_route
+        route = normalize_patrol_route(patrol_route_from_components, patrol_mode_from_components) or (current_location,)
         behavior_state = enemy_states[enemy_index].behavior_state
         if not isinstance(behavior_state, PatrollerBehaviorState):
             behavior_state = PatrollerBehaviorState()
@@ -63,7 +67,11 @@ class PatrollerBehavior(EnemyBehavior):
 
         patrol_index = max(0, min(behavior_state.patrol_index, len(route) - 1))
         patrol_direction = 1 if behavior_state.patrol_direction >= 0 else -1
-        patrol_mode = spec.patrol_mode if spec.patrol_mode in (PATROL_MODE_LOOP, PATROL_MODE_PING_PONG) else PATROL_MODE_PING_PONG
+        patrol_mode = (
+            patrol_mode_from_components
+            if patrol_mode_from_components in (PATROL_MODE_LOOP, PATROL_MODE_PING_PONG)
+            else PATROL_MODE_PING_PONG
+        )
         next_index = _next_patrol_index(patrol_index, patrol_direction, len(route), patrol_mode)
         next_direction = patrol_direction if patrol_mode == PATROL_MODE_LOOP else _next_patrol_direction(patrol_index, patrol_direction, len(route))
 

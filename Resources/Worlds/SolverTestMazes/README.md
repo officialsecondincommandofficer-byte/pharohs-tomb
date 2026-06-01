@@ -25,6 +25,7 @@ Intended categories:
 9. Boards with multiple almost-works corridors
 10. Large max-stress boards
 11. Mechanic probes such as teleports and actor-specific wall layouts
+12. ECS bridge validation probes for canonical enemy payloads and runtime-system agreement
 
 Source of truth for the exact planned maze specs and benchmark matrix:
 - `Tools/solver_test_mazes_regression_matrix.json`
@@ -34,6 +35,7 @@ Current tuning note:
 
 Related roadmap:
 - `Design_Docs/Solver_Generation_Roadmap.md`
+- `Design_Docs/ECS_Bridge_Runtime_Validation_Guide.md`
 
 When the mazes are generated:
 - exported `.tres` files should live in this world folder or an imported manifest path associated with this folder
@@ -50,3 +52,8 @@ Wall mechanics note:
 Escape-zone note:
 - dual-exit probes should explicitly call out whether the stored solution reaches the dedicated main exit or the 2x2 escape zone
 - keep at least one authored regression board that still wins through the 2x2 zone until the main-exit preference question is intentionally resolved
+
+ECS bridge note:
+- `Probes/ECSBridge` contains validation boards used to confirm Python export data and Godot runtime systems still agree after the ECS/component migration work
+- these probes should remain small, intentional, and scenario-focused rather than becoming general content levels
+- if a runtime-system regression appears in enemy behavior, spawner timing, or turn-end teleport handling, add or update a probe here before broadening generation coverage

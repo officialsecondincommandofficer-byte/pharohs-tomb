@@ -1,0 +1,155 @@
+{
+  "id": "ecs_bridge_validation_pack",
+  "generated_by": "Tools/generate_ecs_bridge_validation_pack.py",
+  "probe_count": 3,
+  "probes": [
+    {
+      "scenario_id": "ecs_bridge_greedy_samurai",
+      "display_name": "ECS Bridge Greedy Samurai",
+      "resource_path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Worlds\\SolverTestMazes\\Probes\\ECSBridge\\ecs_bridge_greedy_samurai_9x9_len023_probe.tres",
+      "width": 9,
+      "height": 9,
+      "solution_total_steps": 23,
+      "generation_profile_id": "ecs_bridge_greedy_samurai",
+      "enemy_summary": [
+        {
+          "type": "greedy_chaser",
+          "role": "x_chaser",
+          "movement_type": "greedy",
+          "cell": [
+            3,
+            8
+          ],
+          "traits": [],
+          "canonical_archetype": "enemy.greedy_chaser.horizontal"
+        },
+        {
+          "type": "greedy_chaser",
+          "role": "y_chaser",
+          "movement_type": "greedy",
+          "cell": [
+            1,
+            8
+          ],
+          "traits": [],
+          "canonical_archetype": "enemy.greedy_chaser.vertical"
+        },
+        {
+          "type": "samurai",
+          "role": "dasher",
+          "movement_type": "dash",
+          "cell": [
+            6,
+            1
+          ],
+          "traits": [],
+          "canonical_archetype": "enemy.dasher.dash"
+        }
+      ],
+      "zone_spawners": [],
+      "checks": [
+        "Greedy chasers still respect component-driven axis priority.",
+        "Samurai still rotates, charges, and dashes using component-facing state.",
+        "Mixed legacy and canonical fields serialize together without runtime drift."
+      ]
+    },
+    {
+      "scenario_id": "ecs_bridge_patroller_stationary_wanderer",
+      "display_name": "ECS Bridge Patroller Stationary Wanderer",
+      "resource_path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Worlds\\SolverTestMazes\\Probes\\ECSBridge\\ecs_bridge_patroller_stationary_wanderer_8x8_len010_probe.tres",
+      "width": 8,
+      "height": 8,
+      "solution_total_steps": 10,
+      "generation_profile_id": "ecs_bridge_patroller_stationary_wanderer",
+      "enemy_summary": [
+        {
+          "type": "patroller",
+          "role": "patroller",
+          "movement_type": "patrol",
+          "cell": [
+            0,
+            5
+          ],
+          "traits": [],
+          "canonical_archetype": "enemy.patroller.route"
+        },
+        {
+          "type": "stationary_blocker",
+          "role": "stationary_blocker",
+          "movement_type": "stationary",
+          "cell": [
+            5,
+            3
+          ],
+          "traits": [],
+          "canonical_archetype": "enemy.stationary_blocker.anchor"
+        },
+        {
+          "type": "wanderer",
+          "role": "wanderer",
+          "movement_type": "wander",
+          "cell": [
+            5,
+            2
+          ],
+          "traits": [],
+          "canonical_archetype": "enemy.wanderer.random_walk"
+        }
+      ],
+      "zone_spawners": [],
+      "checks": [
+        "Patroller reads patrol route and patrol mode from ecs_components.",
+        "Stationary blocker remains immobile under component-driven movement family selection.",
+        "Wanderer uses component-facing index and behavior seed without legacy-only reads."
+      ]
+    },
+    {
+      "scenario_id": "ecs_bridge_escape_zone_linked_hunter",
+      "display_name": "ECS Bridge Escape Zone Linked Hunter",
+      "resource_path": "C:\\Users\\echri\\godotFolder\\Godot_v4.5.1-stable_mono_win64\\godot_v4.5.1_projects\\Pharohs_Tomb\\pharohs-tomb\\Resources\\Worlds\\SolverTestMazes\\Probes\\ECSBridge\\ecs_bridge_escape_zone_linked_hunter_10x10_len028_probe.tres",
+      "width": 10,
+      "height": 10,
+      "solution_total_steps": 28,
+      "generation_profile_id": "ecs_bridge_escape_zone_linked_hunter",
+      "enemy_summary": [
+        {
+          "type": "greedy_chaser",
+          "role": "x_chaser",
+          "movement_type": "greedy",
+          "cell": [
+            3,
+            1
+          ],
+          "traits": [],
+          "canonical_archetype": "enemy.greedy_chaser.horizontal"
+        },
+        {
+          "type": "greedy_chaser",
+          "role": "y_chaser",
+          "movement_type": "greedy",
+          "cell": [
+            2,
+            7
+          ],
+          "traits": [],
+          "canonical_archetype": "enemy.greedy_chaser.vertical"
+        }
+      ],
+      "zone_spawners": [
+        {
+          "id": "escape_zone_linked_hunter",
+          "enemy_type": "linked_escape_hunter",
+          "role": "linked_escape_hunter",
+          "movement_type": "astar",
+          "canonical_archetype": "enemy.escape_linked_hunter.astar",
+          "spawn_interval_turns": 2
+        }
+      ],
+      "checks": [
+        "Escape-zone spawner emits linked hunter payloads with canonical archetype fields.",
+        "AStar linked hunter behavior still routes through the component-derived movement family.",
+        "Spawn countdown, warning, and lifetime values remain aligned across Python and Godot."
+      ]
+    }
+  ]
+}

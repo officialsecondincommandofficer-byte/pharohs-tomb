@@ -11,7 +11,9 @@ SAMURAI_CHARGE_DELAYS: tuple[int, ...] = (3, 2, 1)
 
 class SamuraiBehavior(EnemyBehavior):
     def initial_behavior_state(self, spec: EnemySpec) -> SamuraiBehaviorState:
-        return SamuraiBehaviorState(facing_index=spec.facing_index)
+        return SamuraiBehaviorState(
+            facing_index=spec.component_int("movement", "facing_index", spec.facing_index)
+        )
 
     def choose_spawn_cell(
         self,
@@ -35,7 +37,7 @@ class SamuraiBehavior(EnemyBehavior):
         enemy_specs: tuple[EnemySpec, ...],
         spec: EnemySpec,
     ) -> EnemyStepResult:
-        del layout, spec
+        del spec
         current_location = enemy_positions[enemy_index]
         if current_location is None:
             return EnemyStepResult(caught_player=False, next_state=enemy_states[enemy_index])

@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="SavedMazeResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://MazeGenerator/saved_maze_resource.gd" id="1_hji17"]
+
+[resource]
+script = ExtResource("1_hji17")
+version = 1
+display_name = "1970-01-01 01:41:42 UTC 8x8 Probe #001"
+saved_at_unix = 6102
+width = 8
+height = 8
+cell_size = 16
+size_category = "large"
+difficulty_category = "probe"
+horizontal_walls = Array[Vector2i]([Vector2i(4, 1), Vector2i(2, 2), Vector2i(4, 2), Vector2i(5, 2), Vector2i(5, 3), Vector2i(7, 3), Vector2i(3, 4), Vector2i(2, 5), Vector2i(5, 5), Vector2i(7, 5)])
+vertical_walls = Array[Vector2i]([Vector2i(6, 0), Vector2i(2, 1), Vector2i(3, 1), Vector2i(5, 1), Vector2i(6, 1), Vector2i(4, 2), Vector2i(6, 2), Vector2i(4, 3), Vector2i(5, 3), Vector2i(3, 4), Vector2i(5, 5), Vector2i(1, 6), Vector2i(6, 6), Vector2i(1, 7), Vector2i(5, 7)])
+player_horizontal_walls = Array[Vector2i]([])
+player_vertical_walls = Array[Vector2i]([])
+enemy_horizontal_walls = Array[Vector2i]([])
+enemy_vertical_walls = Array[Vector2i]([])
+one_way_passages = Array[Dictionary]([])
+teleport_pairs = Array[Dictionary]([])
+enemy_teleport_pairs = Array[Dictionary]([])
+shared_teleport_pairs = Array[Dictionary]([])
+trap_cells = Array[Vector2i]([])
+player_spawn = Vector2i(5, 5)
+enemy_spawns = Array[Dictionary]([{"type": "patroller", "cell": Vector2i(0, 5), "move_priority": "horizontal", "step_count": 1, "facing_index": 2, "canonical_archetype": "enemy.patroller.route", "ecs_schema_version": 1, "role": "patroller", "movement_type": "patrol", "patrol_route": Array[Vector2i]([Vector2i(0, 5), Vector2i(1, 5), Vector2i(1, 4), Vector2i(2, 4), Vector2i(2, 3), Vector2i(2, 2), Vector2i(3, 2), Vector2i(3, 1), Vector2i(3, 0), Vector2i(2, 0), Vector2i(1, 0), Vector2i(1, 1), Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3), Vector2i(0, 4)])}, {"type": "stationary_blocker", "cell": Vector2i(5, 3), "move_priority": "horizontal", "step_count": 1, "facing_index": 2, "canonical_archetype": "enemy.stationary_blocker.anchor", "ecs_schema_version": 1, "role": "stationary_blocker", "movement_type": "stationary"}, {"type": "wanderer", "cell": Vector2i(5, 2), "move_priority": "horizontal", "step_count": 1, "facing_index": 1, "canonical_archetype": "enemy.wanderer.random_walk", "ecs_schema_version": 1, "role": "wanderer", "movement_type": "wander", "behavior_seed": 628160845}])
+minotaur_spawn = Vector2i(0, 5)
+exit_cell = Vector2i(0, 2)
+main_exit_cell = Vector2i(0, 2)
+exit_cells = Array[Vector2i]([Vector2i(0, 2)])
+main_exit_cells = Array[Vector2i]([Vector2i(0, 2)])
+win_zone_cells = Array[Vector2i]([Vector2i(0, 2)])
+escape_zone_cells = Array[Vector2i]([])
+zone_spawners = Array[Dictionary]([])
+escape_zone_spawners = Array[Dictionary]([])
+solution_actions = Array[String](["down", "left", "left", "left", "left", "up", "up", "left", "up", "up"])
+solution_total_steps = 10
+generation_mode = "IMPORTED_MINOTAUR_PROJECT"
+generation_profile_id = "ecs_bridge_patroller_stationary_wanderer"

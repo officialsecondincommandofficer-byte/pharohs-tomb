@@ -25,12 +25,15 @@ def string_array(values: Iterable[str]) -> str:
 
 
 def enemy_spawn_dictionary(enemy: EnemySpawn) -> str:
+    bridge_payload = enemy.bridge_payload
     values = [
         f'"type": {json.dumps(enemy.enemy_type)}',
         f'"cell": {vector2i(enemy.cell)}',
         f'"move_priority": {json.dumps(enemy.move_priority)}',
         f'"step_count": {enemy.step_count}',
         f'"facing_index": {enemy.facing_index}',
+        f'"canonical_archetype": {json.dumps(bridge_payload["archetype_id"])}',
+        f'"ecs_schema_version": {bridge_payload["schema_version"]}',
     ]
     if enemy.role:
         values.append(f'"role": {json.dumps(enemy.role)}')
@@ -89,6 +92,7 @@ def directed_edge_array(values: Iterable[DirectedEdge]) -> str:
 
 
 def zone_spawner_dictionary(spawner: ZoneSpawnerSpec) -> str:
+    bridge_payload = spawner.enemy_spec.bridge_payload
     values = [
         f'"id": {json.dumps(spawner.spawner_id)}',
         f'"spawn_interval_turns": {spawner.spawn_interval_turns}',
@@ -101,6 +105,8 @@ def zone_spawner_dictionary(spawner: ZoneSpawnerSpec) -> str:
         f'"step_count": {spawner.enemy_spec.step_count}',
         f'"facing_index": {spawner.enemy_spec.facing_index}',
         f'"lifetime_turns": {spawner.enemy_spec.lifetime_turns}',
+        f'"canonical_archetype": {json.dumps(bridge_payload["archetype_id"])}',
+        f'"ecs_schema_version": {bridge_payload["schema_version"]}',
     ]
     if spawner.enemy_spec.traits:
         values.append(f'"traits": {string_array(spawner.enemy_spec.traits)}')

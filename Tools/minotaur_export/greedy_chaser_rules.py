@@ -86,7 +86,7 @@ class GreedyChaserBehavior(EnemyBehavior):
                 layout=layout,
                 player_location=player_location,
                 enemy_location=current_location,
-                move_priority=spec.move_priority,
+                move_priority=spec.component_str("movement", "move_priority", spec.move_priority),
                 blocked_cells=blocked_cells,
             ),
         )
