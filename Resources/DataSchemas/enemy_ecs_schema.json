@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "bridge_mode": "legacy_fields_preserved",
+  "default_scene_family": "chaser",
+  "default_tints": {
+    "horizontal": [0.92, 0.24, 0.18, 1.0],
+    "vertical": [0.2, 0.52, 0.95, 1.0]
+  },
+  "enemy_type_profiles": {
+    "x_chaser": {
+      "canonical_enemy_type": "greedy_chaser",
+      "default_role": "x_chaser"
+    },
+    "y_chaser": {
+      "canonical_enemy_type": "greedy_chaser",
+      "default_role": "y_chaser"
+    },
+    "chaser": {
+      "canonical_enemy_type": "greedy_chaser",
+      "default_role_by_move_priority": {
+        "horizontal": "x_chaser",
+        "vertical": "y_chaser"
+      }
+    },
+    "greedy_chaser": {
+      "canonical_enemy_type": "greedy_chaser",
+      "default_role_by_move_priority": {
+        "horizontal": "x_chaser",
+        "vertical": "y_chaser"
+      }
+    },
+    "minotaur": {
+      "canonical_enemy_type": "minotaur",
+      "default_role_by_move_priority": {
+        "horizontal": "x_chaser",
+        "vertical": "y_chaser"
+      },
+      "scene_family": "minotaur"
+    },
+    "linked_escape_hunter": {
+      "canonical_enemy_type": "linked_escape_hunter",
+      "default_role": "linked_escape_hunter"
+    },
+    "astar_chaser": {
+      "canonical_enemy_type": "linked_escape_hunter",
+      "default_role": "linked_escape_hunter"
+    },
+    "samurai": {
+      "canonical_enemy_type": "samurai",
+      "default_role": "dasher",
+      "scene_family": "samurai"
+    },
+    "dasher": {
+      "canonical_enemy_type": "samurai",
+      "default_role": "dasher",
+      "scene_family": "samurai"
+    },
+    "patroller": {
+      "canonical_enemy_type": "patroller",
+      "default_role": "patroller",
+      "scene_family": "patroller"
+    },
+    "stationary_blocker": {
+      "canonical_enemy_type": "stationary_blocker",
+      "default_role": "stationary_blocker",
+      "scene_family": "stationary_blocker"
+    },
+    "wanderer": {
+      "canonical_enemy_type": "wanderer",
+      "default_role": "wanderer",
+      "scene_family": "wanderer"
+    }
+  },
+  "role_profiles": {
+    "x_chaser": {
+      "archetype_id": "enemy.greedy_chaser.horizontal",
+      "movement_type": "greedy",
+      "scene_family": "chaser",
+      "tint": [0.92, 0.24, 0.18, 1.0],
+      "components": {
+        "identity": {
+          "design_role": "x_chaser"
+        },
+        "movement": {
+          "family": "greedy",
+          "axis": "horizontal"
+        }
+      }
+    },
+    "y_chaser": {
+      "archetype_id": "enemy.greedy_chaser.vertical",
+      "movement_type": "greedy",
+      "scene_family": "chaser",
+      "tint": [0.2, 0.52, 0.95, 1.0],
+      "components": {
+        "identity": {
+          "design_role": "y_chaser"
+        },
+        "movement": {
+          "family": "greedy",
+          "axis": "vertical"
+        }
+      }
+    },
+    "linked_escape_hunter": {
+      "archetype_id": "enemy.escape_linked_hunter.astar",
+      "movement_type": "astar",
+      "scene_family": "chaser",
+      "tint": [0.88, 0.78, 0.32, 1.0],
+      "components": {
+        "identity": {
+          "design_role": "linked_escape_hunter"
+        },
+        "movement": {
+          "family": "astar"
+        },
+        "spawn_context": {
+          "kind": "escape_zone_linked"
+        }
+      }
+    },
+    "dasher": {
+      "archetype_id": "enemy.dasher.dash",
+      "movement_type": "dash",
+      "scene_family": "samurai",
+      "tint": [0.7, 0.7, 0.78, 1.0],
+      "components": {
+        "identity": {
+          "design_role": "dasher"
+        },
+        "movement": {
+          "family": "dash"
+        }
+      }
+    },
+    "patroller": {
+      "archetype_id": "enemy.patroller.route",
+      "movement_type": "patrol",
+      "scene_family": "patroller",
+      "tint": [0.65, 0.85, 1.0, 1.0],
+      "components": {
+        "identity": {
+          "design_role": "patroller"
+        },
+        "movement": {
+          "family": "patrol"
+        }
+      }
+    },
+    "stationary_blocker": {
+      "archetype_id": "enemy.stationary_blocker.anchor",
+      "movement_type": "stationary",
+      "scene_family": "stationary_blocker",
+      "tint": [0.95, 0.95, 0.55, 1.0],
+      "components": {
+        "identity": {
+          "design_role": "stationary_blocker"
+        },
+        "movement": {
+          "family": "stationary"
+        }
+      }
+    },
+    "wanderer": {
+      "archetype_id": "enemy.wanderer.random_walk",
+      "movement_type": "wander",
+      "scene_family": "wanderer",
+      "tint": [1.0, 0.8, 0.55, 1.0],
+      "components": {
+        "identity": {
+          "design_role": "wanderer"
+        },
+        "movement": {
+          "family": "wander"
+        }
+      }
+    }
+  },
+  "trait_components": {
+    "killer": {
+      "contact": {
+        "enemy_collision": "kill_non_killers",
+        "player_collision": "kill_player"
+      }
+    },
+    "escape_linked": {
+      "spawn_context": {
+        "kind": "escape_zone_linked"
+      }
+    }
+  }
+}

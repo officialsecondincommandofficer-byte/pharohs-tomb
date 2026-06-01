@@ -79,7 +79,8 @@ def initial_spawner_states(zone_spawners: tuple[ZoneSpawnerSpec, ...]) -> tuple[
 
 def rules_initial_enemy_state(spec: EnemySpec) -> EnemyRuntimeState:
     return EnemyRuntimeState(
-        activated=spec.wake_goal_distance < 0 and spec.spawn_delay_turns <= 0,
-        turns_remaining=spec.lifetime_turns,
-        turns_until_spawn=spec.spawn_delay_turns,
+        activated=spec.component_int("activation", "wake_goal_distance", spec.wake_goal_distance) < 0
+        and spec.component_int("activation", "spawn_delay_turns", spec.spawn_delay_turns) <= 0,
+        turns_remaining=spec.component_int("lifecycle", "lifetime_turns", spec.lifetime_turns),
+        turns_until_spawn=spec.component_int("activation", "spawn_delay_turns", spec.spawn_delay_turns),
     )

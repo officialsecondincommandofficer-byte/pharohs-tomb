@@ -2,6 +2,24 @@
 
 This project is now a Godot 4.x adaptation of **Theseus and the Minotaur**, using the repo's existing pixel-art board presentation and thin-wall maze style.
 
+## Runtime Architecture
+
+- Python and Godot now share a canonical enemy schema:
+  `Resources/DataSchemas/enemy_ecs_schema.json`
+- Enemy payloads are normalized through a long compatibility bridge that still accepts legacy `role`, `movement_type`, and `traits`.
+- Godot runtime behavior is now largely organized as:
+  `record -> registry -> system -> view`
+- The main migrated slices are:
+  enemy runtime records and systems,
+  zone spawner runtime records and systems,
+  board interaction systems for teleports, actor-specific walls, and turn-end transitions.
+
+Useful architecture docs:
+
+- `Design_Docs/ECS_Component_Migration_Plan.md`
+- `Design_Docs/ECS_Bridge_Runtime_Validation_Guide.md`
+- `Design_Docs/Runtime_Architecture.md`
+
 ## Current Playable Loop
 
 - Move one tile or wait.
@@ -15,6 +33,7 @@ This project is now a Godot 4.x adaptation of **Theseus and the Minotaur**, usin
 - Boards are generated at runtime from connected edge-wall layouts.
 - The generator follows a board-plus-solver workflow inspired by the reference Python repo.
 - Solvable candidates are grouped by solution length and selected by difficulty bucket.
+- Runtime board interaction rules are shared through explicit systems instead of being spread only across scene/controller logic.
 - MongoDB and precomputed maze retrieval are intentionally out of scope.
 - Save support is v1 and hotkey-only for now; loading and save browsing are intentionally deferred.
 

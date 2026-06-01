@@ -13,6 +13,8 @@ def advance_zone_spawner(
     player_location,
     occupied_cells: set[tuple[int, int]],
 ) -> tuple[ZoneSpawnerState, SpawnedEnemyState | None]:
+    wake_goal_distance = spawner.enemy_spec.component_int("activation", "wake_goal_distance", spawner.enemy_spec.wake_goal_distance)
+    lifetime_turns = spawner.enemy_spec.component_int("lifecycle", "lifetime_turns", spawner.enemy_spec.lifetime_turns)
     next_turns_until_spawn = state.turns_until_spawn - 1
     if next_turns_until_spawn > 0:
         return replace(state, turns_until_spawn=next_turns_until_spawn), None
@@ -32,8 +34,8 @@ def advance_zone_spawner(
         return ZoneSpawnerState(turns_until_spawn=1), None
 
     runtime_state = EnemyRuntimeState(
-        activated=spawner.enemy_spec.wake_goal_distance < 0,
-        turns_remaining=spawner.enemy_spec.lifetime_turns,
+        activated=wake_goal_distance < 0,
+        turns_remaining=lifetime_turns,
         behavior_state=behavior.initial_behavior_state(spawner.enemy_spec),
     )
     return (

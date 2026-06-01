@@ -2,6 +2,7 @@ extends RefCounted
 class_name MazeData
 
 const EnemySpawnDataScript = preload("res://MazeGenerator/enemy_spawn_data.gd")
+const BoardInteractionSystemScript = preload("res://MazeGenerator/board_interaction_system.gd")
 
 const SAVE_VERSION := 1
 
@@ -367,7 +368,7 @@ func has_one_way_passage(a: Vector2i, b: Vector2i) -> bool:
 
 
 func is_trap_cell(cell: Vector2i) -> bool:
-	return _trap_lookup.has(cell)
+	return BoardInteractionSystemScript.is_trap_cell(self, cell)
 
 
 func is_exit_cell(cell: Vector2i) -> bool:
@@ -428,15 +429,11 @@ func goal_distance_from_player_cell(start_cell: Vector2i) -> int:
 
 
 func get_teleport_destination(cell: Vector2i) -> Vector2i:
-	if _teleport_lookup.has(cell):
-		return _teleport_lookup[cell]
-	return cell
+	return BoardInteractionSystemScript.teleport_destination(self, cell, BoardInteractionSystemScript.ACTOR_PLAYER, false)
 
 
 func get_enemy_teleport_destination(cell: Vector2i) -> Vector2i:
-	if _enemy_teleport_lookup.has(cell):
-		return _enemy_teleport_lookup[cell]
-	return cell
+	return BoardInteractionSystemScript.teleport_destination(self, cell, BoardInteractionSystemScript.ACTOR_ENEMY, true, false)
 
 
 func get_shared_teleport_destination(cell: Vector2i) -> Vector2i:
@@ -446,33 +443,15 @@ func get_shared_teleport_destination(cell: Vector2i) -> Vector2i:
 
 
 func resolve_player_transition(cell: Vector2i, action: String) -> Dictionary:
-	var stepped_cell: Vector2i = apply_cardinal_action(cell, action)
-	var resolved_cell: Vector2i = get_teleport_destination(stepped_cell)
-	return {
-		"stepped_cell": stepped_cell,
-		"resolved_cell": resolved_cell,
-		"used_teleport": resolved_cell != stepped_cell,
-	}
+	return BoardInteractionSystemScript.resolve_player_transition(self, cell, action)
 
 
 func resolve_enemy_turn_end_transition(final_cell: Vector2i) -> Dictionary:
-	var resolved_cell: Vector2i = get_enemy_teleport_destination(final_cell)
-	if resolved_cell == final_cell:
-		resolved_cell = get_shared_teleport_destination(final_cell)
-	return {
-		"stepped_cell": final_cell,
-		"resolved_cell": resolved_cell,
-		"used_teleport": resolved_cell != final_cell,
-	}
+	return BoardInteractionSystemScript.resolve_turn_end_transition(self, final_cell, BoardInteractionSystemScript.ACTOR_ENEMY)
 
 
 func resolve_player_turn_end_transition(final_cell: Vector2i) -> Dictionary:
-	var resolved_cell: Vector2i = get_shared_teleport_destination(final_cell)
-	return {
-		"stepped_cell": final_cell,
-		"resolved_cell": resolved_cell,
-		"used_teleport": resolved_cell != final_cell,
-	}
+	return BoardInteractionSystemScript.resolve_turn_end_transition(self, final_cell, BoardInteractionSystemScript.ACTOR_PLAYER)
 
 
 func has_wall_between(a: Vector2i, b: Vector2i) -> bool:
@@ -480,40 +459,15 @@ func has_wall_between(a: Vector2i, b: Vector2i) -> bool:
 
 
 func has_shared_wall_between(a: Vector2i, b: Vector2i) -> bool:
-	var delta := b - a
-	if abs(delta.x) + abs(delta.y) != 1:
-		return true
-
-	if delta.x != 0:
-		return has_vertical_wall(Vector2i(max(a.x, b.x), a.y))
-
-	return has_horizontal_wall(Vector2i(a.x, max(a.y, b.y)))
+	return BoardInteractionSystemScript.has_shared_wall_between(self, a, b)
 
 
 func has_player_wall_between(a: Vector2i, b: Vector2i) -> bool:
-	var delta := b - a
-	if abs(delta.x) + abs(delta.y) != 1:
-		return true
-	if has_shared_wall_between(a, b):
-		return true
-
-	if delta.x != 0:
-		return has_enemy_vertical_wall(Vector2i(max(a.x, b.x), a.y)) or has_one_way_passage(b, a)
-
-	return has_enemy_horizontal_wall(Vector2i(a.x, max(a.y, b.y))) or has_one_way_passage(b, a)
+	return BoardInteractionSystemScript.is_blocked(self, a, b, BoardInteractionSystemScript.ACTOR_PLAYER)
 
 
 func has_enemy_wall_between(a: Vector2i, b: Vector2i) -> bool:
-	var delta := b - a
-	if abs(delta.x) + abs(delta.y) != 1:
-		return true
-	if has_shared_wall_between(a, b):
-		return true
-
-	if delta.x != 0:
-		return has_player_vertical_wall(Vector2i(max(a.x, b.x), a.y)) or has_one_way_passage(b, a)
-
-	return has_player_horizontal_wall(Vector2i(a.x, max(a.y, b.y))) or has_one_way_passage(b, a)
+	return BoardInteractionSystemScript.is_blocked(self, a, b, BoardInteractionSystemScript.ACTOR_ENEMY)
 
 
 func can_step(a: Vector2i, b: Vector2i) -> bool:
@@ -521,15 +475,11 @@ func can_step(a: Vector2i, b: Vector2i) -> bool:
 
 
 func can_player_step(a: Vector2i, b: Vector2i) -> bool:
-	if not is_in_bounds(a) or not is_in_bounds(b):
-		return false
-	return not has_player_wall_between(a, b)
+	return BoardInteractionSystemScript.can_step(self, a, b, BoardInteractionSystemScript.ACTOR_PLAYER)
 
 
 func can_enemy_step(a: Vector2i, b: Vector2i) -> bool:
-	if not is_in_bounds(a) or not is_in_bounds(b):
-		return false
-	return not has_enemy_wall_between(a, b)
+	return BoardInteractionSystemScript.can_step(self, a, b, BoardInteractionSystemScript.ACTOR_ENEMY)
 
 
 func get_cardinal_neighbors(cell: Vector2i) -> Array[Vector2i]:
@@ -537,21 +487,11 @@ func get_cardinal_neighbors(cell: Vector2i) -> Array[Vector2i]:
 
 
 func get_player_cardinal_neighbors(cell: Vector2i) -> Array[Vector2i]:
-	var neighbors: Array[Vector2i] = []
-	for direction in ACTION_TO_DIRECTION.values():
-		var next_cell: Vector2i = cell + direction
-		if can_player_step(cell, next_cell):
-			neighbors.append(next_cell)
-	return neighbors
+	return BoardInteractionSystemScript.cardinal_neighbors(self, cell, BoardInteractionSystemScript.ACTOR_PLAYER)
 
 
 func get_enemy_cardinal_neighbors(cell: Vector2i) -> Array[Vector2i]:
-	var neighbors: Array[Vector2i] = []
-	for direction in ACTION_TO_DIRECTION.values():
-		var next_cell: Vector2i = cell + direction
-		if can_enemy_step(cell, next_cell):
-			neighbors.append(next_cell)
-	return neighbors
+	return BoardInteractionSystemScript.cardinal_neighbors(self, cell, BoardInteractionSystemScript.ACTOR_ENEMY)
 
 
 func get_move_options(cell: Vector2i, include_skip: bool = true) -> Array[String]:
@@ -568,17 +508,7 @@ func get_move_options(cell: Vector2i, include_skip: bool = true) -> Array[String
 
 
 func apply_cardinal_action(cell: Vector2i, action: String) -> Vector2i:
-	if action == "skip":
-		return cell
-
-	if not ACTION_TO_DIRECTION.has(action):
-		return cell
-
-	var next_cell: Vector2i = cell + ACTION_TO_DIRECTION[action]
-	if not can_player_step(cell, next_cell):
-		return cell
-
-	return next_cell
+	return BoardInteractionSystemScript.apply_cardinal_action(self, cell, action, BoardInteractionSystemScript.ACTOR_PLAYER)
 
 
 func apply_action(cell: Vector2i, action: String) -> Vector2i:

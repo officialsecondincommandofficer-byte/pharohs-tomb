@@ -17,16 +17,7 @@ from .enemy_spawn_rules import advance_spawn_state
 from .greedy_chaser_rules import GreedyChaserBehavior, choose_greedy_step
 from .patrol_rules import PatrollerBehavior
 from .grid import MazeLayout
-from .models import (
-    Coord,
-    EnemyRuntimeState,
-    EnemySpec,
-    EnemySpawn,
-    GameState,
-    SpawnedEnemyState,
-    ZoneSpawnerSpec,
-    resolved_movement_type,
-)
+from .models import Coord, EnemyRuntimeState, EnemySpec, EnemySpawn, GameState, SpawnedEnemyState, ZoneSpawnerSpec
 from .movement import (
     apply_action,
     apply_enemy_action,
@@ -86,9 +77,10 @@ class EnemyTurnRules:
     def initial_enemy_state(self, spec: EnemySpec) -> EnemyRuntimeState:
         behavior = self.behavior_for_spec(spec)
         return EnemyRuntimeState(
-            activated=spec.wake_goal_distance < 0 and spec.spawn_delay_turns <= 0,
-            turns_remaining=spec.lifetime_turns,
-            turns_until_spawn=spec.spawn_delay_turns,
+            activated=spec.component_int("activation", "wake_goal_distance", spec.wake_goal_distance) < 0
+            and spec.component_int("activation", "spawn_delay_turns", spec.spawn_delay_turns) <= 0,
+            turns_remaining=spec.component_int("lifecycle", "lifetime_turns", spec.lifetime_turns),
+            turns_until_spawn=spec.component_int("activation", "spawn_delay_turns", spec.spawn_delay_turns),
             behavior_state=behavior.initial_behavior_state(spec),
         )
 
@@ -299,18 +291,20 @@ class EnemyTurnRules:
         return next_enemy_location == player_location
 
     def build_despawned_state(self, spec: EnemySpec) -> EnemyRuntimeState:
-        if spec.respawn_delay_turns <= 0:
+        respawn_delay_turns = spec.component_int("activation", "respawn_delay_turns", spec.respawn_delay_turns)
+        lifetime_turns = spec.component_int("lifecycle", "lifetime_turns", spec.lifetime_turns)
+        if respawn_delay_turns <= 0:
             return EnemyRuntimeState()
         behavior = self.behavior_for_spec(spec)
         return EnemyRuntimeState(
             activated=False,
-            turns_remaining=spec.lifetime_turns,
-            turns_until_spawn=spec.respawn_delay_turns,
+            turns_remaining=lifetime_turns,
+            turns_until_spawn=respawn_delay_turns,
             behavior_state=behavior.initial_behavior_state(spec),
         )
 
     def behavior_for_spec(self, spec: EnemySpec) -> EnemyBehavior:
-        movement_type = resolved_movement_type(spec.enemy_type, role=spec.role, explicit_movement_type=spec.movement_type)
+        movement_type = spec.resolved_movement_type
         return self.behavior_registry.get(movement_type, self.behavior_registry["greedy"])
 
     def blocked_cells_for_mover(self, mover_index, enemy_positions, enemy_specs):

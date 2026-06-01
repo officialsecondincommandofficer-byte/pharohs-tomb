@@ -82,6 +82,9 @@ class ManifestWriter:
                     "enemy_spawns": [
                         {
                             "type": enemy.enemy_type,
+                            "canonical_enemy_type": enemy.bridge_payload["canonical_enemy_type"],
+                            "canonical_archetype": enemy.bridge_payload["archetype_id"],
+                            "ecs_schema_version": enemy.bridge_payload["schema_version"],
                             "cell": list(enemy.cell),
                             "move_priority": enemy.move_priority,
                             "step_count": enemy.step_count,
@@ -89,6 +92,7 @@ class ManifestWriter:
                             "traits": list(enemy.traits),
                             "role": enemy.role,
                             "movement_type": enemy.movement_type,
+                            "ecs_components": enemy.bridge_payload["components"],
                             "patrol_route": [list(cell) for cell in enemy.patrol_route],
                             "patrol_mode": enemy.patrol_mode,
                             "behavior_seed": enemy.behavior_seed,

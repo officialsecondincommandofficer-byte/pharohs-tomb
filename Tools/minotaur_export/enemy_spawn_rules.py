@@ -13,6 +13,7 @@ def advance_spawn_state(
     player_location: Coord,
     enemy_positions: list[Coord | None],
 ) -> tuple[Coord | None, EnemyRuntimeState]:
+    wake_goal_distance = spec.component_int("activation", "wake_goal_distance", spec.wake_goal_distance)
     if state.turns_until_spawn <= 0 or spec.spawn_cell is None:
         return None, state
 
@@ -27,6 +28,6 @@ def advance_spawn_state(
 
     return spawn_cell, replace(
         state,
-        activated=spec.wake_goal_distance < 0,
+        activated=wake_goal_distance < 0,
         turns_until_spawn=0,
     )

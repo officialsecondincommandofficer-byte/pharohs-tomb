@@ -93,7 +93,9 @@ def _apply_direction(enemy_location: Coord, direction_index: int) -> Coord:
 
 class WandererBehavior(EnemyBehavior):
     def initial_behavior_state(self, spec: EnemySpec) -> WandererBehaviorState:
-        return WandererBehaviorState(facing_index=spec.facing_index % len(WANDERER_DIRECTIONS))
+        return WandererBehaviorState(
+            facing_index=spec.component_int("movement", "facing_index", spec.facing_index) % len(WANDERER_DIRECTIONS)
+        )
 
     def choose_spawn_cell(
         self,
@@ -131,7 +133,7 @@ class WandererBehavior(EnemyBehavior):
             enemy_location=current_location,
             blocked_cells=blocked_cells,
             facing_index=behavior_state.facing_index,
-            behavior_seed=spec.behavior_seed,
+            behavior_seed=spec.component_int("behavior", "seed", spec.behavior_seed),
             decision_count=behavior_state.decision_count,
             visited_ticks=behavior_state.visited_ticks,
         )

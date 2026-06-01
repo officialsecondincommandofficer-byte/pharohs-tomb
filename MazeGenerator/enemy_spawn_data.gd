@@ -1,6 +1,8 @@
 extends RefCounted
 class_name EnemySpawnData
 
+const EnemySchemaBridge := preload("res://Global/enemy_schema_bridge.gd")
+
 
 static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_empty: bool = false) -> Array[Dictionary]:
 	var coerced: Array[Dictionary] = []
@@ -9,10 +11,19 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 			continue
 		var spawn: Dictionary = entry.duplicate(true)
 		var raw_type := String(spawn.get("type", "greedy_chaser"))
-		spawn["type"] = _resolved_enemy_type(raw_type)
+		spawn["type"] = EnemySchemaBridge.resolve_enemy_type(raw_type)
 		spawn["cell"] = coerce_vector2i(spawn.get("cell", fallback_cell))
-		spawn["role"] = String(spawn.get("role", _resolved_enemy_role(raw_type)))
-		spawn["movement_type"] = String(spawn.get("movement_type", _resolved_movement_type(raw_type, String(spawn.get("role", "")))))
+		spawn["role"] = EnemySchemaBridge.resolved_enemy_role(
+			raw_type,
+			String(spawn.get("move_priority", "horizontal")),
+			coerce_string_array(spawn.get("traits", [])),
+			String(spawn.get("role", ""))
+		)
+		spawn["movement_type"] = EnemySchemaBridge.resolved_movement_type(
+			raw_type,
+			String(spawn.get("role", "")),
+			String(spawn.get("movement_type", ""))
+		)
 		spawn["move_priority"] = String(spawn.get("move_priority", "horizontal"))
 		spawn["step_count"] = int(spawn.get("step_count", 2))
 		spawn["facing_index"] = int(spawn.get("facing_index", 2))
@@ -27,6 +38,11 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 			spawn["patrol_mode"]
 		)
 		spawn["behavior_seed"] = int(spawn.get("behavior_seed", 0))
+		var bridge_payload: Dictionary = EnemySchemaBridge.build_bridge_payload(spawn)
+		spawn["canonical_enemy_type"] = String(bridge_payload.get("canonical_enemy_type", spawn["type"]))
+		spawn["canonical_archetype"] = String(bridge_payload.get("archetype_id", ""))
+		spawn["ecs_schema_version"] = int(bridge_payload.get("schema_version", 1))
+		spawn["ecs_components"] = bridge_payload.get("components", {}).duplicate(true)
 		coerced.append(spawn)
 
 	if coerced.is_empty() and not allow_empty:
@@ -35,7 +51,7 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 
 
 static func default_greedy_chaser(cell: Vector2i) -> Dictionary:
-	return {
+	var spawn := {
 		"type": "greedy_chaser",
 		"cell": cell,
 		"role": "x_chaser",
@@ -49,6 +65,12 @@ static func default_greedy_chaser(cell: Vector2i) -> Dictionary:
 		"spawn_delay_turns": 0,
 		"respawn_delay_turns": 0,
 	}
+	var bridge_payload: Dictionary = EnemySchemaBridge.build_bridge_payload(spawn)
+	spawn["canonical_enemy_type"] = String(bridge_payload.get("canonical_enemy_type", spawn["type"]))
+	spawn["canonical_archetype"] = String(bridge_payload.get("archetype_id", ""))
+	spawn["ecs_schema_version"] = int(bridge_payload.get("schema_version", 1))
+	spawn["ecs_components"] = bridge_payload.get("components", {}).duplicate(true)
+	return spawn
 
 
 static func first_enemy_cell(enemy_spawns: Array[Dictionary], fallback_cell: Vector2i) -> Vector2i:
@@ -87,53 +109,3 @@ static func normalize_patrol_route(route: Array[Vector2i], patrol_mode: String) 
 		normalized.remove_at(normalized.size() - 1)
 	return normalized
 
-
-static func _resolved_enemy_type(raw_type: String) -> String:
-	match raw_type:
-		"x_chaser", "y_chaser":
-			return "greedy_chaser"
-		"astar_chaser":
-			return "linked_escape_hunter"
-		"dasher":
-			return "samurai"
-		_:
-			return raw_type
-
-
-static func _resolved_enemy_role(raw_type: String) -> String:
-	match raw_type:
-		"x_chaser", "y_chaser", "linked_escape_hunter", "dasher", "patroller", "stationary_blocker", "wanderer":
-			return raw_type
-		"astar_chaser":
-			return "linked_escape_hunter"
-		"samurai":
-			return "dasher"
-		_:
-			return ""
-
-
-static func _resolved_movement_type(raw_type: String, role: String) -> String:
-	var resolved_role := role if not role.is_empty() else _resolved_enemy_role(raw_type)
-	match resolved_role:
-		"linked_escape_hunter":
-			return "astar"
-		"x_chaser", "y_chaser":
-			return "greedy"
-		"dasher":
-			return "dash"
-		"patroller":
-			return "patrol"
-		"stationary_blocker":
-			return "stationary"
-		"wanderer":
-			return "wander"
-		_:
-			match raw_type:
-				"patroller":
-					return "patrol"
-				"stationary_blocker":
-					return "stationary"
-				"wanderer":
-					return "wander"
-				_:
-					return ""

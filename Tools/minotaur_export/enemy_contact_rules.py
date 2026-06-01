@@ -21,13 +21,18 @@ def enemy_index_at_position(
     return None
 
 
+def _is_killer(spec: EnemySpec) -> bool:
+    contact_component = spec.component("contact")
+    return contact_component.get("enemy_collision") == "kill_non_killers" or KILLER_TRAIT in spec.traits
+
+
 def resolve_enemy_contact(
     mover_index: int,
     target_index: int,
     enemy_specs: tuple[EnemySpec, ...],
 ) -> str:
-    mover_is_killer = KILLER_TRAIT in enemy_specs[mover_index].traits
-    target_is_killer = KILLER_TRAIT in enemy_specs[target_index].traits
+    mover_is_killer = _is_killer(enemy_specs[mover_index])
+    target_is_killer = _is_killer(enemy_specs[target_index])
 
     if target_is_killer:
         if mover_is_killer and mover_index < target_index:

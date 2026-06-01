@@ -3,6 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .shared_enemy_schema import (
+    build_enemy_bridge_payload,
+    resolved_enemy_role as schema_resolved_enemy_role,
+    resolved_movement_type as schema_resolved_movement_type,
+)
+
 
 Coord = tuple[int, int]
 Edge = tuple[Coord, Coord]
@@ -218,6 +224,50 @@ class EnemySpec:
     patrol_mode: str = "ping_pong"
     behavior_seed: int = 0
 
+    @property
+    def bridge_payload(self) -> dict:
+        return build_enemy_bridge_payload(
+            enemy_type=self.enemy_type,
+            move_priority=self.move_priority,
+            role=self.role,
+            movement_type=self.movement_type,
+            traits=self.traits,
+            step_count=self.step_count,
+            facing_index=self.facing_index,
+            wake_goal_distance=self.wake_goal_distance,
+            lifetime_turns=self.lifetime_turns,
+            spawn_delay_turns=self.spawn_delay_turns,
+            respawn_delay_turns=self.respawn_delay_turns,
+            patrol_route=self.patrol_route,
+            patrol_mode=self.patrol_mode,
+            behavior_seed=self.behavior_seed,
+        )
+
+    @property
+    def resolved_role(self) -> str:
+        return str(self.bridge_payload["legacy"]["role"])
+
+    @property
+    def resolved_movement_type(self) -> str:
+        return str(self.bridge_payload["legacy"]["movement_type"])
+
+    def component(self, component_name: str) -> dict:
+        return dict(self.bridge_payload.get("components", {}).get(component_name, {}))
+
+    def component_str(self, component_name: str, key: str, fallback: str) -> str:
+        return str(self.component(component_name).get(key, fallback))
+
+    def component_int(self, component_name: str, key: str, fallback: int) -> int:
+        return int(self.component(component_name).get(key, fallback))
+
+    def component_tuple(self, component_name: str, key: str) -> tuple:
+        value = self.component(component_name).get(key, ())
+        if isinstance(value, list):
+            return tuple(value)
+        if isinstance(value, tuple):
+            return value
+        return ()
+
 
 @dataclass(frozen=True, slots=True)
 class EnemySpawn:
@@ -236,6 +286,33 @@ class EnemySpawn:
     patrol_route: tuple[Coord, ...] = ()
     patrol_mode: str = "ping_pong"
     behavior_seed: int = 0
+
+    @property
+    def bridge_payload(self) -> dict:
+        return build_enemy_bridge_payload(
+            enemy_type=self.enemy_type,
+            move_priority=self.move_priority,
+            role=self.role,
+            movement_type=self.movement_type,
+            traits=self.traits,
+            step_count=self.step_count,
+            facing_index=self.facing_index,
+            wake_goal_distance=self.wake_goal_distance,
+            lifetime_turns=self.lifetime_turns,
+            spawn_delay_turns=self.spawn_delay_turns,
+            respawn_delay_turns=self.respawn_delay_turns,
+            patrol_route=self.patrol_route,
+            patrol_mode=self.patrol_mode,
+            behavior_seed=self.behavior_seed,
+        )
+
+    @property
+    def resolved_role(self) -> str:
+        return str(self.bridge_payload["legacy"]["role"])
+
+    @property
+    def resolved_movement_type(self) -> str:
+        return str(self.bridge_payload["legacy"]["movement_type"])
 
     @classmethod
     def from_spec(cls, spec: EnemySpec, cell: Coord) -> "EnemySpawn":
@@ -275,19 +352,12 @@ def resolved_enemy_role(
     traits: tuple[str, ...] = (),
     explicit_role: str = "",
 ) -> str:
-    if explicit_role:
-        return explicit_role
-    if enemy_type in ("dasher", "samurai"):
-        return "dasher"
-    if enemy_type == "linked_escape_hunter":
-        return "linked_escape_hunter"
-    if enemy_type == "astar_chaser" or "escape_linked" in traits:
-        return "linked_escape_hunter"
-    if enemy_type in ("x_chaser", "y_chaser"):
-        return enemy_type
-    if enemy_type in ("chaser", "greedy_chaser", "minotaur"):
-        return "y_chaser" if move_priority == "vertical" else "x_chaser"
-    return enemy_type
+    return schema_resolved_enemy_role(
+        enemy_type,
+        move_priority=move_priority,
+        traits=traits,
+        explicit_role=explicit_role,
+    )
 
 
 def resolved_movement_type(
@@ -295,22 +365,11 @@ def resolved_movement_type(
     role: str = "",
     explicit_movement_type: str = "",
 ) -> str:
-    if explicit_movement_type:
-        return explicit_movement_type
-    resolved_role = role or enemy_type
-    if resolved_role == "linked_escape_hunter" or enemy_type == "astar_chaser":
-        return "astar"
-    if resolved_role in ("x_chaser", "y_chaser", "chaser", "minotaur"):
-        return "greedy"
-    if resolved_role in ("dasher", "samurai"):
-        return "dash"
-    if resolved_role == "patroller":
-        return "patrol"
-    if resolved_role == "stationary_blocker":
-        return "stationary"
-    if resolved_role == "wanderer":
-        return "wander"
-    return "greedy"
+    return schema_resolved_movement_type(
+        enemy_type,
+        role=role,
+        explicit_movement_type=explicit_movement_type,
+    )
 
 
 @dataclass(frozen=True, slots=True)
