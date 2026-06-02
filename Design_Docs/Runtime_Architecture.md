@@ -77,6 +77,29 @@ Pattern:
 - `BoardInteractionSystem` owns runtime movement legality and transition rules
 - teleports, actor-specific walls, and turn-end transitions should go through the system layer
 
+### World Runtime Core
+
+Primary files:
+
+- `GameManager/world_runtime_registry.gd`
+- `GameManager/world_runtime_state.gd`
+- `GameManager/world_enemy_phase_runtime_payload.gd`
+- `GameManager/world_board_effect_runtime_payload.gd`
+- `GameManager/world_turn_system.gd`
+- `Player/player_runtime_state.gd`
+- `GameManager/game_manager.gd`
+
+Pattern:
+
+- `WorldRuntimeRegistry` owns the active canonical runtime snapshot plus start/history snapshots
+- `WorldRuntimeState` is the mutable world snapshot shape stored inside the registry
+- enemy/spawner world-state data now lives in typed runtime payload adapters instead of raw registry dictionaries
+- board-effect runtime state has an explicit typed payload even though current mutable effect state is intentionally minimal
+- player runtime state now lives in the world runtime instead of only on the player node
+- `WorldTurnSystem` resolves player step, enemy phase, spawner phase, turn-end transitions, and win/loss sequencing
+- `GameManager` still owns session flow, but it should delegate turn mutation, reset, undo, and replay through the world registry layer
+- the `Player` node is now primarily input plus presentation, not the only gameplay truth
+
 ## Python Runtime Shape
 
 The Python side is still not an ECS engine, but it follows the same architectural direction:
@@ -116,4 +139,4 @@ The current runtime architecture is strong for enemies, spawners, and board inte
 
 - additional spawned actor families
 - richer hazard or board-effect runtime state
-- any future player-side component/runtime decomposition
+- broader actor participation in the world registry when future actor families need mutable runtime state

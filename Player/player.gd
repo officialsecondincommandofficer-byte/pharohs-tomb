@@ -7,11 +7,13 @@ signal action_requested(action_name)
 
 var board_state: MazeData
 var current_cell: Vector2i = Vector2i.ZERO
+var is_alive := true
 var input_enabled := false
 
 
 func setup_floor(next_board_state: MazeData) -> void:
 	board_state = next_board_state
+	is_alive = true
 	set_cell_immediate(board_state.player_spawn)
 	input_enabled = true
 
@@ -30,12 +32,30 @@ func set_cell_immediate(cell: Vector2i) -> void:
 	_play_idle()
 
 
-func move_to_cell(cell: Vector2i) -> void:
+func present_move_to_cell(cell: Vector2i) -> void:
 	var direction: Vector2i = cell - current_cell
 	current_cell = cell
 	if direction != Vector2i.ZERO:
 		_update_facing(direction)
 		await _animate_to_world_position(board_state.to_world(current_cell))
+	_play_idle()
+
+
+func move_to_cell(cell: Vector2i) -> void:
+	await present_move_to_cell(cell)
+
+
+func build_state_snapshot() -> Dictionary:
+	return {
+		"cell": current_cell,
+		"alive": is_alive,
+	}
+
+
+func restore_from_state(state: Dictionary) -> void:
+	current_cell = state.get("cell", current_cell)
+	is_alive = bool(state.get("alive", is_alive))
+	position = board_state.to_world(current_cell)
 	_play_idle()
 
 

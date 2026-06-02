@@ -49,6 +49,15 @@ Keep three categories distinct:
 
 `Resources/Worlds/SolverTestMazes` is the main home for this discipline.
 
+### 4. ECS restraint
+
+The current ECS/runtime foundation is strong enough for the active gameplay slice.
+
+Roadmap guidance:
+- more ECS should be added later only when a new mutable actor family or runtime restore problem clearly needs it
+- prefer regression coverage and real mechanic pressure before another architecture-only expansion
+- avoid pushing deeper into ECS purity when the remaining problem is presentation polish or content tuning
+
 ## Medium-Term Architecture
 
 ### 1. Formal state model
