@@ -12,7 +12,8 @@ This project is now a Godot 4.x adaptation of **Theseus and the Minotaur**, usin
 - The main migrated slices are:
   enemy runtime records and systems,
   zone spawner runtime records and systems,
-  board interaction systems for teleports, actor-specific walls, and turn-end transitions.
+  board interaction systems for teleports, actor-specific walls, and turn-end transitions,
+  and a world runtime registry that keeps player state, typed enemy/spawner runtime payloads, and turn snapshots in canonical runtime state.
 
 Useful architecture docs:
 

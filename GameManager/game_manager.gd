@@ -2,6 +2,8 @@ extends Node
 
 const LevelBoardLoaderScript = preload("res://Worlds/level_board_loader.gd")
 const MazeSaveServiceScript = preload("res://MazeGenerator/maze_save_service.gd")
+const WorldRuntimeRegistryScript = preload("res://GameManager/world_runtime_registry.gd")
+const WorldTurnSystemScript = preload("res://GameManager/world_turn_system.gd")
 
 var game_camera: Camera2D
 var tile_map: Node
@@ -11,11 +13,9 @@ var enemy_manager: Node2D
 var hud: CanvasLayer
 
 var board_state: MazeData
-var move_count := 0
-var game_over := false
 var input_locked := false
 var replaying_solution := false
-var _state_history: Array[Dictionary] = []
+var world_runtime_registry
 var _maze_save_service
 var _level_board_loader
 var _selected_world = null
@@ -69,17 +69,15 @@ func restart_run() -> void:
 			board_state.difficulty_category,
 		]
 	)
-	move_count = 0
-	game_over = false
 	input_locked = false
 	replaying_solution = false
-	_state_history.clear()
 
 	tile_map.render_board(board_state, true)
 	fog_of_war.setup_floor(board_state)
 	player.setup_floor(board_state)
 	enemy_manager.setup_floor(board_state)
-	_state_history.append(_snapshot_state("start"))
+	world_runtime_registry = WorldRuntimeRegistryScript.new().capture_from_runtime(player, enemy_manager, 0, false)
+	world_runtime_registry.cache_start_snapshot()
 
 	_refresh_camera()
 	_refresh_visibility()
@@ -107,13 +105,15 @@ func reset_current_board() -> void:
 	if board_state == null or input_locked:
 		return
 
-	move_count = 0
-	game_over = false
+	input_locked = false
 	replaying_solution = false
-	_state_history.clear()
-	player.set_cell_immediate(board_state.player_spawn)
-	enemy_manager.set_cells_immediate(_enemy_spawn_cells())
-	_state_history.append(_snapshot_state("start"))
+	if world_runtime_registry == null or not world_runtime_registry.has_start_snapshot():
+		player.setup_floor(board_state)
+		enemy_manager.setup_floor(board_state)
+		world_runtime_registry = WorldRuntimeRegistryScript.new().capture_from_runtime(player, enemy_manager, 0, false)
+		world_runtime_registry.cache_start_snapshot()
+	else:
+		world_runtime_registry.restore_start_snapshot(player, enemy_manager)
 	_refresh_visibility()
 	_update_hud("In progress")
 	hud.set_message("Board reset. %s" % _controls_message())
@@ -121,19 +121,12 @@ func reset_current_board() -> void:
 
 
 func undo_last_turn() -> void:
-	if input_locked or _state_history.size() <= 1:
+	if input_locked or world_runtime_registry == null or not world_runtime_registry.can_undo():
 		return
 
-	_state_history.pop_back()
-	var snapshot: Dictionary = _state_history.back()
-	move_count = max(_state_history.size() - 1, 0)
-	game_over = false
+	world_runtime_registry.undo(player, enemy_manager)
 	replaying_solution = false
-	player.set_cell_immediate(snapshot["player"])
-	if snapshot.has("enemy_states"):
-		enemy_manager.restore_enemy_states(snapshot["enemy_states"])
-	else:
-		enemy_manager.set_cells_immediate(snapshot.get("enemies", [snapshot.get("minotaur", Vector2i.ZERO)]))
+	input_locked = false
 	_refresh_visibility()
 	_update_hud("In progress")
 	hud.set_message("Move undone. %s" % _controls_message())
@@ -141,7 +134,7 @@ func undo_last_turn() -> void:
 
 
 func _on_player_action_requested(action_name: String) -> void:
-	if input_locked or game_over or replaying_solution:
+	if input_locked or _is_game_over() or replaying_solution:
 		return
 	_resolve_player_action.call_deferred(action_name, false)
 
@@ -179,14 +172,14 @@ func _run_solution_replay() -> void:
 
 	for action in board_state.solution_actions:
 		await _resolve_player_action(action, true)
-		if game_over:
+		if _is_game_over():
 			break
 		await get_tree().create_timer(0.1).timeout
 
 	replaying_solution = false
 	input_locked = false
-	player.set_input_enabled(not game_over)
-	if game_over and board_state.is_exit_cell(player.get_current_cell()):
+	player.set_input_enabled(not _is_game_over())
+	if _is_game_over() and world_runtime_registry != null and board_state.is_exit_cell(world_runtime_registry.player_cell()):
 		hud.set_message("SOLUTION GIVEN")
 
 
@@ -196,108 +189,68 @@ func _resolve_player_action(action_name: String, from_replay: bool) -> void:
 	if input_locked and not from_replay:
 		return
 
-	var current_player: Vector2i = player.get_current_cell()
-	var transition: Dictionary = board_state.resolve_player_transition(current_player, action_name)
-	var stepped_player: Vector2i = transition.get("stepped_cell", current_player)
-	var next_player: Vector2i = transition.get("resolved_cell", current_player)
-	if stepped_player == current_player and action_name != "skip":
-		if not from_replay:
-			hud.set_message("That move is blocked.")
-		return
-
 	if not from_replay:
 		input_locked = true
 		player.set_input_enabled(false)
 
-	if stepped_player != current_player:
-		await player.move_to_cell(stepped_player)
-	else:
-		player.set_cell_immediate(current_player)
-
-	if board_state.is_trap_cell(stepped_player):
-		move_count += 1
-		_state_history.append(_snapshot_state(action_name))
-		_refresh_visibility()
-		game_over = true
-		_update_hud("You lose")
-		hud.set_message("YOU LOSE!")
+	var turn_result: Dictionary = await WorldTurnSystemScript.resolve_player_action(
+		board_state,
+		world_runtime_registry,
+		action_name,
+		player,
+		enemy_manager
+	)
+	if not bool(turn_result.get("consumed", false)):
 		if not from_replay:
+			hud.set_message(String(turn_result.get("message", "That move is blocked.")))
 			input_locked = false
-			player.set_input_enabled(false)
+			player.set_input_enabled(true)
 		return
 
-	var enemy_results: Array = await enemy_manager.begin_enemy_phase(stepped_player)
-	move_count += 1
-	var enemy_contacted_player := false
-	for enemy_result in enemy_results:
-		if bool(enemy_result.get("contact_player", false)):
-			enemy_contacted_player = true
-			break
-	if enemy_contacted_player or enemy_manager.any_enemy_at_cell(stepped_player):
-		game_over = true
-	else:
-		var turn_end_transition: Dictionary = board_state.resolve_player_turn_end_transition(next_player)
-		next_player = turn_end_transition.get("resolved_cell", next_player)
-		if next_player != stepped_player:
-			player.set_cell_immediate(next_player)
-		if board_state.is_trap_cell(next_player):
-			game_over = true
 	_refresh_visibility()
-	_state_history.append(_snapshot_state(action_name))
 
-	var status_text := "In progress"
-	if game_over:
-		status_text = "You lose"
-	elif board_state.is_exit_cell(next_player):
-		game_over = true
+	var status_text := String(turn_result.get("status_text", "In progress"))
+	var player_cell: Vector2i = turn_result.get("player_cell", world_runtime_registry.player_cell())
+	if not _is_game_over() and board_state.is_exit_cell(player_cell):
 		status_text = "You win"
+		turn_result["message"] = "YOU WIN!"
 
 	_update_hud(status_text)
 
-	if game_over:
-		if from_replay and board_state.is_exit_cell(next_player):
+	if _is_game_over():
+		if from_replay and board_state.is_exit_cell(player_cell):
 			hud.set_message("SOLUTION GIVEN")
-		elif board_state.is_exit_cell(next_player):
-			hud.set_message("YOU WIN!")
 		else:
-			hud.set_message("YOU LOSE!")
+			hud.set_message(String(turn_result.get("message", "YOU LOSE!")))
 	else:
 		if not from_replay:
 			hud.set_message(_controls_message())
 
 	if not from_replay:
 		input_locked = false
-		player.set_input_enabled(not game_over)
+		player.set_input_enabled(not _is_game_over())
 
 
 func _snapshot_state(action_name: String) -> Dictionary:
-	return {
-		"action": action_name,
-		"player": player.get_current_cell(),
-		"enemy_states": enemy_manager.get_enemy_states(),
-		"enemies": enemy_manager.get_current_cells(),
-		"minotaur": enemy_manager.get_current_cell(),
-	}
-
-
-func _enemy_spawn_cells() -> Array[Vector2i]:
-	var cells: Array[Vector2i] = []
-	for spawn_data in board_state.enemy_spawns:
-		cells.append(spawn_data.get("cell", board_state.minotaur_spawn))
-	return cells
+	if world_runtime_registry == null:
+		world_runtime_registry = WorldRuntimeRegistryScript.new().capture_from_runtime(player, enemy_manager, 0, false)
+	return world_runtime_registry.current_snapshot(action_name)
 
 
 func _refresh_visibility() -> void:
 	if board_state == null:
 		return
 
+	var player_cell: Vector2i = player.get_current_cell()
+	if world_runtime_registry != null:
+		player_cell = world_runtime_registry.player_cell()
 	var visible_cells: Array[Vector2i] = fog_of_war.update_visibility(
-		player.get_current_cell(),
+		player_cell,
 		max(board_state.width, board_state.height),
 		true
 	)
 	enemy_manager.update_visibility(visible_cells)
-	tile_map.set_spawn_warning_cells(enemy_manager.get_spawn_warning_cells(player.get_current_cell()))
+	tile_map.set_spawn_warning_cells(enemy_manager.get_spawn_warning_cells(player_cell))
 
 
 func _refresh_camera() -> void:
@@ -328,7 +281,7 @@ func _update_hud(status_text: String) -> void:
 		"size_category": board_state.size_category,
 		"difficulty": board_state.difficulty_category,
 		"wall_density": board_state.wall_density,
-		"moves_taken": move_count,
+		"moves_taken": _current_move_count(),
 		"solution_total_steps": board_state.solution_total_steps,
 		"seed_id": _get_seed_id(),
 		"status": status_text,
@@ -349,6 +302,18 @@ func _get_seed_id() -> String:
 	if not board_state.generation_profile_id.is_empty():
 		return board_state.generation_profile_id
 	return "N/A"
+
+
+func _current_move_count() -> int:
+	if world_runtime_registry == null:
+		return 0
+	return world_runtime_registry.move_count()
+
+
+func _is_game_over() -> bool:
+	if world_runtime_registry == null:
+		return false
+	return world_runtime_registry.is_game_over()
 
 
 func _load_board_for_current_run() -> MazeData:

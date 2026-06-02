@@ -37,6 +37,11 @@ Related roadmap:
 - `Design_Docs/Solver_Generation_Roadmap.md`
 - `Design_Docs/ECS_Bridge_Runtime_Validation_Guide.md`
 
+Runtime regression harness:
+- `Tools/GodotRuntimeRegression.tscn` and `Tools/godot_runtime_regression.gd` run headless undo/reset/replay checks against curated runtime boards
+- prefer adding restore/replay regressions there when the issue is about runtime-state ownership rather than solver generation
+- keep the harness focused on canonical gameplay flow, not visual presentation timing
+
 When the mazes are generated:
 - exported `.tres` files should live in this world folder or an imported manifest path associated with this folder
 - add a `world_manifest.json` that points at the curated resources

@@ -24,6 +24,8 @@ Implemented today:
 - Godot enemy runtime records, registries, and systems
 - Godot zone spawner runtime records, registries, and systems
 - Godot board interaction system for teleports, actor-specific walls, and turn-end transitions
+- Godot world runtime registry for player state, undo/reset snapshots, replay history, and canonical turn resolution
+- typed world-runtime payload adapters for enemy/spawner state and future mutable board effects
 - scene scripts reduced to mostly presentation, hydration, and preview responsibilities
 
 For the enemy-plus-spawner-plus-board-interaction slice, the runtime loop is effectively ECS-shaped already. The remaining project-wide work is mostly extending the same pattern to future actor types and keeping legacy compatibility intact while older payloads still exist.
@@ -84,6 +86,7 @@ Implemented for the current enemy families.
 Current priority inside Stage 3:
 
 - keep board interaction rules centralized in shared runtime systems
+- keep player state and turn snapshots flowing through the world runtime registry instead of node-only state
 - use runtime records and registries for any new spawned actor families
 - avoid reintroducing scene-local behavior logic for new Godot actor types
 

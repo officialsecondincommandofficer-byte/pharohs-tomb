@@ -2,6 +2,7 @@ extends Node2D
 
 signal enemy_phase_finished(enemy_results)
 
+const WorldEnemyPhaseRuntimePayloadScript := preload("res://GameManager/world_enemy_phase_runtime_payload.gd")
 const ZoneSpawnControllerScript := preload("res://EnemyManager/zone_spawn_controller.gd")
 const EnemySchemaBridge := preload("res://Global/enemy_schema_bridge.gd")
 const EnemyContactSystemScript := preload("res://EnemyManager/enemy_contact_system.gd")
@@ -99,6 +100,17 @@ func get_enemy_states() -> Dictionary:
 		"spawner_states": _zone_spawn_controller.build_state_snapshot(),
 		"dynamic_spawn_order": _dynamic_spawn_order,
 	}
+
+
+func export_runtime_payload():
+	return WorldEnemyPhaseRuntimePayloadScript.new().from_dictionary(get_enemy_states())
+
+
+func restore_runtime_payload(runtime_payload) -> void:
+	if runtime_payload != null and runtime_payload is RefCounted and runtime_payload.get_script() == WorldEnemyPhaseRuntimePayloadScript:
+		restore_enemy_states(runtime_payload.to_dictionary())
+		return
+	restore_enemy_states(runtime_payload)
 
 
 func restore_enemy_states(enemy_states) -> void:
