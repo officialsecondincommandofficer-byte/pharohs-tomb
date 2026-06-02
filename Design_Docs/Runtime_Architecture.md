@@ -32,6 +32,13 @@ This bridge still accepts legacy `role`, `movement_type`, and `traits`, but new 
 
 ## Godot Runtime Shape
 
+Live scene flow:
+
+- `App/AppShell.tscn` is the project entry scene and app shell
+- `Gameplay/GameplayScreen.tscn` is the gameplay composition scene
+- `GameManager/game_manager.gd` owns gameplay session orchestration inside that gameplay scene
+- `Legacy/` contains deprecated bootstrap/prototype content that is not part of the live runtime path
+
 ### Enemies
 
 Primary files:

@@ -11,13 +11,12 @@ config_version=5
 [application]
 
 config/name="Pharaohs_Tomb"
-run/main_scene="res://App/AppRoot.tscn"
+run/main_scene="res://App/AppShell.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-SceneManager="*res://Global/Managers/SceneManager.tscn"
 MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
 MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"

@@ -16,7 +16,7 @@ func save_board(board_state: MazeData) -> Dictionary:
 			"file_name": "",
 		}
 
-	var saved_at_unix: int = Time.get_unix_time_from_system()
+	var saved_at_unix: int = int(Time.get_unix_time_from_system())
 	var display_name := _build_display_name(board_state, saved_at_unix)
 	var resource = SavedMazeResourceScript.new()
 	resource.apply_payload(board_state.to_saved_payload(display_name, saved_at_unix))

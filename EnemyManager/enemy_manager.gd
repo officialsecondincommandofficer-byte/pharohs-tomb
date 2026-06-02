@@ -4,7 +4,7 @@ signal enemy_phase_finished(enemy_results)
 
 const WorldEnemyPhaseRuntimePayloadScript := preload("res://GameManager/world_enemy_phase_runtime_payload.gd")
 const ZoneSpawnControllerScript := preload("res://EnemyManager/zone_spawn_controller.gd")
-const EnemySchemaBridge := preload("res://Global/enemy_schema_bridge.gd")
+const EnemySchemaBridgeScript := preload("res://Global/enemy_schema_bridge.gd")
 const EnemyContactSystemScript := preload("res://EnemyManager/enemy_contact_system.gd")
 const EnemyRuntimeRegistryScript := preload("res://EnemyManager/enemy_runtime_registry.gd")
 const EnemyTurnSystemScript := preload("res://EnemyManager/enemy_turn_system.gd")
@@ -168,11 +168,11 @@ func _resolve_enemy_contact(mover_index: int, target_index: int) -> String:
 	return EnemyContactSystemScript.resolve_contact(_runtime_registry.record_at(mover_index), _runtime_registry.record_at(target_index))
 
 func _tint_for_spawn(spawn_data: Dictionary) -> Color:
-	return EnemySchemaBridge.tint_for_spawn(spawn_data)
+	return EnemySchemaBridgeScript.tint_for_spawn(spawn_data)
 
 
 func _scene_for_spawn(spawn_data: Dictionary) -> PackedScene:
-	match EnemySchemaBridge.scene_family_for_spawn(spawn_data):
+	match EnemySchemaBridgeScript.scene_family_for_spawn(spawn_data):
 		"chaser":
 			return CHASER_SCENE
 		"patroller":

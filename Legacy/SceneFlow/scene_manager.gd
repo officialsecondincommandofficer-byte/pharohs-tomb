@@ -55,7 +55,7 @@ func _connect_scene_signals(scene: Node):
 
 
 func _on_start_game():
-	goto_scene("res://src/Stages/TrainingGround/TrainingGround.tscn")
+	goto_scene("res://Legacy/Prototype/src/GameRunner/GameRunner.tscn")
 
 # 🔑 Generic handler for all signals
 func _on_scene_signal(signal_name: String, args = []):
@@ -64,9 +64,9 @@ func _on_scene_signal(signal_name: String, args = []):
 	match signal_name:
 		"start_game":
 			print("Going and Getting Training stage")
-			goto_scene("res://src/stages/TrainingStage.tscn")
+			goto_scene("res://Legacy/Prototype/src/GameRunner/GameRunner.tscn")
 		"open_options":
-			goto_scene("res://src/ui/OptionsMenu.tscn")
+			push_warning("Legacy options menu was not preserved in the prototype archive.")
 		"quit_game":
 			get_tree().quit()
 		_:

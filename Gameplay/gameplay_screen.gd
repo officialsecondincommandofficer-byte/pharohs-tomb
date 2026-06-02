@@ -18,9 +18,9 @@ func configure_selected_level(
 
 
 func _ready() -> void:
-	print("[Startup] Main._ready begin")
+	print("[Startup] GameplayScreen._ready begin")
 	_ensure_global_input_actions()
-	print("[Startup] Main input actions ready")
+	print("[Startup] GameplayScreen input actions ready")
 	game_manager.bootstrap({
 		"camera": $GameCamera,
 		"tile_map": $TileMap,
@@ -31,7 +31,7 @@ func _ready() -> void:
 		"selected_world": _selected_world,
 		"selected_level": _selected_level,
 	})
-	print("[Startup] Main._ready end")
+	print("[Startup] GameplayScreen._ready end")
 
 
 func _unhandled_input(event: InputEvent) -> void:
