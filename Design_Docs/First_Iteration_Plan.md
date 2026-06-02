@@ -2,7 +2,7 @@
 
 ## Summary
 - First Iteration is a playable vertical slice of the vision: one generated floor, strict turn sequencing, grid-based player movement, one-hit death, key-gated exit, turn limit, fog of war, minimal HUD, and enemy turns driven by signals.
-- The approved filesystem interpretation is a scene-tree-mapped layout: the vision document's `Main -> GameManager / MazeGenerator / TileMap / FogOfWar / Player / EnemyManager / ItemLayer / HUD` structure becomes the gameplay folder structure.
+- The approved filesystem interpretation is a scene-tree-mapped layout: the vision document's gameplay root is now represented by `Gameplay/GameplayScreen.tscn`, while `App/AppShell.tscn` owns screen flow above it.
 - `GameManager` is implemented last, after `MazeGenerator`, `Player`, `EnemyManager`, `ItemLayer`, `FogOfWar`, and `HUD` have stable interfaces.
 - `Design_Docs/First_Iteration_Plan.md` is the planned destination for this document when implementation begins.
 - Current implementation note: the runtime maze now uses thin edge walls between tiles, a tiled perimeter border, randomized board-size presets, and randomized wall-density presets.

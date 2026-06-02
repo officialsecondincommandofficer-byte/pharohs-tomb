@@ -1,6 +1,6 @@
 extends Node
 
-const MainScene := preload("res://Main/Main.tscn")
+const GameplayScreenScene := preload("res://Gameplay/GameplayScreen.tscn")
 const WorldManifestParserScript := preload("res://Worlds/world_manifest_parser.gd")
 const WorldLevelDefinitionScript := preload("res://Worlds/world_level_definition.gd")
 
@@ -140,7 +140,7 @@ func _run_spawner_restore_regression(world, level) -> void:
 
 
 func _instantiate_level(world, level):
-	var main = MainScene.instantiate()
+	var main = GameplayScreenScene.instantiate()
 	main.configure_selected_level(world, level)
 	get_tree().root.add_child(main)
 	await get_tree().process_frame

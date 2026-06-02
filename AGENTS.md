@@ -17,6 +17,8 @@ Treat that parent file as inherited guidance for Godot 4.5, GDScript-only work, 
 - Treat the current Godot runtime architecture as:
   `record -> registry -> system -> view`
 - Keep scene scripts thin. New behavior logic should usually live in systems, not per-scene controllers.
+- Treat the current live scene flow as:
+  `App/AppShell.tscn -> Gameplay/GameplayScreen.tscn -> GameManager`
 
 ## Important Runtime Areas
 
@@ -54,6 +56,7 @@ Shared schema:
   canonical payload -> runtime record -> registry -> system -> presentation
 - Avoid reintroducing node-only authority for gameplay state during turn resolution.
 - Keep Python solver/runtime behavior aligned with Godot runtime behavior when changing movement, teleport, spawner, or contact rules.
+- Keep deprecated bootstrap content under `Legacy/` instead of letting it read like active runtime code.
 
 ## Docs To Keep In Sync
 

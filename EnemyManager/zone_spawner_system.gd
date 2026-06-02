@@ -2,7 +2,7 @@ extends RefCounted
 class_name ZoneSpawnerSystem
 
 const INVALID_SPAWN_CELL := Vector2i(-9999, -9999)
-const EnemySchemaBridge := preload("res://Global/enemy_schema_bridge.gd")
+const EnemySchemaBridgeScript := preload("res://Global/enemy_schema_bridge.gd")
 
 
 static func warning_cells(registry, player_cell: Vector2i, occupied_cells: Array[Vector2i]) -> Array[Vector2i]:
@@ -52,7 +52,7 @@ static func build_spawn_configuration(spawner_config: Dictionary, spawn_cell: Ve
 		"patrol_mode": String(spawner_config.get("patrol_mode", "ping_pong")),
 		"behavior_seed": int(spawner_config.get("behavior_seed", 0)),
 	}
-	var bridge_payload: Dictionary = EnemySchemaBridge.build_bridge_payload(spawn_config)
+	var bridge_payload: Dictionary = EnemySchemaBridgeScript.build_bridge_payload(spawn_config)
 	spawn_config["canonical_enemy_type"] = String(bridge_payload.get("canonical_enemy_type", spawn_config["type"]))
 	spawn_config["canonical_archetype"] = String(bridge_payload.get("archetype_id", ""))
 	spawn_config["ecs_schema_version"] = int(bridge_payload.get("schema_version", 1))

@@ -519,11 +519,11 @@ func build_floor_lookup() -> Dictionary:
 	return _floor_lookup.duplicate()
 
 
-func to_saved_payload(display_name: String = "", saved_at_unix: int = 0) -> Dictionary:
+func to_saved_payload(next_display_name: String = "", next_saved_at_unix: int = 0) -> Dictionary:
 	return {
 		"version": SAVE_VERSION,
-		"display_name": display_name,
-		"saved_at_unix": saved_at_unix,
+		"display_name": next_display_name,
+		"saved_at_unix": next_saved_at_unix,
 		"width": width,
 		"height": height,
 		"cell_size": cell_size,

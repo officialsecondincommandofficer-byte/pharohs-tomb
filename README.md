@@ -2,6 +2,13 @@
 
 This project is now a Godot 4.x adaptation of **Theseus and the Minotaur**, using the repo's existing pixel-art board presentation and thin-wall maze style.
 
+## Scene Layout
+
+- `App/AppShell.tscn` is the actual run scene and app shell.
+- `Gameplay/GameplayScreen.tscn` is the active gameplay screen instantiated by the app shell.
+- `GameManager/game_manager.gd` owns gameplay session flow inside the gameplay screen.
+- `Legacy/` holds deprecated bootstrap and prototype content that is kept for reference, not for the live runtime path.
+
 ## Runtime Architecture
 
 - Python and Godot now share a canonical enemy schema:

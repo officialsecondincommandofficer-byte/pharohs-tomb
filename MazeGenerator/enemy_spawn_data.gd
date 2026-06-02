@@ -1,7 +1,7 @@
 extends RefCounted
 class_name EnemySpawnData
 
-const EnemySchemaBridge := preload("res://Global/enemy_schema_bridge.gd")
+const EnemySchemaBridgeScript := preload("res://Global/enemy_schema_bridge.gd")
 
 
 static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_empty: bool = false) -> Array[Dictionary]:
@@ -11,15 +11,15 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 			continue
 		var spawn: Dictionary = entry.duplicate(true)
 		var raw_type := String(spawn.get("type", "greedy_chaser"))
-		spawn["type"] = EnemySchemaBridge.resolve_enemy_type(raw_type)
+		spawn["type"] = EnemySchemaBridgeScript.resolve_enemy_type(raw_type)
 		spawn["cell"] = coerce_vector2i(spawn.get("cell", fallback_cell))
-		spawn["role"] = EnemySchemaBridge.resolved_enemy_role(
+		spawn["role"] = EnemySchemaBridgeScript.resolved_enemy_role(
 			raw_type,
 			String(spawn.get("move_priority", "horizontal")),
 			coerce_string_array(spawn.get("traits", [])),
 			String(spawn.get("role", ""))
 		)
-		spawn["movement_type"] = EnemySchemaBridge.resolved_movement_type(
+		spawn["movement_type"] = EnemySchemaBridgeScript.resolved_movement_type(
 			raw_type,
 			String(spawn.get("role", "")),
 			String(spawn.get("movement_type", ""))
@@ -38,7 +38,7 @@ static func coerce_enemy_spawn_array(raw_value, fallback_cell: Vector2i, allow_e
 			spawn["patrol_mode"]
 		)
 		spawn["behavior_seed"] = int(spawn.get("behavior_seed", 0))
-		var bridge_payload: Dictionary = EnemySchemaBridge.build_bridge_payload(spawn)
+		var bridge_payload: Dictionary = EnemySchemaBridgeScript.build_bridge_payload(spawn)
 		spawn["canonical_enemy_type"] = String(bridge_payload.get("canonical_enemy_type", spawn["type"]))
 		spawn["canonical_archetype"] = String(bridge_payload.get("archetype_id", ""))
 		spawn["ecs_schema_version"] = int(bridge_payload.get("schema_version", 1))
@@ -65,7 +65,7 @@ static func default_greedy_chaser(cell: Vector2i) -> Dictionary:
 		"spawn_delay_turns": 0,
 		"respawn_delay_turns": 0,
 	}
-	var bridge_payload: Dictionary = EnemySchemaBridge.build_bridge_payload(spawn)
+	var bridge_payload: Dictionary = EnemySchemaBridgeScript.build_bridge_payload(spawn)
 	spawn["canonical_enemy_type"] = String(bridge_payload.get("canonical_enemy_type", spawn["type"]))
 	spawn["canonical_archetype"] = String(bridge_payload.get("archetype_id", ""))
 	spawn["ecs_schema_version"] = int(bridge_payload.get("schema_version", 1))
@@ -108,4 +108,3 @@ static func normalize_patrol_route(route: Array[Vector2i], patrol_mode: String) 
 	if patrol_mode == "loop" and normalized.size() > 1 and normalized[0] == normalized[normalized.size() - 1]:
 		normalized.remove_at(normalized.size() - 1)
 	return normalized
-

@@ -18,6 +18,7 @@ The migration is no longer just planned; most of the runtime bridge is now in pl
 
 Implemented today:
 
+- clear app-shell vs gameplay-screen scene separation through `App/AppShell.tscn` and `Gameplay/GameplayScreen.tscn`
 - shared enemy schema consumed by Python and Godot
 - canonical enemy payload stamping during export and board load
 - component-first solver/runtime behavior selection in Python

@@ -3,7 +3,7 @@ extends Control
 const MainMenuScene = preload("res://App/Screens/MainMenu.tscn")
 const WorldSelectScene = preload("res://App/Screens/WorldSelectScreen.tscn")
 const LevelSelectScene = preload("res://App/Screens/LevelSelectScreen.tscn")
-const GameplayScene = preload("res://Main/Main.tscn")
+const GameplayScreenScene = preload("res://Gameplay/GameplayScreen.tscn")
 const WorldCatalogServiceScript = preload("res://Worlds/world_catalog_service.gd")
 
 @onready var content_root: Control = $ContentRoot
@@ -60,7 +60,7 @@ func _start_level(level_definition) -> void:
 		return
 
 	_selected_level_index = _find_level_index(level_definition)
-	var gameplay = GameplayScene.instantiate()
+	var gameplay = GameplayScreenScene.instantiate()
 	gameplay.configure_selected_level(_selected_world, level_definition)
 	gameplay.return_to_level_select_requested.connect(_on_return_to_level_select_requested)
 	gameplay.next_level_requested.connect(_on_next_level_requested)
